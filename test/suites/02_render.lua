@@ -386,8 +386,8 @@ do
     api.resetIcons()
     cfg.compact = true
     frame('compact')
-    check('compact draws its own window', saw('WINDOW:clockwork compact'), true)
-    check('compact does not draw the panel', sawExact('WINDOW:clockwork'), false)
+    check('compact draws its own window', saw('WINDOW:petworks compact'), true)
+    check('compact does not draw the panel', sawExact('WINDOW:petworks'), false)
     check('compact draws the gems', saw('IMG:'), true)
     check('compact draws a gem cell', saw('BTN:Fire##cw_gem'), true)
     check('compact offers the way back', saw('BTN:full##cw_layout'), true)
@@ -422,7 +422,7 @@ do
     cfg.compact_rows = 1
     check('...and wrote the file', api.loadSettings() and cfg.compact_rows, 2)
     frame('compact two rows')
-    check('two rows: still the compact window', saw('WINDOW:clockwork compact'), true)
+    check('two rows: still the compact window', saw('WINDOW:petworks compact'), true)
     -- A row is begun by an item placed without SameLine; the rail's slot is
     -- that item on both, or the recasts would land on the gems' line.
     check('two rows: the rail keeps its slot on each', countExact('DUMMY:3:28'), 2)
@@ -447,23 +447,23 @@ do
     -- With a number the command picks the rows and the strip; it does not
     -- toggle, so it is safe to send from a macro whichever layout is up.
     cfg.compact_rows = 1
-    handlers['command']({ command = '/cw compact 2' })
-    check('/cw compact 2 picks two rows', cfg.compact_rows, 2)
+    handlers['command']({ command = '/pw compact 2' })
+    check('/pw compact 2 picks two rows', cfg.compact_rows, 2)
     check('...and stays on the strip', cfg.compact, true)
     cfg.compact_rows = 1
-    check('/cw compact 2 wrote the file', api.loadSettings() and cfg.compact_rows, 2)
+    check('/pw compact 2 wrote the file', api.loadSettings() and cfg.compact_rows, 2)
     cfg.compact, cfg.compact_rows = false, 2
-    handlers['command']({ command = '/cw compact 1' })
-    check('/cw compact 1 picks one row', cfg.compact_rows, 1)
+    handlers['command']({ command = '/pw compact 1' })
+    check('/pw compact 1 picks one row', cfg.compact_rows, 1)
     check('...and the strip, from the panel', cfg.compact, true)
     clicks['full##cw_layout'] = true
     frame('compact switch')
     check('the button returns to the panel', cfg.compact, false)
     check('and wrote the file', api.loadSettings() and cfg.compact, false)
-    handlers['command']({ command = '/cw compact' })
-    check('/cw compact flips it', cfg.compact, true)
+    handlers['command']({ command = '/pw compact' })
+    check('/pw compact flips it', cfg.compact, true)
     cfg.compact = false
-    check('/cw compact wrote the file', api.loadSettings() and cfg.compact, true)
+    check('/pw compact wrote the file', api.loadSettings() and cfg.compact, true)
     cfg.compact = false
     api.saveSettings()
     frame('full again')
@@ -476,9 +476,9 @@ do
     petIn()
 end
 
--- ------------------- the header's close, /cw show, and Tuning's stat checks --
+-- ------------------- the header's close, /pw show, and Tuning's stat checks --
 -- Six details of the header and the Tuning tab: the panel closes from its own
--- corner rather than a switch buried in Settings, /cw show is that switch, the
+-- corner rather than a switch buried in Settings, /pw show is that switch, the
 -- ids row goes, Tuning states every element's stat check rather than only the
 -- ones with a maneuver up, and two tooltips say how the model picks the weaponskill.
 do
@@ -490,7 +490,7 @@ do
     check('settings drops the panel switch', saw('BTN:show the panel'), false)
     check('tuning drops the ids row', saw('ids   self'), false)
     local src = (function()
-        local f = assert(io.open(ADDON_DIR .. '/cw/ui/panel.lua', 'r'))
+        local f = assert(io.open(ADDON_DIR .. '/pw/ui/panel.lua', 'r'))
         local t = f:read('*a')
         f:close()
         return t
@@ -499,9 +499,9 @@ do
           src:find('Maintenance needs +2 or better', 1, true) ~= nil, true)
     check('the oils tooltip drops the ammo sentence',
           src:find('AMMO slot', 1, true), nil)
-    -- NO_DATA lives in cw/sets.lua: the Apply button and /cw load both give it
+    -- NO_DATA lives in pw/sets.lua: the Apply button and /pw load both give it
     local setsSrc = (function()
-        local f = assert(io.open(ADDON_DIR .. '/cw/sets.lua', 'r'))
+        local f = assert(io.open(ADDON_DIR .. '/pw/sets.lua', 'r'))
         local t = f:read('*a')
         f:close()
         return t
@@ -509,18 +509,18 @@ do
     check('the loadout offers the gear route',
           setsSrc:find('equip or unequip any piece of gear or an attachment', 1, true) ~= nil, true)
 
-    -- /cw show is the switch; the burden dump keeps the bare command and gains
+    -- /pw show is the switch; the burden dump keeps the bare command and gains
     -- its own name
     check('the panel starts shown', cfg.show_window, true)
-    handlers['command']({ command = '/cw show' })
-    check('/cw show hides the panel', cfg.show_window, false)
+    handlers['command']({ command = '/pw show' })
+    check('/pw show hides the panel', cfg.show_window, false)
     frame('hidden')
-    check('and nothing draws', saw('WINDOW:clockwork'), false)
-    handlers['command']({ command = '/cw show' })
-    check('/cw show brings it back', cfg.show_window, true)
-    check('/cw show wrote the file', api.loadSettings() and cfg.show_window, true)
+    check('and nothing draws', saw('WINDOW:petworks'), false)
+    handlers['command']({ command = '/pw show' })
+    check('/pw show brings it back', cfg.show_window, true)
+    check('/pw show wrote the file', api.loadSettings() and cfg.show_window, true)
     while #printed > 0 do table.remove(printed) end
-    handlers['command']({ command = '/cw' })
+    handlers['command']({ command = '/pw' })
     local dumped = false
     for _, p in ipairs(printed) do if p:find('burden', 1, true) then dumped = true end end
     check('the bare command still dumps the burden', dumped, true)
@@ -553,11 +553,11 @@ do
     for _, status in ipairs({ 0, 1 }) do
         world.login = status
         frame('login status ' .. status)
-        check('nothing draws at login status ' .. status, saw('WINDOW:clockwork'), false)
+        check('nothing draws at login status ' .. status, saw('WINDOW:petworks'), false)
     end
     world.login = 2
     frame('logged back in')
-    check('and it comes back in game', saw('WINDOW:clockwork'), true)
+    check('and it comes back in game', saw('WINDOW:petworks'), true)
     check('no native read was swallowed getting there', api.swallowed(), 0)
 end
 
@@ -566,7 +566,7 @@ end
 -- than fall through to "select a set" - `selected and cache[selected] or nil`
 -- turns false into nil.
 do
-    local f = assert(io.open(SCRATCH .. '/config/addons/clockwork/sets/bad.txt', 'w'))
+    local f = assert(io.open(SCRATCH .. '/config/addons/petworks/sets/bad.txt', 'w'))
     f:write('Valoredge Head\n')
     f:close()
     api.refreshSets()
@@ -582,7 +582,7 @@ end
 -- saved, 'bad' selected, the 0x044 with the VE set.
 do
     local function writeSet(name, text)
-        local f = assert(io.open(SCRATCH .. '/config/addons/clockwork/sets/' .. name .. '.txt', 'w'))
+        local f = assert(io.open(SCRATCH .. '/config/addons/petworks/sets/' .. name .. '.txt', 'w'))
         f:write(text)
         f:close()
         api.refreshSets()
@@ -727,7 +727,7 @@ do
     -- not PUP: the window is not drawn at all
     world.mainjob, world.subjob = 1, 0
     frame('not pup')
-    check('not pup draws nothing', saw('WINDOW:clockwork'), false)
+    check('not pup draws nothing', saw('WINDOW:petworks'), false)
     world.mainjob = 18
 end
 

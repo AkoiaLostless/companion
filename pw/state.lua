@@ -1,8 +1,8 @@
--- cw/state.lua - `tm`, the one table every module shares; returns it. Written on
+-- pw/state.lua - `tm`, the one table every module shares; returns it. Written on
 -- the packet thread and read on the render thread. Fields are documented where
 -- they are set; the modules that own them also publish their functions onto it
 -- (tm.timerRows, tm.petLive, tm.noteMob, ...). Defines tm.clear.
-local config = require('cw.config')
+local config = require('pw.config')
 
 -- Aliasing. Only these tables keep one identity for the life of the addon -
 -- created here, never reassigned, and reset in place (tm.clear, or key by key) -
@@ -135,7 +135,7 @@ tm.auto044 = nil      -- last PUP extended-job packet (0x044): skills, stats, ow
 tm.auto044Seq = 0     -- bumped per 0x044, so an apply step can wait for the reply to ITS packet
 tm.zoneSeq = 0        -- bumped per 0x00A, so an apply can notice it zoned
 tm.statsDirty = false -- set by the packet thread, consumed on d3d_present
-tm.statRefreshPending = false -- a 0x061 arrived; the next frame records the gear (cw/gear.lua)
+tm.statRefreshPending = false -- a 0x061 arrived; the next frame records the gear (pw/gear.lua)
 tm.eqCache, tm.eqCacheAt   = nil, 0
 tm.eqCacheSeq = -1      -- the 0x044 sequence the cache was built against
 tm.oilCache, tm.oilCacheAt = nil, 0
@@ -145,7 +145,7 @@ tm.oilCache, tm.oilCacheAt = nil, 0
 -- 'cast' (the same comparison, with your stat as worn when the element last
 -- resolved); 'learned' (inferred from a verified burden reading while no 0x044
 -- has arrived); 'observed' (a run of readings overruled the comparison - frozen
--- until /cw reset or a frame change); 'assumed' (no comparison possible, so the
+-- until /pw reset or a frame change); 'assumed' (no comparison possible, so the
 -- losing cost). nil reads as 'assumed'.
 tm.costSource = {}
 -- Consecutive observations that contradict a COMPUTED cost, per element.

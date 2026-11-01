@@ -210,7 +210,7 @@ do
     advance(2.5)
     petOut(PET + 64, MOB + 64)
     handlers['d3d_present']()
-    handlers['command']({ command = '/cw sync' })   -- burden carried over from earlier blocks
+    handlers['command']({ command = '/pw sync' })   -- burden carried over from earlier blocks
     local quiet = rowFor('Fire')
     check('sidebar row is quiet at zero burden', quiet.chance, 0)
     check('sidebar row has no overload to serve at zero', quiet.dur, 0)
@@ -380,20 +380,20 @@ do
     advance(2.5)
     petOut(PET + 74, MOB + 74)
     frame('panel closed')
-    check('the second window is absent while closed', saw('WINDOW:clockwork if you use'), false)
+    check('the second window is absent while closed', saw('WINDOW:petworks if you use'), false)
     check('and its content with it', saw('if you use'), false)
     api.config.sidebar = not api.config.sidebar api.sidebarRows()
     frame('panel open')
-    check('the second window opens', saw('WINDOW:clockwork if you use'), true)
-    check('the main window is still there', saw('WINDOW:clockwork'), true)
-    check('it is no longer inside the Status tab', saw('WINDOW:clockwork if you use'), true)
+    check('the second window opens', saw('WINDOW:petworks if you use'), true)
+    check('the main window is still there', saw('WINDOW:petworks'), true)
+    check('it is no longer inside the Status tab', saw('WINDOW:petworks if you use'), true)
     check('its own close button', saw('BTN:x##cw_sideclose'), true)
     -- closing it from its own button, not from the Status tab
     clicks['x##cw_sideclose'] = true
     frame('panel closes itself')
     check('the close button shuts it', api.config.sidebar, false)
     frame('panel stays closed')
-    check('and it stays shut', saw('WINDOW:clockwork if you use'), false)
+    check('and it stays shut', saw('WINDOW:petworks if you use'), false)
 end
 
 -- ------------------------------------ the WS branch that ignores maneuvers --
@@ -607,7 +607,7 @@ end
 -- read by someone deciding which maneuver to cast. The Tuning tab is exempt: it
 -- exists to check the addon rather than to play it, and says so.
 do
-    local f = assert(io.open(ADDON_DIR .. '/clockwork.lua', 'r'))
+    local f = assert(io.open(ADDON_DIR .. '/petworks.lua', 'r'))
     local lines = {}
     for line in f:lines() do lines[#lines + 1] = line end
     f:close()

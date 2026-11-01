@@ -1,10 +1,10 @@
 -- ------------------------------------------------------ the model's pace --
--- cw/frame.lua runs the model every tm.modelEvery seconds, or on the next
+-- pw/frame.lua runs the model every tm.modelEvery seconds, or on the next
 -- frame after a packet or command marks it dirty; the frames between draw
 -- its last answer. The other suites run it every frame (fixtures/load.lua),
 -- so this one sets the pace back to the addon's own and puts it back after.
 do
-    local tm = require('cw.state')
+    local tm = require('pw.state')
     api.resetSwallowed()
     petOut(PET + 520, MOB + 520)
     tm.modelEvery = 0.1

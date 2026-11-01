@@ -1,5 +1,5 @@
 -- ------------------------------------------------ your own job abilities --
--- cw/cooldowns.lua: the master's PUP job abilities, read off the client's
+-- pw/cooldowns.lua: the master's PUP job abilities, read off the client's
 -- recast table rather than modelled. A fixture sets world.abilities (what
 -- HasAbility answers, by resource id = 0x200 + LSB's abilityId) and
 -- world.recast (slot -> { timer id, ticks in 1/60 s }), then refreshes.

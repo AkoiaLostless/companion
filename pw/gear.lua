@@ -1,4 +1,4 @@
--- cw/gear.lua - your stats with the gear you have on NOW, not the gear you had
+-- pw/gear.lua - your stats with the gear you have on NOW, not the gear you had
 -- on at the last stat refresh. Exports itemStats, wornStats, markRefresh and
 -- liveStat; publishes tm.statBasis.
 --
@@ -16,10 +16,10 @@
 -- right as long as it has not changed since the refresh. Only the plain stat
 -- lines of an item are counted: a latent, a set bonus or an automaton line
 -- is conditional, and is left to the stale total.
-local D  = require('cw.data')
+local D  = require('pw.data')
 local PLAYER_STAT_INDEX = D.PLAYER_STAT_INDEX
-local tm = require('cw.state')
-local U  = require('cw.util')
+local tm = require('pw.state')
+local U  = require('pw.util')
 local safe, player, equippedItemId = U.safe, U.player, U.equippedItemId
 
 local STATS = { 'STR', 'DEX', 'VIT', 'AGI', 'INT', 'MND', 'CHR' }

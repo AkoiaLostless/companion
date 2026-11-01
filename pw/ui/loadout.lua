@@ -1,21 +1,21 @@
--- cw/ui/loadout.lua - the Loadout tab: what the automaton wears, the saved sets,
+-- pw/ui/loadout.lua - the Loadout tab: what the automaton wears, the saved sets,
 -- and the preview and apply of one. Owns the tab's UI state (setsUi); exports
 -- NO_DATA, refreshSets, selectSet and drawLoadoutTab.
 local imgui = require('imgui')
 local chat  = require('chat')
-local D  = require('cw.data')
+local D  = require('pw.data')
 local ELEMENTS = D.ELEMENTS
-local tm = require('cw.state')
-local A  = require('cw.attachments')
+local tm = require('pw.state')
+local A  = require('pw.attachments')
 local ATTACH_ELEM, attachEffect = A.ATTACH_ELEM, A.attachEffect
-local B  = require('cw.burden')
+local B  = require('pw.burden')
 local maneuverCounts = B.maneuverCounts
-local S  = require('cw.sets')
+local S  = require('pw.sets')
 local validSetName, listSets, setExists, loadSet = S.validSetName, S.listSets, S.setExists, S.loadSet
 local saveSet, deleteSet, renameSet, itemIds = S.saveSet, S.deleteSet, S.renameSet, S.itemIds
 local capacityOf, unownedIn, equippedSet, liveSet = S.capacityOf, S.unownedIn, S.equippedSet, S.liveSet
 local startApply, applyBlocker, applyRunning = S.startApply, S.applyBlocker, S.applyRunning
-local SF = require('cw.ui.surface')
+local SF = require('pw.ui.surface')
 local EL_COLOR, COL_GOOD, COL_WARN, COL_BAD = SF.EL_COLOR, SF.COL_GOOD, SF.COL_WARN, SF.COL_BAD
 local COL_DIM, COL_TEXT, hudPad, hudInner = SF.COL_DIM, SF.COL_TEXT, SF.hudPad, SF.hudInner
 local hudText, tip, elementIcon = SF.hudText, SF.tip, SF.elementIcon
@@ -183,7 +183,7 @@ local function savePopup(current)
             setsUi.confirm = { action = 'save', name = name, at = os.clock() }
         else
             local ok, err = saveSet(name, current)
-            print(chat.header('clockwork'):append(ok and chat.message('saved set ' .. name)
+            print(chat.header('petworks'):append(ok and chat.message('saved set ' .. name)
                                                       or chat.error(err or 'save failed')))
             refreshSets()
             selectSet(name)
@@ -201,7 +201,7 @@ local function savePopup(current)
                 selectSet(name)
                 imgui.CloseCurrentPopup()
             else
-                print(chat.header('clockwork'):append(chat.error('rename failed')))
+                print(chat.header('petworks'):append(chat.error('rename failed')))
             end
         end
         imgui.EndDisabled()

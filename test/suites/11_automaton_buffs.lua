@@ -404,7 +404,7 @@ do
     -- ...and a Regen takes it, exactly as the line warned
     while #printed > 0 do table.remove(printed) end
     send028(act(8, 110, SELF))
-    local last = CLOCKWORK_TEST.last
+    local last = PETWORKS_TEST.last
     check('hedged loss is not an anomaly', last.kind, 'pet_spell')
     check('hedged loss is marked in the record', last.rec.hedged, true)
     check('hedged loss keeps what was expected', last.rec.expected, 'Protect IV')
@@ -414,7 +414,7 @@ do
     advance(25)
     handlers['d3d_present']()
     send028(act(8, 45, SELF))
-    check('hedged excuses only the Regen', CLOCKWORK_TEST.last.kind, 'spell_mispredicted')
+    check('hedged excuses only the Regen', PETWORKS_TEST.last.kind, 'spell_mispredicted')
     -- and with NOTHING hedged - both sides holding a Regen, so the rung never
     -- raised the question - a Regen taking the window is a plain miss again
     send028({ actor = MOB + 97, category = 4, param = 110,
@@ -424,5 +424,5 @@ do
     local _, w2 = api.predictSpell()
     check('unhedged pick is silent about a Regen', (w2 or ''):find('or a Regen', 1, true), nil)
     send028(act(8, 111, SELF))
-    check('unhedged loss is still an anomaly', CLOCKWORK_TEST.last.kind, 'spell_mispredicted')
+    check('unhedged loss is still an anomaly', PETWORKS_TEST.last.kind, 'spell_mispredicted')
 end

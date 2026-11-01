@@ -1,4 +1,4 @@
-# clockwork
+# petworks
 
 > **Approved for use on HorizonXI.**
 
@@ -6,18 +6,18 @@ An Ashita addon for HorizonXI (requires Ashita 4.3 or later): a HUD for **Puppet
 per element, the maneuvers you have up, the automaton's next weaponskill and spell, its
 recasts, and your loadout.
 
-Documentation, screenshots and source: https://github.com/patheed-ffxi/clockwork
+Documentation, screenshots and source: https://github.com/patheed-ffxi/petworks
 
 ## Install
 
-Put this `clockwork` folder in your Ashita `addons` directory, so that you have
-`addons/clockwork/clockwork.lua` with `cw/` and `assets/` beside it. Then, in game:
+Put this `petworks` folder in your Ashita `addons` directory, so that you have
+`addons/petworks/petworks.lua` with `pw/` and `assets/` beside it. Then, in game:
 
-    /addon load clockwork
+    /addon load petworks
 
-`/cw` lists the commands. Logging is off by default; the Settings tab turns it on.
+`/pw` lists the commands. Logging is off by default; the Settings tab turns it on.
 
-Many of the values clockwork uses were taken from LandSandBoat and have not been
+Many of the values petworks uses were taken from LandSandBoat and have not been
 verified on HorizonXI yet. To report a wrong prediction, see the "Reporting a wrong
 prediction" section on the GitHub page.
 

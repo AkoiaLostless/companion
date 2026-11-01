@@ -568,9 +568,9 @@ do
     world.petHpp = 100
     -- the Dia the line names is logged as predicted, not as a miss
     frame('sw spell line')
-    CLOCKWORK_TEST.last = nil
+    PETWORKS_TEST.last = nil
     send028(act(8, 23, MOB + 6))
-    check('sw dia logged as predicted', CLOCKWORK_TEST.last and CLOCKWORK_TEST.last.kind, 'pet_spell')
+    check('sw dia logged as predicted', PETWORKS_TEST.last and PETWORKS_TEST.last.kind, 'pet_spell')
     -- that cast shut the magic window (10s) and the enfeeble one (12s): once
     -- the magic one reopens, the nuke is what the shut rung leaves
     advance(10.5)
@@ -605,19 +605,19 @@ do
     -- still describes the previous automaton, so nothing may be written yet.
     send028({ actor = SELF, category = 6, param = 136,
               targets = { { id = SELF, actions = { { message = 0 } } } } })
-    CLOCKWORK_TEST.last = nil
+    PETWORKS_TEST.last = nil
     frame('loadout pending')
-    check('loadout waits for 044', CLOCKWORK_TEST.last, nil)
+    check('loadout waits for 044', PETWORKS_TEST.last, nil)
     -- the server names the new automaton: now it writes
     send044({ head = 5, frame = 35, magic = 120, attachments = { 1, 207 } })
     frame('loadout written')
-    check('loadout logged', CLOCKWORK_TEST.last.kind, 'loadout')
-    check('loadout head', CLOCKWORK_TEST.last.rec.head, 'Soulsoother Head')
-    check('loadout frame', CLOCKWORK_TEST.last.rec.frame, 'Stormwaker Frame')
-    check('loadout attachments', CLOCKWORK_TEST.last.rec.attachments, 'Strobe, Drum Magazine')
-    check('loadout count', CLOCKWORK_TEST.last.rec.count, 2)
+    check('loadout logged', PETWORKS_TEST.last.kind, 'loadout')
+    check('loadout head', PETWORKS_TEST.last.rec.head, 'Soulsoother Head')
+    check('loadout frame', PETWORKS_TEST.last.rec.frame, 'Stormwaker Frame')
+    check('loadout attachments', PETWORKS_TEST.last.rec.attachments, 'Strobe, Drum Magazine')
+    check('loadout count', PETWORKS_TEST.last.rec.count, 2)
     -- and only once per Activate, not once per frame
-    CLOCKWORK_TEST.last = nil
+    PETWORKS_TEST.last = nil
     frame('loadout once')
-    check('loadout not repeated', CLOCKWORK_TEST.last, nil)
+    check('loadout not repeated', PETWORKS_TEST.last, nil)
 end

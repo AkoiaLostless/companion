@@ -1,4 +1,4 @@
--- cw/sets.lua - the saved attachment sets and the Apply coroutine that equips
+-- pw/sets.lua - the saved attachment sets and the Apply coroutine that equips
 -- one. Owns the set files (pupsets' format), the capacity and ownership checks
 -- and the Apply plan. Exports the store (list/load/save/delete/rename and
 -- validSetName), capacityOf, unownedIn, equippedSet, liveSet, planApply,
@@ -6,20 +6,20 @@
 -- publishes tm.flushLoadout and tm.applyState.
 local ffi  = require('ffi')
 local chat = require('chat')
-local D  = require('cw.data')
+local D  = require('pw.data')
 local ELEMENTS, ATTACH_OFFSET, EQUIP_OFFSET, PUPPET_CAP = D.ELEMENTS, D.ATTACH_OFFSET, D.EQUIP_OFFSET, D.PUPPET_CAP
-local tm = require('cw.state')
-local A  = require('cw.attachments')
+local tm = require('pw.state')
+local A  = require('pw.attachments')
 local ATTACH_ELEM = A.ATTACH_ELEM
-local U  = require('cw.util')
+local U  = require('pw.util')
 local safe, isPup, isPupSub, writeFile = U.safe, U.isPup, U.isPupSub, U.writeFile
-local L  = require('cw.log')
+local L  = require('pw.log')
 local logEvent = L.logEvent
-local R  = require('cw.reading')
+local R  = require('pw.reading')
 local equippedNames = R.equippedNames
-local P  = require('cw.pet')
+local P  = require('pw.pet')
 local resolveIds = P.resolveIds
--- The shared tables, never reassigned after cw/state.lua creates them.
+-- The shared tables, never reassigned after pw/state.lua creates them.
 local ids = tm.ids
 
 -- ================================================================= sets ==
@@ -75,10 +75,10 @@ local function validSetName(name)
     return not RESERVED[name:lower()]
 end
 
--- <ashita>/config/addons/clockwork/sets/<name>.txt - clockwork's own folder,
+-- <ashita>/config/addons/petworks/sets/<name>.txt - petworks's own folder,
 -- so nobody needs pupsets installed to use this.
 local function setsDir()
-    return ('%s/config/addons/clockwork/sets/'):format(tm.installRoot())
+    return ('%s/config/addons/petworks/sets/'):format(tm.installRoot())
 end
 local function setPath(name) return setsDir() .. name .. '.txt' end
 
@@ -515,13 +515,13 @@ local function runApply(name, steps, skipped)
         st.done = true
         if st.failed ~= nil then
             st.status = st.failed
-            print(chat.header('clockwork'):append(chat.error(('apply %s: %s'):format(name, st.failed))))
+            print(chat.header('petworks'):append(chat.error(('apply %s: %s'):format(name, st.failed))))
         else
             st.status = ('done - %d changes%s'):format(#steps, skippedNote(skipped))
-            print(chat.header('clockwork'):append(chat.message(('applied %s: %d changes'):format(name, #steps))))
+            print(chat.header('petworks'):append(chat.message(('applied %s: %d changes'):format(name, #steps))))
         end
         if #skipped > 0 then
-            print(chat.header('clockwork'):append(chat.message(
+            print(chat.header('petworks'):append(chat.message(
                 'skipped (not owned or unknown): ' .. table.concat(skipped, ', '))))
         end
     end)
@@ -535,7 +535,7 @@ local NO_DATA = 'no automaton data from the server yet: zone, change job, activa
 local function applyRunning() return tm.applyState ~= nil and not tm.applyState.done end
 
 -- Why a saved set cannot be applied now, or nil when it can. The one list the
--- Loadout tab's Apply button and /cw load both read, so the two cannot
+-- Loadout tab's Apply button and /pw load both read, so the two cannot
 -- disagree. An apply already running is not on it: the button greys out for
 -- that without a reason, and the command says so itself.
 local function applyBlocker(set)
@@ -552,7 +552,7 @@ local function applyBlocker(set)
     return nil
 end
 
--- Entry from the Apply button and /cw load. Needs a 0x044 to diff against;
+-- Entry from the Apply button and /pw load. Needs a 0x044 to diff against;
 -- both refuse without one. Items you do not own are skipped and named.
 local function startApply(name, set)
     if tm.auto044 == nil or tm.auto044.attachments == nil then return end
