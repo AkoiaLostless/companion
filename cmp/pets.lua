@@ -40,6 +40,9 @@ local BEAST = {
     { key = 'familiar',        label = 'Familiar',   short = 'Fam',  name = 'Familiar',        ability = 24,  timer = 0 },
 }
 local ABIL_READY = 251
+-- Familiar (the two-hour) sets a charmed pet's time left to about half an
+-- hour: 28-30 minutes, as Ross has seen it on Horizon. Thirty is shown.
+local ABIL_FAMILIAR, FAMILIAR_CHARM = 24, 1800
 local AVATAR = {
     { key = 'bp_rage',         label = 'BP: Rage',   short = 'Rage', name = 'Blood Pact: Rage', ability = 91,  timer = 173 },
     { key = 'bp_ward',         label = 'BP: Ward',   short = 'Ward', name = 'Blood Pact: Ward', ability = 172, timer = 174 },
@@ -230,6 +233,16 @@ local function timerView(kind, name)
             if timer.dur ~= nil then writeSaved(timer) end
         end
     end
+    -- Familiar used since this charm began: about thirty minutes from then.
+    if kind == 'charmed' and tm.familiarAt ~= nil and tm.familiarAt ~= timer.familiarSeen then
+        timer.familiarSeen = tm.familiarAt
+        local at = os.time() - math.floor(math.max(0, os.clock() - tm.familiarAt))
+        if at >= timer.start then
+            timer.dur = (at - timer.start) + FAMILIAR_CHARM
+            writeSaved(timer)
+            since = math.max(0, os.time() - timer.start)
+        end
+    end
     if kind == 'charmed' and timer.dur ~= nil then
         return { left = math.max(0, timer.dur - since), total = timer.dur, charm = true }
     end
@@ -320,6 +333,7 @@ end
 -- The packet thread's half: one of your own abilities just went off.
 tm.noteSummon = function(abilityId)
     if SUMMONS[abilityId] then tm.petSummonAt = os.clock() end
+    if abilityId == ABIL_FAMILIAR then tm.familiarAt = os.clock() end
 end
 
 return { kindOf = kindOf, JUGS = JUGS, AVATARS = AVATARS, LISTS = LISTS,

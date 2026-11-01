@@ -78,7 +78,8 @@ Puppetmaster panel goes:
   charm-time gear you are wearing. The mob's level comes from a /check: when you use
   Charm, Companion sends a `/check <t>` for you (pointed at the mob you charmed, if your
   target was something else), and a /check you make yourself counts too. The charm can
-  still break sooner. With **charm check** off on the Settings tab, and no /check of
+  still break sooner. Familiar resets it to about 30 minutes from its use (28 to 30 on
+  Horizon). With **charm check** off on the Settings tab, and no /check of
   that mob, the timer counts up from the charm instead.
 - **HP and TP bars**, plus **MP** for avatars and for any pet that reports MP.
 - **What is on the pet**: buffs on the left and debuffs on the right, the same strip the
