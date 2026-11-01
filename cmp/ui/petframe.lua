@@ -16,8 +16,14 @@ local petStatusStrip = SF.petStatusStrip
 -- The window's width at 100%, against the panel's config.base_width.
 local PET_WIDTH = 260
 
-local KIND_TAG = { jug = 'jug', charmed = 'charmed', avatar = 'avatar', wyvern = 'wyvern' }
-local NO_PET = { charmed = 'no pet out', avatar = 'no avatar out', wyvern = 'no wyvern out' }
+local KIND_TAG = { jug = 'Jug', charmed = 'Charmed', avatar = 'Avatar', wyvern = 'Wyvern' }
+local NO_PET = { charmed = 'No Pet Out', avatar = 'No Avatar Out', wyvern = 'No Wyvern Out' }
+
+-- A jug pet outlines the window in green and a charmed one in gold, so which
+-- kind is out reads at a glance; the tag after the name takes the same colour.
+-- Anything else keeps the panel's borderless look.
+local COL_GOLD = { 1.00, 0.78, 0.25, 1.0 }
+local KIND_EDGE = { jug = COL_GOOD, charmed = COL_GOLD }
 
 -- HP and TP, and MP when the pet has a pool to show: an avatar always (its MP
 -- is yours, but a summoner reads it there), anything else only once it
@@ -78,7 +84,7 @@ local function body(v)
         end
         if KIND_TAG[v.kind] then
             imgui.SameLine(0, tm.s(6))
-            tm.text('label', COL_DIM, KIND_TAG[v.kind])
+            tm.text('label', KIND_EDGE[v.kind] or COL_DIM, KIND_TAG[v.kind])
         end
         timerText(v.timer)
         vitals(pet, v.kind == 'avatar' or (pet.mpp or 0) > 0)
@@ -86,9 +92,9 @@ local function body(v)
         tm.targetRow()
     elseif v.kind ~= nil then
         -- out, but too far for the client to draw: nothing to read
-        tm.text('text', COL_DIM, 'pet out of range')
+        tm.text('text', COL_DIM, 'Pet Out of Range')
     else
-        tm.text('text', COL_DIM, NO_PET[v.listKind] or 'no pet out')
+        tm.text('text', COL_DIM, NO_PET[v.listKind] or 'No Pet Out')
     end
     if #v.rows > 0 then
         imgui.Separator()
@@ -106,12 +112,21 @@ local function draw()
     local width = config.base_width
     config.base_width = PET_WIDTH
     tm.panelPush()
+    local edge = (v.pet ~= nil) and KIND_EDGE[v.kind] or nil
+    if edge ~= nil then
+        imgui.PushStyleVar(ImGuiStyleVar_WindowBorderSize, tm.s(2))
+        imgui.PushStyleColor(ImGuiCol_Border, edge)
+    end
     imgui.SetNextWindowSize({ tm.s(PET_WIDTH), 0 }, ImGuiCond_FirstUseEver)
     local ok, err = true, nil
     if imgui.Begin('companion', nil, HUD_FLAGS) then
         ok, err = pcall(body, v)
     end
     imgui.End()
+    if edge ~= nil then
+        imgui.PopStyleColor(1)
+        imgui.PopStyleVar(1)
+    end
     tm.panelPop()
     config.base_width = width
     if not ok then error(err, 0) end

@@ -51,7 +51,7 @@ do
     check('pets: ...and not as an automaton', tm.snap.is_pup, false)
     check('pets: the window is drawn', saw('WINDOW:companion'), true)
     check('pets: its name', saw('CourierCarrie'), true)
-    check('pets: tagged as a jug', saw('jug'), true)
+    check('pets: tagged as a jug', saw('Jug'), true)
     check('pets: the jug clock starts full', saw('30:00'), true)
     check('pets: no MP bar for a jug with no MP', saw('MP'), false)
     check('pets: TP', saw('TP'), true)
@@ -112,7 +112,7 @@ do
     petAs('Garuda', SMN, WHM)
     world.petMpp = 55
     frame('pets: an avatar')
-    check('pets: avatar tagged', saw('avatar'), true)
+    check('pets: avatar tagged', saw('Avatar'), true)
     check('pets: avatar MP shown', saw('55%'), true)
     check('pets: BP: Rage listed', saw('BP: Rage'), true)
     check('pets: no jug clock', saw('30:00'), false)
@@ -122,7 +122,7 @@ do
     world.abilities = { [0x200 + 61] = true, [0x200 + 80] = true }
     petAs('Bahamut', DRG, WAR)
     frame('pets: a wyvern')
-    check('pets: wyvern tagged', saw('wyvern'), true)
+    check('pets: wyvern tagged', saw('Wyvern'), true)
     check('pets: Spirit Link listed', saw('Spirit Link'), true)
 
     -- BST with nothing out keeps the window, for Call Beast
@@ -130,7 +130,7 @@ do
     world.mainjob, world.subjob = BST, WHM
     world.abilities = { [0x200 + 85] = true }
     frame('pets: BST, no pet')
-    check('pets: the window stays for a pet job', saw('no pet out'), true)
+    check('pets: the window stays for a pet job', saw('No Pet Out'), true)
     check('pets: ...with Call Beast in it', saw('Call Beast'), true)
 
     -- ...but not for a job that only charms on the side
@@ -185,7 +185,7 @@ do
     petAs('Forest Hare', BST, WHM)
     world.petId = CHARMED
     frame('charm: charmed')
-    check('charm: charmed tag', saw('charmed'), true)
+    check('charm: charmed tag', saw('Charmed'), true)
     check('charm: counts down from the estimate', saw('~3:44') or saw('~3:43'), true)
     -- Familiar: about thirty minutes from its use
     tm.noteSummon(24)
@@ -224,7 +224,7 @@ do
     frame('list: status tab')
     check('list: your counting ability shows its time', saw('47s'), true)
     check('list: a ready one says Ready', saw('Ready'), true)
-    check('list: the you label', saw('cooldowns'), true)
+    check('list: the Cooldowns label', saw('Cooldowns'), true)
     check('list: no dial wedges', saw('WEDGE'), false)
     config.cd_list = false
     world.recast, world.abilities = {}, {}

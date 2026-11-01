@@ -264,6 +264,7 @@ package.preload['imgui'] = function()
     rawset(_G, 'ImGuiCol_WindowBg',                  2)
     rawset(_G, 'ImGuiCol_Text',                      0)
     rawset(_G, 'ImGuiCol_FrameBg',                   7)
+    rawset(_G, 'ImGuiCol_Border',                    5)
     -- STRICT. A permissive __index made a misspelled ImGui call a silent no-op
     -- offline and a per-frame nil call in game: `imgui.Separator` mistyped
     -- passed 924 checks and drew nothing. Anything the addon calls has to be

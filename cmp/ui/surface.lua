@@ -624,7 +624,7 @@ tm.targetRow = function()
     -- Nothing to fight: said outright rather than by leaving the row out, so
     -- nothing under it moves.
     if tm.petTarget == 0 then
-        tm.text('label', COL_DIM, 'target')
+        tm.text('label', COL_DIM, 'Target')
         imgui.SameLine()
         tm.text('text', COL_DIM, 'NOT ENGAGED')
         return
@@ -634,7 +634,7 @@ tm.targetRow = function()
     if slot == nil then
         -- Out of the entity table: too far to render, or dead and despawned.
         -- The last name is kept so a one-frame flap does not blank the row.
-        tm.text('label', COL_DIM, 'target')
+        tm.text('label', COL_DIM, 'Target')
         imgui.SameLine()
         tm.text('text', COL_DIM, ('%s - out of sight'):format(tm.targetName()))
         tip('Too far away to read, or dead.')
@@ -644,7 +644,7 @@ tm.targetRow = function()
     -- Still in the entity table at zero: it is dead, not on 0% of its health -
     -- the server never reports a living mob below 1.
     if hpp <= 0 then
-        tm.text('label', COL_DIM, 'target')
+        tm.text('label', COL_DIM, 'Target')
         imgui.SameLine()
         tm.text('text', COL_DIM, 'NOT ENGAGED')
         return
@@ -1048,7 +1048,7 @@ tm.jaGrid = function(x0, width, lineStart, rows)
         local gap = tm.s(8)
         local cols = math.max(1, math.min(#rows, math.floor((width + gap) / (cell + gap))))
         local per = math.ceil(#rows / cols)
-        tm.text('label', COL_DIM, 'cooldowns')
+        tm.text('label', COL_DIM, 'Cooldowns')
         tip('Your own job abilities\' recasts, straight from the client. Which\nones, and whether a ready one is listed: Settings, display.')
         for c = 0, cols - 1 do
             if c * per < #rows then
@@ -1075,7 +1075,7 @@ tm.jaGrid = function(x0, width, lineStart, rows)
     end
     local cols = math.max(1, math.floor((width + gap) / (cell + gap)))
     if lineStart == nil then
-        tm.text('label', COL_DIM, 'cooldowns')
+        tm.text('label', COL_DIM, 'Cooldowns')
         tip('Your own job abilities\' recasts, straight from the client. Which\nones, how they are drawn, and whether a ready one is listed:\nSettings, display.')
     end
     for i, r in ipairs(rows) do
