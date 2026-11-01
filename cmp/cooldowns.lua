@@ -66,7 +66,10 @@ local longest = {}
 -- made-up master's.
 local function learned(d, p, ja)
     if d ~= nil then return d.has[ja.key] == true end
-    return p:HasAbility(JA_RESOURCE + ja.ability)
+    if p:HasAbility(JA_RESOURCE + ja.ability) then return true end
+    -- one row for two abilities on one timer (Sic and Ready, cmp/pets.lua):
+    -- learned when either is
+    return ja.alt ~= nil and p:HasAbility(JA_RESOURCE + ja.alt)
 end
 
 -- The client's recast table, read once: what is left on each timer and the

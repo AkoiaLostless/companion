@@ -31,9 +31,9 @@ local BEAST = {
     { key = 'bestial_loyalty', label = 'Loyalty',    short = 'BL',   name = 'Bestial Loyalty', ability = 387, timer = 94 },
     { key = 'charm',           label = 'Charm',      short = 'Chm',  name = 'Charm',           ability = 52,  timer = 97 },
     { key = 'reward',          label = 'Reward',     short = 'Rwd',  name = 'Reward',          ability = 78,  timer = 103 },
-    -- Sic, and Ready where the server grants it instead: one timer, and the
-    -- label follows whichever you have (sicLabel below)
-    { key = 'sic',             label = 'Sic',        short = 'Sic',  name = 'Sic',             ability = 72,  timer = 102 },
+    -- Sic, and Ready where the server grants it instead: one timer, listed
+    -- when you have either, and the label and charges follow which (sicRow)
+    { key = 'sic',             label = 'Sic',        short = 'Sic',  name = 'Sic',             ability = 72,  timer = 102, alt = 251 },
     { key = 'snarl',           label = 'Snarl',      short = 'Snl',  name = 'Snarl',           ability = 225, timer = 107 },
     { key = 'feral_howl',      label = 'Feral Howl', short = 'FH',   name = 'Feral Howl',      ability = 161, timer = 105 },
     { key = 'killer_instinct', label = 'Killer Ins.', short = 'KI',  name = 'Killer Instinct', ability = 162, timer = 106 },
@@ -182,10 +182,29 @@ local function timerView(kind, name)
 end
 
 -- --------------------------------------------------------------- the view --
-local function sicLabel(row)
+-- Ready works on charges: three, each refilled over READY_CHARGE seconds,
+-- and the client's recast timer counts down until all three are back
+-- (LSB abilities_charges.sql: recastId 102, 3 charges, 30 s upstream). How
+-- long one charge takes on this server, with your gear and merits, is learned
+-- from the timer itself: a use from a full stock starts it at exactly one
+-- charge. Until one is seen, Horizon's 45 s.
+local READY_MAX, chargeSecs, sicWas = 3, 45, nil
+local function sicRow(row, kind)
     if row.key ~= 'sic' then return end
-    if safe(function() return player():HasAbility(0x200 + ABIL_READY) end, false) then
-        row.label, row.short, row.name = 'Ready', 'Rdy', 'Ready'
+    local hasReady = safe(function() return player():HasAbility(0x200 + ABIL_READY) end, false)
+    if not hasReady then return end
+    if kind ~= 'charmed' then row.label, row.short, row.name = 'Ready', 'Rdy', 'Ready' end
+    local rem = row.remaining or 0
+    if sicWas == 0 and rem > 0 and rem <= 120 then chargeSecs = math.max(5, math.ceil(rem)) end
+    sicWas = rem
+    local missing = math.min(READY_MAX, math.ceil(rem / chargeSecs - 0.01))
+    row.charges, row.maxCharges = READY_MAX - math.max(0, missing), READY_MAX
+    if rem > 0 then
+        -- the time to the NEXT charge, which is the one you are waiting on
+        row.remaining = rem - (missing - 1) * chargeSecs
+        row.total = chargeSecs
+        -- one in stock is usable now: ready, with the next on its way
+        if row.charges > 0 then row.state = 'ready' end
     end
 end
 local function always() return true end
@@ -215,7 +234,7 @@ tm.petRefresh = function()
     if listKind == nil then return false end
     if pet ~= nil then settleTimer(kind, pet.name) end
     local rows = safe(function() return tm.jaBuild(LISTS[listKind] or {}, always) end, {})
-    for _, r in ipairs(rows) do sicLabel(r) end
+    for _, r in ipairs(rows) do sicRow(r, listKind) end
     tm.petView = {
         kind  = kind,
         listKind = listKind,
