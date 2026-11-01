@@ -1,6 +1,6 @@
 addon.name    = 'companion'
 addon.author  = 'Pathead (Clockwork), AkoiaLostless'
-addon.version = '1.1.5'
+addon.version = '1.1.6'
 addon.desc    = 'Puppetmaster burden, maneuvers, weaponskill prediction and loadout, and a pet window for BST, SMN and DRG.'
 
 require('common')
