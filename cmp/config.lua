@@ -166,6 +166,10 @@ local config =
     -- charmed pet, a SMN avatar, a DRG wyvern (cmp/pets.lua). Off leaves those
     -- jobs without a window, for when another addon draws their pets.
     pet_window       = true,
+    -- When you Charm, a /check of the mob goes out on its own, so the charmed
+    -- pet's window can count its charm DOWN (an estimate from the server's
+    -- formula) instead of up. Off: only a /check you make yourself is used.
+    charm_check      = true,
     cd_activate      = true,
     cd_dea           = true,
     cd_repair        = true,

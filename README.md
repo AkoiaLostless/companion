@@ -72,8 +72,14 @@ Puppetmaster panel goes:
   180 minutes), amber in the last 5 minutes and red in the last minute. It starts when
   you use Call Beast or Bestial Loyalty, and it survives zoning and an addon reload. A
   jug pet that was already out when Companion loaded has no timer until the next one.
-- **A charmed pet's time since the charm**, counting up. When a charm breaks depends on
-  your CHR and the pet's level, so Companion does not guess.
+- **A charmed pet's charm time left**, an estimate shown as `~3:44`. The server never
+  tells your client how long a charm lasts, so Companion works it out with the server's
+  own formula (LandSandBoat's): your CHR, your level against the mob's, and the
+  charm-time gear you are wearing. The mob's level comes from a /check: when you use
+  Charm, Companion sends a `/check <t>` for you (pointed at the mob you charmed, if your
+  target was something else), and a /check you make yourself counts too. The charm can
+  still break sooner. With **charm check** off on the Settings tab, and no /check of
+  that mob, the timer counts up from the charm instead.
 - **HP and TP bars**, plus **MP** for avatars and for any pet that reports MP.
 - **What is on the pet**: buffs on the left and debuffs on the right, the same strip the
   automaton gets.

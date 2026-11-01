@@ -90,6 +90,51 @@ TurbidToloi 120]]):gmatch('(%S+)%s+(%d+)') do
     JUGS[n] = tonumber(mins) * 60
 end
 
+-- Charm-time gear: item id -> CHARM_TIME points, each 5% more charm (LSB
+-- item_mods.sql, mod 360). Anything else you wear adds nothing here.
+local CHARM_GEAR = {
+    [10658] = 6, [10678] = 8, [10698] = 5, [10718] = 3, [10738] = 4, [12517] = 4, [12646] = 5,
+    [13969] = 3, [14097] = 2, [14222] = 6, [14481] = 6, [14508] = 7, [14898] = 3, [14917] = 4,
+    [15080] = 5, [15095] = 6, [15110] = 4, [15125] = 2, [15140] = 3, [15233] = 4, [15253] = 5,
+    [15360] = 2, [15569] = 6, [15588] = 2, [15673] = 3, [17936] = 1, [23048] = 30, [23071] = 12,
+    [23138] = 14, [23205] = 11, [23272] = 9, [23339] = 10, [23383] = 35, [23674] = 12,
+    [26640] = 8, [26641] = 10, [26816] = 8, [26817] = 12, [26992] = 7, [26993] = 9, [27168] = 5,
+    [27169] = 7, [27344] = 6, [27345] = 8, [27671] = 5, [27692] = 5, [27815] = 7, [27836] = 7,
+    [27951] = 4, [27972] = 5, [28098] = 7, [28119] = 7, [28231] = 3, [28252] = 3,
+}
+
+-- How long a charm lasts, in seconds: LSB's getCharmDuration
+-- (scripts/globals/job_utils/beastmaster.lua). The base is 1.25 x CHR + 150;
+-- a mob 7 or more levels above you cuts it to a 24th and one 9 or more below
+-- multiplies it by 6, with LSB's fitted curve between; each CHARM_TIME point
+-- on your gear adds 5%. An estimate of the server's number: anything the
+-- server adds that this does not see (a food, a buff) moves it.
+local function charmSeconds(chr, myLevel, mobLevel, charmTime)
+    local base = math.floor(1.25 * chr + 150)
+    local d = myLevel - mobLevel
+    local mult = 1 / 24
+    if d >= 9 then
+        mult = 6
+    elseif d >= -6 then
+        mult = 0.9997336 + 0.3652882 * d + 0.02097742 * d ^ 2 - 0.004106429 * d ^ 3
+             + 0.000007231037 * d ^ 4 + 0.00005102634 * d ^ 5
+    end
+    local dur = base * mult
+    return math.floor(dur + dur * (charmTime * 0.5 / 10))
+end
+
+-- Your side of it, read now: CHR as the server counts it (base and gear),
+-- your main job's level, and the charm-time points on what you wear.
+local function charmNow(mobLevel)
+    return safe(function()
+        local p = player()
+        local chr = p:GetStat(6) + p:GetStatModifier(6)
+        local pts = 0
+        for slot = 0, 15 do pts = pts + (CHARM_GEAR[U.equippedItemId(slot)] or 0) end
+        return charmSeconds(chr, p:GetMainJobLevel(), mobLevel, pts)
+    end, nil)
+end
+
 local function squash(name) return (tostring(name or ''):gsub('%s+', '')) end
 
 -- ---------------------------------------------------------- which kind --
@@ -134,8 +179,10 @@ local function readSaved()
         if f == nil then return end
         local line = f:read('*l') or ''
         f:close()
-        local name, kind, start = line:match('^([^|]+)|(%a+)|(%d+)$')
-        if name ~= nil then saved = { name = name, kind = kind, start = tonumber(start) } end
+        local name, kind, start, dur = line:match('^([^|]+)|(%a+)|(%d+)|?(%d*)$')
+        if name ~= nil then
+            saved = { name = name, kind = kind, start = tonumber(start), dur = tonumber(dur) }
+        end
     end)
     return saved
 end
@@ -143,7 +190,8 @@ local function writeSaved(t)
     saved = t
     safe(function()
         ashita.fs.create_directory(timerPath():gsub('pet%.txt$', ''))
-        U.writeFile(timerPath(), ('%s|%s|%d\n'):format(t.name, t.kind, t.start))
+        U.writeFile(timerPath(), ('%s|%s|%d|%s\n'):format(t.name, t.kind, t.start,
+                                                         t.dur and tostring(t.dur) or ''))
     end)
 end
 
@@ -173,6 +221,18 @@ end
 local function timerView(kind, name)
     if timer == nil then return nil end
     local since = math.max(0, os.time() - timer.start)
+    -- A charm's length, once the /check of that mob has answered (cmp/inbound.lua
+    -- keeps every level a check reports, by the mob's id, which the pet keeps).
+    if kind == 'charmed' and timer.dur == nil then
+        local level = tm.checked[ids.pet_id]
+        if level ~= nil then
+            timer.dur = charmNow(level)
+            if timer.dur ~= nil then writeSaved(timer) end
+        end
+    end
+    if kind == 'charmed' and timer.dur ~= nil then
+        return { left = math.max(0, timer.dur - since), total = timer.dur, charm = true }
+    end
     if kind == 'jug' then
         local dur = JUGS[squash(name)]
         if dur == nil then return nil end
@@ -217,7 +277,19 @@ local PET_MAIN = { [JOB_BST] = 'charmed', [JOB_SMN] = 'avatar', [JOB_DRG] = 'wyv
 -- 'charmed', 'avatar', 'wyvern', 'pet' or nil with no pet out) and returns
 -- whether the pet window should draw; when it should, tm.petView holds what
 -- it draws. An automaton answers false: the main panel is its window.
+-- The /check a Charm asks for (cmp/outbound.lua noted the Charm). Sent from
+-- here, the render thread, as a typed /check of your target: outbound.lua
+-- points it at the charmed mob should your target be something else.
+local function sendCharmCheck()
+    local w = tm.charmWant
+    if w == nil or w.state ~= 'want' then return end
+    if os.clock() - w.at > 3 then tm.charmWant = nil return end
+    w.state, w.at = 'sent', os.clock()
+    safe(function() AshitaCore:GetChatManager():QueueCommand(1, '/check <t>') end)
+end
+
 tm.petRefresh = function()
+    sendCharmCheck()
     local main, sub = safe(function() return player():GetMainJob() end, 0),
                       safe(function() return player():GetSubJob() end, 0)
     if tm.demo ~= nil then main = JOB_PUP end
@@ -251,5 +323,6 @@ tm.noteSummon = function(abilityId)
 end
 
 return { kindOf = kindOf, JUGS = JUGS, AVATARS = AVATARS, LISTS = LISTS,
+         charmSeconds = charmSeconds, CHARM_GEAR = CHARM_GEAR,
          -- for the harness: forget the timer and the saved record
          resetTimer = function() timer, timerFor, saved = nil, nil, nil end }

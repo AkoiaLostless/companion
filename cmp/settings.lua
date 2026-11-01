@@ -47,6 +47,7 @@ local PERSIST = {
     cd_dials          = { 'bool' },
     cd_list           = { 'bool' },
     pet_window        = { 'bool' },
+    charm_check       = { 'bool' },
     cd_activate       = { 'bool' },
     cd_dea            = { 'bool' },
     cd_repair         = { 'bool' },

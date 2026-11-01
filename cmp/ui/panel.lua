@@ -551,6 +551,8 @@ local function displayView()
     imgui.SameLine(hudPad() + tm.s(180), 0)
     toggle('pet window', 'pet_window',
            'A window for BST, SMN and DRG pets: HP, MP, TP, its target, its\nstatus and your pet abilities\' recasts. Off for when another addon\ndraws those pets.')
+    toggle('charm check', 'charm_check',
+           'When you Charm, send a /check of the mob so the charmed pet\'s\nwindow can count the charm down. Off: only your own /check counts.')
     local list = tm.jaList
     local half = math.ceil(#list / 2)
     imgui.BeginGroup()
