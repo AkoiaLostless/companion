@@ -73,7 +73,7 @@ local function tagText(kind)
     -- The font's line box carries room above the letters for accents, so a
     -- pill around the whole box sits high on the word. Its top is trimmed by
     -- that room, which centers the letters in it.
-    local top, bottom = y + h * 0.15 - padY, y + h + padY
+    local top, bottom = y + h * 0.2 - padY, y + h + padY
     local r = (bottom - top) / 2
     dl:AddRectFilled({ x, top }, { x + w + padX * 2, bottom }, tm.u32(fill), r)
     dl:AddText({ x + padX, y }, tm.u32(BUBBLE_TEXT), s)
