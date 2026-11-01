@@ -19,9 +19,9 @@ local PET_WIDTH = 260
 local KIND_TAG = { jug = 'Jug', charmed = 'Charmed', avatar = 'Avatar', wyvern = 'Wyvern' }
 local NO_PET = { charmed = 'No Pet Out', avatar = 'No Avatar Out', wyvern = 'No Wyvern Out' }
 
--- A jug pet outlines the window in green and a charmed one in gold, so which
--- kind is out reads at a glance; the tag after the name takes the same colour.
--- Anything else keeps the panel's borderless look.
+-- The tag after the name is boxed in green for a jug pet and in gold for a
+-- charmed one, so which kind is out reads at a glance. Avatar and wyvern tags
+-- stay plain.
 local COL_GOLD = { 1.00, 0.78, 0.25, 1.0 }
 local KIND_EDGE = { jug = COL_GOOD, charmed = COL_GOLD }
 
@@ -54,6 +54,29 @@ local function vitals(pet, showMp)
     under(n, 'TP', ('%d'):format(tp))
 end
 
+-- The kind tag; a jug or charmed one gets an outlined box of its color,
+-- padded so the line around it clears the letters.
+local function tagText(kind)
+    local edge = KIND_EDGE[kind]
+    if edge == nil then
+        tm.text('label', COL_DIM, KIND_TAG[kind])
+        return
+    end
+    local s = KIND_TAG[kind]
+    local padX, padY = tm.s(4), tm.s(1)
+    imgui.PushFont(tm.font, tm.px('label'))
+    local w, h = imgui.CalcTextSize(s)
+    imgui.PopFont()
+    local x, y = imgui.GetCursorScreenPos()
+    imgui.GetWindowDrawList():AddRect({ x, y - padY }, { x + w + padX * 2, y + h + padY },
+        tm.u32(edge), tm.s(3), 0, tm.s(1))
+    imgui.Dummy({ padX, h })
+    imgui.SameLine(0, 0)
+    tm.text('label', edge, s)
+    imgui.SameLine(0, 0)
+    imgui.Dummy({ padX, h })
+end
+
 -- The jug's time left, or the charm's time so far, at the end of the name line.
 local function timerText(t)
     if t == nil then return end
@@ -84,7 +107,7 @@ local function body(v)
         end
         if KIND_TAG[v.kind] then
             imgui.SameLine(0, tm.s(6))
-            tm.text('label', KIND_EDGE[v.kind] or COL_DIM, KIND_TAG[v.kind])
+            tagText(v.kind)
         end
         timerText(v.timer)
         vitals(pet, v.kind == 'avatar' or (pet.mpp or 0) > 0)
@@ -112,21 +135,12 @@ local function draw()
     local width = config.base_width
     config.base_width = PET_WIDTH
     tm.panelPush()
-    local edge = (v.pet ~= nil) and KIND_EDGE[v.kind] or nil
-    if edge ~= nil then
-        imgui.PushStyleVar(ImGuiStyleVar_WindowBorderSize, tm.s(2))
-        imgui.PushStyleColor(ImGuiCol_Border, edge)
-    end
     imgui.SetNextWindowSize({ tm.s(PET_WIDTH), 0 }, ImGuiCond_FirstUseEver)
     local ok, err = true, nil
     if imgui.Begin('companion', nil, HUD_FLAGS) then
         ok, err = pcall(body, v)
     end
     imgui.End()
-    if edge ~= nil then
-        imgui.PopStyleColor(1)
-        imgui.PopStyleVar(1)
-    end
     tm.panelPop()
     config.base_width = width
     if not ok then error(err, 0) end
