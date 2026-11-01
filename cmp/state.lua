@@ -181,5 +181,9 @@ tm.view = 'pup'
 -- When you last used an ability that brings a pet out (cmp/pets.lua), and the
 -- kind of pet out now and what its window shows.
 tm.petSummonAt, tm.petKind, tm.petView = nil, nil, nil
+-- [mob server id] = the level a /check of it reported (cmp/inbound.lua), and
+-- the /check a Charm has asked for: { id, idx, at, state = 'want' | 'sent' |
+-- 'waiting' } (cmp/outbound.lua, cmp/pets.lua).
+tm.checked, tm.charmWant = {}, nil
 
 return tm

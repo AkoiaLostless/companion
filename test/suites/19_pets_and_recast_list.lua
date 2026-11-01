@@ -147,6 +147,42 @@ do
     check('pets: the automaton gets the panel', tm.view, 'pup')
     check('pets: the panel draws', saw('burden') or saw('no maneuvers'), true)
 
+    -- --------------------------------------------- the charm countdown --
+    check('charm: even levels, CHR 60', PETS.charmSeconds(60, 75, 75, 0), 224)
+    check('charm: 9 levels down caps at 6x', PETS.charmSeconds(60, 75, 66, 0), 1350)
+    check('charm: 7 levels up is a 24th', PETS.charmSeconds(60, 75, 82, 0), 9)
+    check('charm: 4 gear points add 20%', PETS.charmSeconds(60, 75, 66, 4), 1620)
+    check('charm: Beast Helm counts 4', PETS.CHARM_GEAR[12517], 4)
+
+    clearPet()
+    world.mainjob, world.subjob = BST, WHM
+    world.stats, world.statMods = { [6] = 60 }, { [6] = 0 }
+    world.mainlvl = 75
+    world.commands = {}
+    PETS.resetTimer()
+    local CHARMED = MOB + 960
+    local function out(id, bytes) local e = { id = id, injected = false, data = bytes } handlers['packet_out'](e) return e end
+    local function u32s(v) return string.char(v % 256, math.floor(v / 256) % 256, math.floor(v / 65536) % 256, math.floor(v / 16777216) % 256) end
+    -- 0x001A: target, index, ActionID 9 (job ability), Charm (52)
+    out(0x01A, ('\0'):rep(4) .. u32s(CHARMED) .. string.char(0xC0, 0x03, 9, 0, 52, 0) .. ('\0'):rep(10))
+    check('charm: your Charm asks for a check', tm.charmWant ~= nil and tm.charmWant.id, CHARMED)
+    frame('charm: the frame after Charm')
+    check('charm: a /check goes out', world.commands[1], '/check <t>')
+    -- the client's 0x00DD, aimed at something else: pointed at the mob
+    local e = out(0x0DD, ('\0'):rep(4) .. u32s(MOB + 1) .. u32s(1) .. ('\0'):rep(8))
+    check('charm: the check is pointed at the charmed mob',
+          type(e.data_modified) == 'table' and e.data_modified[5] == CHARMED % 256, true)
+    send029(0x01000001, CHARMED, 75, 0xAD)       -- "...decent challenge", level 75
+    check('charm: the level is kept', tm.checked[CHARMED], 75)
+    check('charm: the check is answered', tm.charmWant, nil)
+    tm.noteSummon(52)
+    petAs('Forest Hare', BST, WHM)
+    world.petId = CHARMED
+    frame('charm: charmed')
+    check('charm: charmed tag', saw('charmed'), true)
+    check('charm: counts down from the estimate', saw('~3:44') or saw('~3:43'), true)
+    world.stats, world.statMods = nil, nil
+
     -- the light path parses nothing with no pet out but your own abilities
     clearPet()
     world.mainjob, world.subjob = BST, WHM

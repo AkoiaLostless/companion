@@ -54,11 +54,16 @@ local function timerText(t)
     imgui.SameLine(0, tm.s(8))
     if t.left ~= nil then
         local col = (t.left <= 60) and COL_BAD or (t.left <= 300) and COL_WARN or COL_TEXT
-        tm.text('text', col, tm.fmtLeft(t.left))
-        tip(('Time left before the jug pet leaves (%s in all).'):format(tm.fmtLeft(t.total)))
+        tm.text('text', col, (t.charm and '~' or '') .. tm.fmtLeft(t.left))
+        if t.charm then
+            tip(('Estimated time before the charm wears off (%s in all), from\nthe server\'s formula: your CHR, your level against the mob\'s\n(from the /check on Charm) and your charm-time gear. It can\nbreak sooner.')
+                :format(tm.fmtLeft(t.total)))
+        else
+            tip(('Time left before the jug pet leaves (%s in all).'):format(tm.fmtLeft(t.total)))
+        end
     else
         tm.text('text', COL_TEXT, tm.fmtLeft(t.since))
-        tip('Time since you charmed it. When a charm wears off depends on\nyour CHR and the pet\'s level, so this counts up rather than down.')
+        tip('Time since you charmed it. It counts down instead once a /check\nof the mob has said its level (charm check, Settings).')
     end
 end
 

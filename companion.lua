@@ -1,6 +1,6 @@
 addon.name    = 'companion'
 addon.author  = 'Pathead (Clockwork), AkoiaLostless'
-addon.version = '1.0.1'
+addon.version = '1.1.0'
 addon.desc    = 'Puppetmaster burden, maneuvers, weaponskill prediction and loadout, and a pet window for BST, SMN and DRG.'
 
 require('common')
@@ -28,6 +28,7 @@ require('cmp.settings')   -- publishes tm.loadSettings, tm.saveSettings, tm.rest
 local S      = require('cmp.sets')
 require('cmp.demo')
 local IN     = require('cmp.inbound')
+local OUT    = require('cmp.outbound')
 local C      = require('cmp.commands')
 local F      = require('cmp.frame')
 require('cmp.ui.surface')
@@ -37,6 +38,7 @@ local PN     = require('cmp.ui.panel')
 local PF     = require('cmp.ui.petframe')
 
 ashita.events.register('packet_in', 'companion_packet', IN.onPacket)
+ashita.events.register('packet_out', 'companion_packet_out', OUT.onPacketOut)
 
 -- tm.frameId numbers the frames, and tm.inFrame says one is being drawn:
 -- reads that cannot change inside a frame are made once per frame id

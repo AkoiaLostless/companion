@@ -445,6 +445,13 @@ local player = permissive({
 })
 AshitaCore = {
     GetInstallPath = function() return SCRATCH end,
+    -- typed commands the addon queues, in world.commands
+    GetChatManager = function()
+        return { QueueCommand = function(_, mode, text)
+            world.commands = world.commands or {}
+            world.commands[#world.commands + 1] = text
+        end }
+    end,
     GetMemoryManager = function()
         return {
             GetPlayer = function() return player end,

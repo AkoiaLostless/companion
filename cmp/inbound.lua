@@ -187,10 +187,30 @@ local function onZone()
     tm.mobs = {}         -- the mobs stayed behind
     tm.touched = {}      -- ...and their enmity lists with them
     tm.zoneSeq = tm.zoneSeq + 1
+    tm.checked, tm.charmWant = {}, nil   -- the mobs, and any check, stayed behind
 end
 
 -- 0x029 (battle message): deaths and wear-offs, on any mob we know and on
 -- our automaton.
+-- A /check reply: "<mob> seems like an easy prey" and the rest carry the
+-- mob's level as the first parameter (messages 170-178 - 0xAA-0xB2 - or the
+-- level-range flag 0x40-0x47 in the second). Kept by the mob's id for the
+-- charm estimate (cmp/pets.lua). Answers whether it was one.
+local function noteCheck(data, msg, tgt)
+    local p2 = u32le(data, 0x10)
+    local w = tm.charmWant
+    local ours = w ~= nil and w.id == tgt and p2 >= 0x40 and p2 <= 0x47
+    if not ((msg >= 0xAA and msg <= 0xB2) or ours) then return false end
+    local level = u32le(data, 0x0C)
+    if level < 1 or level > 150 then return false end
+    local n = 0
+    for _ in pairs(tm.checked) do n = n + 1 end
+    if n >= 32 then tm.checked = {} end
+    tm.checked[tgt] = level
+    if w ~= nil and w.id == tgt then tm.charmWant = nil end
+    return true
+end
+
 local function onBattleMessage(data)
     -- GP_SERV_BATTLE_MESSAGE - XiPackets world/server/0x0029:
     --   0x04 UniqueNoCas   0x08 UniqueNoTar   0x0C Data   0x18 MessageNum
@@ -199,6 +219,7 @@ local function onBattleMessage(data)
     local msg = u16le(data, 0x18)
     local cas = u32le(data, 0x04)
     local tgt = u32le(data, 0x08)
+    if #data >= 0x1A and noteCheck(data, msg, tgt) then return end
     -- Any mob we know: its death drops everything we held on it - the
     -- server kills every effect (mobentity.cpp DistributeRewards) and the
     -- respawn REUSES the id, so an entry that outlived the death would
