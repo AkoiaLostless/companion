@@ -882,7 +882,8 @@ end
 -- however the abilities are named.
 tm.recastCell = function(r, labelW)
     if config.cd_list then
-        tm.listCell(r.label, r.state, r.remaining, r.model, tm.listTimeW())
+        local nameW, _, boxW = tm.listWidths(tm.rows)
+        tm.listCell(r, boxW, nameW)
         tip(('%s: %ds recast. Ready means usable, not that it is about to\nfire. ? = not used since the addon loaded.')
             :format(r.name, r.model))
         return
@@ -906,27 +907,61 @@ local LIST_NEAR = 0.30
 tm.listTimeW = function()
     return math.max(tm.width('text', 'Ready'), tm.width('text', '00:00'))
 end
-tm.listCell = function(label, state, remaining, total, timeW, charges, maxCharges)
+
+-- Each recast as a box of its own, a faint panel with a bar down its left
+-- edge in its state's colour, so neighbouring abilities can never run into
+-- each other. Inside, one typeface and one baseline for everything: the
+-- name from the left edge, the charges (Ready's n/3) after it in a slot of
+-- their own, and the time right-aligned against the box's right edge, so the
+-- times of a column end on one line.
+local LIST_BG = { 1, 1, 1, 0.07 }
+local function listColor(state, remaining, total)
+    if state == 'ready' then return COL_GOOD end
+    if state == 'counting' then
+        return (total ~= nil and total > 0 and remaining / total <= LIST_NEAR) and COL_WARN or COL_TEXT
+    end
+    return COL_DIM
+end
+-- The widths a column of boxes needs to hold `rows`: the widest name, the
+-- charges slot (0 when none has charges), and the box as a whole.
+tm.listWidths = function(rows)
+    local nameW, chargeW = 0, 0
+    for _, r in ipairs(rows) do
+        local w = tm.width('text', r.label)
+        if w > nameW then nameW = w end
+        if r.charges ~= nil then chargeW = math.max(chargeW, tm.width('text', '0/3') + tm.s(6)) end
+    end
+    local pad = tm.s(6)
+    return nameW, chargeW, pad + nameW + chargeW + tm.s(10) + tm.listTimeW() + pad
+end
+tm.listCell = function(r, boxW, nameW)
+    local state, remaining = r.state, r.remaining
     local txt = (state == 'counting' and tm.fmtLeft(remaining))
              or (state == 'ready' and 'Ready') or '?'
     -- A charge ability (Ready): usable with charges in stock while the next
-    -- one still refills, so the time to that next charge shows in green.
-    if charges ~= nil and remaining ~= nil and remaining > 0 then txt = tm.fmtLeft(remaining) end
-    local col = COL_DIM
-    if state == 'ready' then
-        col = COL_GOOD
-    elseif state == 'counting' then
-        col = (total ~= nil and total > 0 and remaining / total <= LIST_NEAR) and COL_WARN or COL_TEXT
+    -- one still refills, so the time to that next charge shows, in green.
+    if r.charges ~= nil and remaining ~= nil and remaining > 0 then txt = tm.fmtLeft(remaining) end
+    local col = listColor(state, remaining, r.total or r.model)
+    local x, y = imgui.GetCursorScreenPos()
+    local th = tm.px('text')
+    local h, pad = th + tm.s(6), tm.s(6)
+    local dl = imgui.GetWindowDrawList()
+    dl:AddRectFilled({ x, y }, { x + boxW, y + h }, tm.u32(LIST_BG), tm.s(3))
+    dl:AddRectFilled({ x, y }, { x + tm.s(2), y + h }, tm.u32(col), 0)
+    imgui.PushFont(tm.font, th)
+    local ty = y + (h - th) / 2
+    local function put(tx, s, c)
+        dl:AddText({ tx + tm.s(1), ty + tm.s(1) }, tm.SHADOW, s)
+        dl:AddText({ tx, ty }, tm.u32(c), s)
     end
-    imgui.Dummy({ math.max(0, timeW - tm.width('text', txt)), 0 })
-    imgui.SameLine(0, 0)
-    tm.text('text', col, txt)
-    imgui.SameLine(0, tm.s(6))
-    tm.text('label', (state == 'ready') and COL_TEXT or COL_DIM, label)
-    if charges ~= nil then
-        imgui.SameLine(0, tm.s(4))
-        tm.text('text', (charges > 0) and COL_GOOD or COL_DIM, ('%d/%d'):format(charges, maxCharges))
+    put(x + pad, r.label, (state == 'ready') and COL_TEXT or COL_DIM)
+    if r.charges ~= nil then
+        put(x + pad + nameW + tm.s(6), ('%d/%d'):format(r.charges, r.maxCharges),
+            (r.charges > 0) and COL_GOOD or COL_DIM)
     end
+    put(x + boxW - pad - imgui.CalcTextSize(txt), txt, col)
+    imgui.PopFont()
+    imgui.Dummy({ boxW, h })
 end
 
 -- What is left on one of your own abilities, or that it is ready, on hover.
@@ -1009,15 +1044,11 @@ tm.jaGrid = function(x0, width, lineStart, rows)
     -- The list, in columns read top to bottom, as many columns as the width
     -- holds. Not on the compact strip (lineStart): it has no room for names.
     if config.cd_list and lineStart == nil then
-        local timeW, labelW = tm.listTimeW(), 0
-        for _, r in ipairs(rows) do
-            local w = tm.width('label', r.label)
-            if w > labelW then labelW = w end
-        end
-        local cell, gap = timeW + tm.s(6) + labelW, tm.s(14)
+        local nameW, _, cell = tm.listWidths(rows)
+        local gap = tm.s(8)
         local cols = math.max(1, math.min(#rows, math.floor((width + gap) / (cell + gap))))
         local per = math.ceil(#rows / cols)
-        tm.text('label', COL_DIM, 'you')
+        tm.text('label', COL_DIM, 'cooldowns')
         tip('Your own job abilities\' recasts, straight from the client. Which\nones, and whether a ready one is listed: Settings, display.')
         for c = 0, cols - 1 do
             if c * per < #rows then
@@ -1025,7 +1056,7 @@ tm.jaGrid = function(x0, width, lineStart, rows)
                 imgui.BeginGroup()
                 for i = c * per + 1, math.min(#rows, (c + 1) * per) do
                     local r = rows[i]
-                    tm.listCell(r.label, r.state, r.remaining, r.total, timeW, r.charges, r.maxCharges)
+                    tm.listCell(r, cell, nameW)
                     jaTip(r)
                 end
                 imgui.EndGroup()
@@ -1044,7 +1075,7 @@ tm.jaGrid = function(x0, width, lineStart, rows)
     end
     local cols = math.max(1, math.floor((width + gap) / (cell + gap)))
     if lineStart == nil then
-        tm.text('label', COL_DIM, 'you')
+        tm.text('label', COL_DIM, 'cooldowns')
         tip('Your own job abilities\' recasts, straight from the client. Which\nones, how they are drawn, and whether a ready one is listed:\nSettings, display.')
     end
     for i, r in ipairs(rows) do

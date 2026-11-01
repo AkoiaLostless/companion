@@ -123,14 +123,14 @@ do
 
     world.recast = {}
     frame('ja: nothing counting')
-    check('nothing counting draws no you label', at('you'), nil)
+    check('nothing counting draws no you label', at('cooldowns'), nil)
 
     world.recast = { [3] = { 206, 2820 } }        -- Repair, 47 s
     frame('ja: Repair counting')
     local auto = api.timerRows()
     check('precondition: an automaton cell is drawn',
           #auto > 0 and at(auto[1].label) ~= nil, true)
-    check('a counting ability brings the you label', at('you') ~= nil, true)
+    check('a counting ability brings the you label', at('cooldowns') ~= nil, true)
     check('...its label', at('Repair') ~= nil, true)
     check('...and its seconds', at('47s') ~= nil, true)
     local lastAuto = 0
@@ -138,8 +138,8 @@ do
         local i = at(r.label)
         if i ~= nil and i > lastAuto then lastAuto = i end
     end
-    check('every automaton cell comes before the you group', lastAuto < (at('you') or 0), true)
-    check('...and the you label before its cells', (at('you') or 1e9) < (at('Repair') or 0), true)
+    check('every automaton cell comes before the you group', lastAuto < (at('cooldowns') or 0), true)
+    check('...and the you label before its cells', (at('cooldowns') or 1e9) < (at('Repair') or 0), true)
 
     -- The column is the automaton's alone again: none of your cells in it,
     -- and the deltas it holds are the ones it held before the group existed.
@@ -148,7 +148,7 @@ do
     check('the deltas fit beside the automaton cells with you counting',
           #api.sideColumn(#auto + 2, buffs), 0)
     check('...and the column draws none of your cells', at('Repair'), nil)
-    check('...nor the you label', at('you'), nil)
+    check('...nor the you label', at('cooldowns'), nil)
 
     c.cd_hide_ready = false
     world.recast = {}
@@ -310,7 +310,7 @@ do
     c.cd_hide_ready, c.cd_dials = false, true
     world.recast = { [3] = { 206, 2820 } }        -- Repair, 47 s
     frame('ja dials: Repair counting')
-    check('dials keep the you label', sawExact('you'), true)
+    check('dials keep the you label', sawExact('cooldowns'), true)
     check('a dial is named short', sawExact('Rep'), true)
     -- exact: the oils line's 'Repair and Maintenance unusable' is not a cell
     check('...not by its full name', sawExact('Repair'), false)
@@ -379,7 +379,7 @@ do
     check('...naming it', sawExact('Repair'), true)
     check('...with its seconds', sawExact('47s'), true)
     check('...from under the gems', countExact('X:17'), 2)
-    check('...and no you label on the strip', sawExact('you'), false)
+    check('...and no you label on the strip', sawExact('cooldowns'), false)
     -- dials at the cells' pitch: 17, then 17 + 27 = 44 (nothing else on the
     -- one-row strip sits at 44)
     c.cd_hide_ready, c.cd_dials = false, true
