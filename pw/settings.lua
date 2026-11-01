@@ -1,12 +1,12 @@
--- cw/settings.lua - the Settings tab's toggles, kept across a reload. Owns the
+-- pw/settings.lua - the Settings tab's toggles, kept across a reload. Owns the
 -- whitelist of saved keys and their defaults. Returns nothing; publishes
 -- tm.settingsPath, tm.saveSettings, tm.loadSettings, tm.restoreDefaults and
--- tm.saveCount. tm.installRoot (cw/log.lua) and tm.sidebarInvalidate are reached
+-- tm.saveCount. tm.installRoot (pw/log.lua) and tm.sidebarInvalidate are reached
 -- through tm at call time, so neither module is required here.
 local chat = require('chat')
-local config = require('cw.config')
-local tm = require('cw.state')
-local U  = require('cw.util')
+local config = require('pw.config')
+local tm = require('pw.state')
+local U  = require('pw.util')
 local safe = U.safe
 
 -- ======================================================== settings file ==
@@ -42,7 +42,7 @@ local PERSIST = {
     show_oils         = { 'bool' },
     hide_zero_ol_rows = { 'bool' },
     show_ol_secs      = { 'bool' },
-    -- your own job abilities in the recast column (cw/cooldowns.lua)
+    -- your own job abilities in the recast column (pw/cooldowns.lua)
     cd_hide_ready     = { 'bool' },
     cd_dials          = { 'bool' },
     cd_activate       = { 'bool' },
@@ -63,7 +63,7 @@ local PERSIST = {
     warn_at           = { 'int', 1, 100 },
 }
 -- The stat you have on when each element's maneuver goes off, as a number
--- (cw/config.lua's stat_check). Saved as `stat_Wind = 83`, because it is your
+-- (pw/config.lua's stat_check). Saved as `stat_Wind = 83`, because it is your
 -- own gear rather than one of the model's constants, and retyping it after
 -- every reload is not a thing anyone would do. NUMBERS ONLY: a 'win' / 'lose'
 -- verdict stays an inline edit, so an old file still cannot resurrect one. A
@@ -86,7 +86,7 @@ for k in pairs(PERSIST) do ORDER[#ORDER + 1] = k end
 table.sort(ORDER)   -- a stable file, so a diff of one means something
 
 tm.settingsPath = function()
-    return ('%s/config/addons/clockwork/settings.txt'):format(tm.installRoot())
+    return ('%s/config/addons/petworks/settings.txt'):format(tm.installRoot())
 end
 
 tm.saveCount = 0
@@ -98,8 +98,8 @@ tm.saveSettings = function()
     local ok = safe(function()
         safe(function() ashita.fs.create_directory(
             (tm.settingsPath():gsub('/settings%.txt$', '/'))) end)
-        local lines = { '# clockwork settings, saved whenever one is changed in game.\n',
-                        '# Delete this file to go back to the defaults in cw/config.lua.\n' }
+        local lines = { '# petworks settings, saved whenever one is changed in game.\n',
+                        '# Delete this file to go back to the defaults in pw/config.lua.\n' }
         for _, k in ipairs(ORDER) do
             lines[#lines + 1] = ('%s = %s\n'):format(k, tostring(config[k]))
         end
@@ -115,7 +115,7 @@ tm.saveSettings = function()
         return (U.writeFile(tm.settingsPath(), table.concat(lines)))
     end, false)
     if not ok then
-        print(chat.header('clockwork'):append(chat.error(
+        print(chat.header('petworks'):append(chat.error(
             'settings could not be saved to ' .. tm.settingsPath()
             .. ' - the change applies to this session only')))
     end

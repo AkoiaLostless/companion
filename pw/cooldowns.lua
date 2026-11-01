@@ -1,11 +1,11 @@
--- cw/cooldowns.lua - your own job abilities' recasts, for the Status tab's
+-- pw/cooldowns.lua - your own job abilities' recasts, for the Status tab's
 -- recast column. The client keeps these itself, so they are READ, not
 -- modelled: nothing here is logged, and there is nothing to calibrate. Native
 -- reads, so render thread only - the packet thread must never require this
 -- file. Publishes tm.jaList and tm.jaRefresh; tm.jaRefresh writes tm.jaRows.
-local config = require('cw.config')
-local tm = require('cw.state')
-local U  = require('cw.util')
+local config = require('pw.config')
+local tm = require('pw.state')
+local U  = require('pw.util')
 local safe, player = U.safe, U.player
 
 -- The PUP job abilities, in the order the column lists them: bringing the
@@ -61,7 +61,7 @@ end
 -- is part of one, so that recast's dial starts full.
 local longest = {}
 
--- Whether you have learned it: the client's answer, or under /cw demo the
+-- Whether you have learned it: the client's answer, or under /pw demo the
 -- made-up master's.
 local function learned(d, p, ja)
     if d ~= nil then return d.has[ja.key] == true end
@@ -74,7 +74,7 @@ end
 -- tm.swallowed.
 tm.jaRefresh = function()
     tm.jaRows = safe(function()
-        -- Under /cw demo the made-up master answers every read (cw/demo.lua),
+        -- Under /pw demo the made-up master answers every read (pw/demo.lua),
         -- whole lengths included: a demo opens mid-recast, where first sight
         -- would start each dial full. `longest` is the client's and is left be.
         local d = tm.demo and tm.demo.ja

@@ -1,6 +1,6 @@
-# clockwork
+# petworks
 
-> This is a fork of [patheed-ffxi/clockwork](https://github.com/patheed-ffxi/clockwork),
+> This is a fork of [patheed-ffxi/petworks](https://github.com/patheed-ffxi/petworks),
 > which is **approved for use on HorizonXI**. The fork adds gear-aware stat reads (see
 > *Gear swaps* below); that change has not been reviewed by Horizon staff.
 
@@ -41,13 +41,13 @@ prediction did *not* match the server, so the model can be corrected from real p
 - **Loadout tab.** Head, frame and every attachment with its live modifier values, plus
   capacity per element. Saved attachment sets with a preview and a confirmed apply,
   paced a second a step as pupsets is — from the tab's Apply button, or from a macro
-  with `/cw load <name>`.
+  with `/pw load <name>`.
 - **What-if sidebar.** For each of the eight elements, what using that maneuver *right
   now* would change and what it would cost.
 - **Anomaly log.** A JSONL record of every maneuver and automaton weaponskill, with
   mismatches between prediction and reality flagged. Off by default; turn it on from
   the Settings tab.
-- **Demo mode.** `/cw demo` walks four made-up automatons so you can see and size the HUD
+- **Demo mode.** `/pw demo` walks four made-up automatons so you can see and size the HUD
   without being on PUP.
 
 ## Screenshots
@@ -59,62 +59,62 @@ prediction did *not* match the server, so the model can be corrected from real p
 | **Tuning → model** — automaton skill, the overload threshold, anomalies and spell windows | **Tuning → maneuver cost** — each element's stat check and what its 1st, 2nd and 3rd maneuver costs |
 | ![The Tuning tab, model view](screenshots/tuning_model.png) | ![The Tuning tab, maneuver cost view](screenshots/tuning_maneuver_cost.png) |
 
-**Compact** (`/cw compact`) — the whole HUD on one line:
+**Compact** (`/pw compact`) — the whole HUD on one line:
 
 ![The compact layout](screenshots/compact.png)
 
-`/cw compact 2`, or the strip's `2` button, puts it on two rows instead: the gems over
-the recasts and the buttons, the bars over the weaponskill and spell. `/cw compact 1`,
+`/pw compact 2`, or the strip's `2` button, puts it on two rows instead: the gems over
+the recasts and the buttons, the bars over the weaponskill and spell. `/pw compact 1`,
 or the `1` button, goes back to one.
 
 ![The compact layout on two rows](screenshots/compact_two_rows.png)
 
 ## Install
 
-1. On [github.com/AkoiaLostless/clockwork](https://github.com/AkoiaLostless/clockwork),
+1. On [github.com/AkoiaLostless/petworks](https://github.com/AkoiaLostless/petworks),
    press **Code → Download ZIP**, or clone this repo. (The original's
-   [Releases](https://github.com/patheed-ffxi/clockwork/releases) do not have the
+   [Releases](https://github.com/patheed-ffxi/petworks/releases) do not have the
    gear-aware stats.)
-2. Put the `clockwork` folder into your Ashita `addons` directory, so that you have
-   `addons/clockwork/clockwork.lua` with `cw/` and `assets/` beside it.
-3. In game: `/addon load clockwork`
+2. Put the `petworks` folder into your Ashita `addons` directory, so that you have
+   `addons/petworks/petworks.lua` with `pw/` and `assets/` beside it.
+3. In game: `/addon load petworks`
 
-To load it every time, add `/addon load clockwork` to your Ashita script.
+To load it every time, add `/addon load petworks` to your Ashita script.
 
 ## Commands
 
-`/clockwork` and `/cw` are the same command. Bare `/cw` prints this list.
+`/petworks` and `/pw` are the same command. Bare `/pw` prints this list.
 
 | Command | Does |
 |---|---|
-| `/cw show` | the panel on or off (the model and the log run either way) |
-| `/cw compact` | the compact strip instead of the full panel; `/cw compact 2` for two rows, `/cw compact 1` for one |
-| `/cw demo` | made-up automatons, for looking at the HUD off PUP; each `/cw demo` is the next one, then off again |
-| `/cw attachments` | the attachments you own |
-| `/cw equipped` | head, frame and attachments |
-| `/cw load <name>` | put a saved attachment set on the automaton, as the Loadout tab's Apply does — the same checks, the same apply, so the automaton has to be deactivated first. Works from a macro; a name with a space needs no quotes. Bare `/cw load` lists your sets |
-| `/cw stat` | the stat you wear when each maneuver goes off, read off your gear — or set it: `/cw stat wind 83`, `now` to take what you are wearing, `off` to go back to reading it. See *Gear swaps* below |
-| `/cw reset` | clear burden, learned costs and counters |
-| `/cw sync` | burden to zero — manual resync only |
+| `/pw show` | the panel on or off (the model and the log run either way) |
+| `/pw compact` | the compact strip instead of the full panel; `/pw compact 2` for two rows, `/pw compact 1` for one |
+| `/pw demo` | made-up automatons, for looking at the HUD off PUP; each `/pw demo` is the next one, then off again |
+| `/pw attachments` | the attachments you own |
+| `/pw equipped` | head, frame and attachments |
+| `/pw load <name>` | put a saved attachment set on the automaton, as the Loadout tab's Apply does — the same checks, the same apply, so the automaton has to be deactivated first. Works from a macro; a name with a space needs no quotes. Bare `/pw load` lists your sets |
+| `/pw stat` | the stat you wear when each maneuver goes off, read off your gear — or set it: `/pw stat wind 83`, `now` to take what you are wearing, `off` to go back to reading it. See *Gear swaps* below |
+| `/pw reset` | clear burden, learned costs and counters |
+| `/pw sync` | burden to zero — manual resync only |
 
 ## Settings and files
 
-clockwork writes these under your Ashita config directory:
+petworks writes these under your Ashita config directory:
 
-- `config/addons/clockwork/settings.txt` — plain `key = value`, one per line, saved
+- `config/addons/petworks/settings.txt` — plain `key = value`, one per line, saved
   whenever you change a setting in game. A whitelist of display and reporting keys only;
   the model constants are deliberately *not* reachable from the UI, so an old settings
   file can never resurrect a value that has since been corrected.
   Unknown keys and wrong types are ignored. The one thing saved here that is not a
-  display key is `stat_<Element>` — your own stat for that maneuver, from `/cw stat`.
-- `config/addons/clockwork/<Character>_YYYY.MM.DD.jsonl` — the log, one JSON object per
+  display key is `stat_<Element>` — your own stat for that maneuver, from `/pw stat`.
+- `config/addons/petworks/<Character>_YYYY.MM.DD.jsonl` — the log, one JSON object per
   line. Off by default: turn it on from the Settings tab.
-- `config/addons/clockwork/sets/<name>.txt` — saved attachment sets, one item name per
+- `config/addons/petworks/sets/<name>.txt` — saved attachment sets, one item name per
   line: the same format the `pupsets` addon uses, so a file copied either way just works.
 
 ## Accuracy — please read
 
-clockwork re-implements a slice of the server's Puppetmaster logic on the client. It does
+petworks re-implements a slice of the server's Puppetmaster logic on the client. It does
 not read the server's mind.
 
 Where this model departs from upstream LandSandBoat for HorizonXI — the Heatsink decay,
@@ -134,7 +134,7 @@ for the maneuver changes the answer.
 The client is only told your stats when it asks (opening the status or equipment menu) or
 when something like a level or zoning makes the server send them, and *never* because you
 swapped gear. What it *does* see straight away is what is in each equipment slot. So
-clockwork remembers the gear you had on the last time the server sent your stats, and
+petworks remembers the gear you had on the last time the server sent your stats, and
 corrects the stat in memory by the difference:
 
     your stat now = stat in memory − that gear's stats + the stats of what you wear now
@@ -143,25 +143,25 @@ A LuAshitacast or GearSwap maneuver set is therefore counted with no menu openin
 setting. The gear's stats are read from each item's description, plain lines only
 (`STR+3`, `AGI-2`, `All attributes +1`): latent effects, set bonuses and automaton/pet
 lines are conditional and are left out, and food, buffs and merits ride along inside the
-number in memory. If you load clockwork mid-session it assumes the gear on at load is what
+number in memory. If you load petworks mid-session it assumes the gear on at load is what
 your last stat refresh saw; open the equipment menu once if you loaded it in other gear.
 
 If the read is still wrong for you — a set bonus or latent that matters — tell it what you
-wear: `/cw stat wind 83`. A typed number outranks the read, and is compared against the
-automaton's live stat, so the check is still lost once that element is stacked. `/cw stat
-wind now` takes the corrected read, and `/cw stat wind off` goes back to reading it.
+wear: `/pw stat wind 83`. A typed number outranks the read, and is compared against the
+automaton's live stat, so the check is still lost once that element is stacked. `/pw stat
+wind now` takes the corrected read, and `/pw stat wind off` goes back to reading it.
 
 ## Reporting a wrong prediction
 
 A stat read wrong after a gear swap comes from this fork, not the original, so do not
 report it upstream; note the item's name and its description text, which is what the read
 is taken from. Anything else can go to the original at
-[github.com/patheed-ffxi/clockwork/issues](https://github.com/patheed-ffxi/clockwork/issues),
+[github.com/patheed-ffxi/petworks/issues](https://github.com/patheed-ffxi/petworks/issues),
 with:
 
-- the clockwork version (`addon.version` at the top of `clockwork.lua`);
-- your automaton's head, frame and attachments (`/cw equipped`), and which maneuvers were up;
-- what clockwork predicted, and what the automaton or the server actually did;
+- the petworks version (`addon.version` at the top of `petworks.lua`);
+- your automaton's head, frame and attachments (`/pw equipped`), and which maneuvers were up;
+- what petworks predicted, and what the automaton or the server actually did;
 - a short excerpt of the log around it. Turn on **write a log file** (or **anomalies to
   the file**) on the Settings tab first; the records where the prediction missed are
   tagged `burden_mismatch`, `ws_mispredicted`, `spell_mispredicted` or `recast_early`.
@@ -182,9 +182,9 @@ abilities involved — check an excerpt before you post it.
 
 ## Credits
 
-clockwork stands on other people's work:
+petworks stands on other people's work:
 
-- **clockwork** (Pathead, [patheed-ffxi/clockwork](https://github.com/patheed-ffxi/clockwork))
+- **petworks** (Pathead, [patheed-ffxi/petworks](https://github.com/patheed-ffxi/petworks))
   — the original addon this fork is built from; everything but the gear-aware stat read
   is theirs.
 - **[LandSandBoat](https://github.com/LandSandBoat/server)** — the burden, overload,
@@ -203,7 +203,7 @@ clockwork stands on other people's work:
 
 ## License
 
-clockwork's code is released under the [MIT License](LICENSE). That license covers the
+petworks's code is released under the [MIT License](LICENSE). That license covers the
 code in this repository, not Square Enix's artwork: the element gems in
 `assets/elements/` are Final Fantasy XI's own art, redistributed as other Ashita addons
 do, and remain Square Enix's property.

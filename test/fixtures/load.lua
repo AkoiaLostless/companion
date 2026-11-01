@@ -1,12 +1,12 @@
 -- ---------------------------------------------------------- load the addon --
--- The one global the addon looks for: when it exists, cw/log.lua leaves each
--- log event's kind and record in CLOCKWORK_TEST.last for the suites to read.
-CLOCKWORK_TEST = {}
+-- The one global the addon looks for: when it exists, pw/log.lua leaves each
+-- log event's kind and record in PETWORKS_TEST.last for the suites to read.
+PETWORKS_TEST = {}
 
 local _   -- the throwaway target in the suite's multi-assignments
 
 -- STRICT GLOBALS. Every global the addon may read is defined above this line:
--- the stubs, the ImGui enums, CLOCKWORK_TEST. From here on an undefined global
+-- the stubs, the ImGui enums, PETWORKS_TEST. From here on an undefined global
 -- is an error, not nil - a module that forgot a require, or a name that stayed
 -- behind in another file, fails at its first read instead of drawing nothing.
 -- A global WRITE is an error too: `function name()` without a forward-declared
@@ -16,30 +16,30 @@ setmetatable(_G, {
     __index    = function(_, k) error('undefined global read: ' .. tostring(k), 2) end,
     __newindex = function(_, k) error('global write: ' .. tostring(k), 2) end,
 })
-local chunk = assert(loadfile(ADDON_DIR .. '/clockwork.lua'))
+local chunk = assert(loadfile(ADDON_DIR .. '/petworks.lua'))
 chunk()
--- The model's pace and the visibility read's (cw/frame.lua) run every frame
+-- The model's pace and the visibility read's (pw/frame.lua) run every frame
 -- here: the suites change the world and draw one frame to see it, with the
 -- fake clock standing still. A suite that tests the pacing sets them back.
-require('cw.state').modelEvery = 0
-require('cw.state').hiddenEvery = 0
+require('pw.state').modelEvery = 0
+require('pw.state').hiddenEvery = 0
 -- The api the suites reach the addon's internals through, built from the
 -- loaded modules: require hands back the instances the addon itself loaded.
 local api = (function()
-    local config = require('cw.config')
-    local D      = require('cw.data')
-    local tm     = require('cw.state')
-    local L      = require('cw.log')
-    local R      = require('cw.reading')
-    local A      = require('cw.attachments')
-    local B      = require('cw.burden')
-    local T      = require('cw.timers')
-    local P      = require('cw.pet')
-    local S      = require('cw.sets')
-    local IN     = require('cw.inbound')
-    local SF     = require('cw.ui.surface')
-    local LO     = require('cw.ui.loadout')
-    local PN     = require('cw.ui.panel')
+    local config = require('pw.config')
+    local D      = require('pw.data')
+    local tm     = require('pw.state')
+    local L      = require('pw.log')
+    local R      = require('pw.reading')
+    local A      = require('pw.attachments')
+    local B      = require('pw.burden')
+    local T      = require('pw.timers')
+    local P      = require('pw.pet')
+    local S      = require('pw.sets')
+    local IN     = require('pw.inbound')
+    local SF     = require('pw.ui.surface')
+    local LO     = require('pw.ui.loadout')
+    local PN     = require('pw.ui.panel')
     return {
         state = function() return { auto044 = tm.auto044, seq = tm.auto044Seq, apply = tm.applyState } end,
         serializeSet = S.serializeSet, parseSetFile = S.parseSetFile, validSetName = S.validSetName,
@@ -72,7 +72,7 @@ local api = (function()
         scProps = function(kind, id) return (kind == 'ws') and D.WS_SC[id] or D.MOBSKILL_SC[id] end,
         timerRows = function() return tm.timerRows() end,
         timersClear = function(edge, src) T.timersClear(edge, src) end,
-        -- your own job abilities (cw/cooldowns.lua): the refresh frame.tick
+        -- your own job abilities (pw/cooldowns.lua): the refresh frame.tick
         -- runs, answering the rows it wrote, and the table it reads from
         jaRefresh = function() tm.jaRefresh() return tm.jaRows end,
         jaList = function() return tm.jaList end,

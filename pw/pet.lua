@@ -1,19 +1,19 @@
--- cw/pet.lua - what is on the automaton and who it is: the effect table the
+-- pw/pet.lua - what is on the automaton and who it is: the effect table the
 -- battle traffic builds, and the lifecycle (despawn, respawn, a new character)
 -- that resets the model. Publishes tm.diaBioTier, tm.diaBioLands,
 -- tm.notePetSilent, tm.mobskillEffect, tm.heldCap and tm.petLive; returns the
 -- message sets, petEffects and the lifecycle functions.
-local config = require('cw.config')
-local D  = require('cw.data')
+local config = require('pw.config')
+local D  = require('pw.data')
 local ELEMENTS = D.ELEMENTS
-local tm = require('cw.state')
-local U  = require('cw.util')
+local tm = require('pw.state')
+local U  = require('pw.util')
 local safe = U.safe
-local L  = require('cw.log')
+local L  = require('pw.log')
 local logEvent = L.logEvent
-local T  = require('cw.timers')
+local T  = require('pw.timers')
 local timersClear = T.timersClear
--- Tables with a stable identity (see cw/state.lua), so safe to alias here.
+-- Tables with a stable identity (see pw/state.lua), so safe to alias here.
 local burden, ids, burdenVerified, seededBy = tm.burden, tm.ids, tm.burdenVerified, tm.seededBy
 local waterSince = tm.waterSince
 
@@ -278,7 +278,7 @@ end
 -- ---------------------------------------------------------------- ident --
 -- ServerId based. Never match on name: automaton names come from a fixed
 -- list and collide between players.
--- Zeroes the model: /cw reset, /cw sync and forgetCharacter (a different
+-- Zeroes the model: /pw reset, /pw sync and forgetCharacter (a different
 -- character in the world). NOT called on despawn - see
 -- onPetLifecycle: in this model a lifecycle edge is not what changes
 -- burden, the Activate is, and the 0x028 handler seeds on that.

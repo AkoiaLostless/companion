@@ -1,32 +1,32 @@
--- cw/commands.lua - the /clockwork and /cw command handler: the help, the owned
+-- pw/commands.lua - the /petworks and /pw command handler: the help, the owned
 -- and equipped listings, demo, compact, show, load, reset and sync. Exports
 -- onCommand.
 local chat = require('chat')
-local config = require('cw.config')
-local D  = require('cw.data')
+local config = require('pw.config')
+local D  = require('pw.data')
 local ELEMENTS = D.ELEMENTS
-local tm = require('cw.state')
-local L  = require('cw.log')
+local tm = require('pw.state')
+local L  = require('pw.log')
 local logPath = L.logPath
-local R  = require('cw.reading')
+local R  = require('pw.reading')
 local equippedNames, ownedAttachments = R.equippedNames, R.ownedAttachments
-local B  = require('cw.burden')
+local B  = require('pw.burden')
 local applyStatCheck, computeCost, myStat = B.applyStatCheck, B.computeCost, B.myStat
-local P  = require('cw.pet')
-local S  = require('cw.sets')
-local DEMO = require('cw.demo')
+local P  = require('pw.pet')
+local S  = require('pw.sets')
+local DEMO = require('pw.demo')
 local resetModel = P.resetModel
--- The shared table, never reassigned after cw/state.lua creates it.
+-- The shared table, never reassigned after pw/state.lua creates it.
 local samples = tm.samples
 
--- `/cw stat` - your side of the stat check, typed, for what the gear read
--- (cw/gear.lua) cannot count: a set bonus, a latent, a description it parses
+-- `/pw stat` - your side of the stat check, typed, for what the gear read
+-- (pw/gear.lua) cannot count: a set bonus, a latent, a description it parses
 -- wrong. The live read follows a swap by the item text. The number is compared against the
 -- automaton's LIVE stat on every use, so an element you beat bare still costs
 -- 20 once that element is stacked.
 local function statCommand(which, value)
-    local function say(line) print(chat.header('clockwork'):append(chat.message(line))) end
-    local function oops(line) print(chat.header('clockwork'):append(chat.error(line))) end
+    local function say(line) print(chat.header('petworks'):append(chat.message(line))) end
+    local function oops(line) print(chat.header('petworks'):append(chat.error(line))) end
     local function statName(el) return D.MANEUVER_STAT[el] or '?' end
 
     if which == nil then
@@ -36,11 +36,11 @@ local function statCommand(which, value)
                 local v = config.stat_check[el]
                 say(('  %-8s %-4s %s'):format(el, statName(el),
                     (type(v) == 'number') and tostring(v)
-                    or (type(v) == 'string') and (v .. ' - forced in cw/config.lua')
+                    or (type(v) == 'string') and (v .. ' - forced in pw/config.lua')
                     or 'read from your gear'))
             end
         end
-        say('/cw stat <element> <number|now|off> - `now` takes what you are wearing')
+        say('/pw stat <element> <number|now|off> - `now` takes what you are wearing')
         return
     end
 
@@ -58,7 +58,7 @@ local function statCommand(which, value)
     local v = value and value:lower() or nil
     local took = nil
     if v == nil then
-        oops(('/cw stat %s <number|now|off>'):format(el:lower()))
+        oops(('/pw stat %s <number|now|off>'):format(el:lower()))
         return
     elseif v == 'off' or v == 'clear' or v == 'none' then
         config.stat_check[el] = nil
@@ -97,17 +97,17 @@ local function statCommand(which, value)
     end
 end
 
--- `/cw load <name>` - a saved set, applied as the Loadout tab's Apply button
+-- `/pw load <name>` - a saved set, applied as the Loadout tab's Apply button
 -- applies it: the same checks, the same apply. What a macro can reach, which a
 -- button is not. The rest of the line is the name, so one with a space needs
 -- no quotes. Bare, it lists the saved sets.
 local function loadCommand(words)
-    local function say(line) print(chat.header('clockwork'):append(chat.message(line))) end
-    local function oops(line) print(chat.header('clockwork'):append(chat.error(line))) end
+    local function say(line) print(chat.header('petworks'):append(chat.message(line))) end
+    local function oops(line) print(chat.header('petworks'):append(chat.error(line))) end
     local names = S.listSets()
     if #words == 0 then
         say((#names == 0) and 'no saved sets - save one on the Loadout tab'
-            or ('/cw load <name> - your sets: ' .. table.concat(names, ', ')))
+            or ('/pw load <name> - your sets: ' .. table.concat(names, ', ')))
         return
     end
     local typed = table.concat(words, ' ')
@@ -116,7 +116,7 @@ local function loadCommand(words)
     local name = nil
     for _, n in ipairs(names) do if n:lower() == typed:lower() then name = n end end
     if name == nil then
-        oops(('no saved set named "%s" - /cw load lists them'):format(typed))
+        oops(('no saved set named "%s" - /pw load lists them'):format(typed))
         return
     end
     if S.applyRunning() then
@@ -144,7 +144,7 @@ local function onCommand(e)
     local args = e.command:args()
     if #args == 0 then return end
     local c = args[1]:lower()
-    if c ~= '/clockwork' and c ~= '/cw' then return end
+    if c ~= '/petworks' and c ~= '/pw' then return end
     e.blocked = true
     -- The bare command says what it can do, rather than printing state the
     -- panel already shows.
@@ -152,7 +152,7 @@ local function onCommand(e)
 
     if sub == 'attachments' or sub == 'owned' then
         if tm.auto044 == nil then
-            print(chat.header('clockwork'):append(chat.error(
+            print(chat.header('petworks'):append(chat.error(
                 'no automaton data yet - zone or summon the automaton, then retry.')))
             return
         end
@@ -168,27 +168,27 @@ local function onCommand(e)
             end
         end
         if missing > 0 then
-            print(chat.header('clockwork'):append(chat.error(
+            print(chat.header('petworks'):append(chat.error(
                 ('%d equipped attachments are missing from the owned list - the automaton data may be out of date')
                 :format(missing))))
         end
         if #owned == 0 then
-            print(chat.header('clockwork'):append(chat.message(
+            print(chat.header('petworks'):append(chat.message(
                 'the last automaton update reported no owned attachments.')))
         else
-            print(chat.header('clockwork'):append(chat.message(('you own %d attachments:'):format(#owned))))
+            print(chat.header('petworks'):append(chat.message(('you own %d attachments:'):format(#owned))))
             for _, n in ipairs(owned) do
-                print(chat.header('clockwork'):append(chat.success('  ' .. n)))
+                print(chat.header('petworks'):append(chat.success('  ' .. n)))
             end
         end
 
     elseif sub == 'equipped' then
         local eq = equippedNames()
-        print(chat.header('clockwork'):append(chat.message(('Head: %s'):format(eq[1] or '-'))))
-        print(chat.header('clockwork'):append(chat.message(('Frame: %s'):format(eq[2] or '-'))))
+        print(chat.header('petworks'):append(chat.message(('Head: %s'):format(eq[1] or '-'))))
+        print(chat.header('petworks'):append(chat.message(('Frame: %s'):format(eq[2] or '-'))))
         for i = 3, 14 do
             if eq[i] ~= nil and eq[i] ~= '' then
-                print(chat.header('clockwork'):append(chat.success('  ' .. eq[i])))
+                print(chat.header('petworks'):append(chat.success('  ' .. eq[i])))
             end
         end
 
@@ -201,16 +201,16 @@ local function onCommand(e)
             -- enable() writes the scenario over the live burden, recasts,
             -- target and effects and disable() zeroes them: nothing brings
             -- back what the server still holds for a real automaton.
-            print(chat.header('clockwork'):append(chat.message(
+            print(chat.header('petworks'):append(chat.message(
                 'demo needs no pet out - it would overwrite the automaton\'s burden, recasts and target')))
         else
             local name, n = DEMO.cycle()
             if name == nil then
-                print(chat.header('clockwork'):append(chat.message(
+                print(chat.header('petworks'):append(chat.message(
                     'demo off - back to the real automaton')))
             else
-                print(chat.header('clockwork'):append(chat.message(
-                    ('demo %d/%d - %s. Nothing here is measured; /cw demo again for the next one')
+                print(chat.header('petworks'):append(chat.message(
+                    ('demo %d/%d - %s. Nothing here is measured; /pw demo again for the next one')
                     :format(tm.demo.which, n, name))))
             end
         end
@@ -231,7 +231,7 @@ local function onCommand(e)
             config.compact = not config.compact
         end
         tm.saveSettings()
-        print(chat.header('clockwork'):append(chat.message(
+        print(chat.header('petworks'):append(chat.message(
             'compact ' .. tostring(config.compact) .. ' - '
             .. ((config.compact_rows == 2) and 'two rows' or 'one line'))))
 
@@ -241,17 +241,17 @@ local function onCommand(e)
         for _, el in ipairs(ELEMENTS) do applyStatCheck(el) end
         tm.clear(samples) tm.anomalies = 0
         tm.casts, tm.missed = 0, 0
-        print(chat.header('clockwork'):append(chat.message('burden, samples, spell counters and anomaly count cleared')))
+        print(chat.header('petworks'):append(chat.message('burden, samples, spell counters and anomaly count cleared')))
 
     elseif sub == 'sync' then
         resetModel('manual')
-        print(chat.header('clockwork'):append(chat.message(
+        print(chat.header('petworks'):append(chat.message(
             'burden zeroed - manual resync only; an Activate seeds activate_burden on its own')))
 
     elseif sub == 'show' or sub == 'window' then
         config.show_window = not config.show_window
         tm.saveSettings()
-        print(chat.header('clockwork'):append(chat.message(
+        print(chat.header('petworks'):append(chat.message(
             'panel ' .. tostring(config.show_window)
             .. ' - the model and the log run either way')))
 
@@ -261,19 +261,19 @@ local function onCommand(e)
         -- way for them to disagree, and the tab is the one that writes the file
         -- and shows the current value. What is here either shows you something,
         -- changes a mode, puts on a set, or is destructive.
-        local function say(line) print(chat.header('clockwork'):append(chat.message(line))) end
-        say('/cw - what the automaton is doing')
+        local function say(line) print(chat.header('petworks'):append(chat.message(line))) end
+        say('/pw - what the automaton is doing')
         say('  show - the panel on or off')
         say('  compact - the compact strip; compact 2 for two rows,')
         say('    compact 1 for one')
         say('  demo - made-up automatons, for looking at the HUD off PUP;')
-        say('    each /cw demo is the next one, then off again')
+        say('    each /pw demo is the next one, then off again')
         say('  attachments - the attachments you own')
         say('  equipped - head, frame and attachments')
         say('  load <name> - put a saved set on the automaton, as Apply')
         say('    does; bare, it lists your sets')
         say('  stat - the stat you wear for each maneuver, which a gear swap')
-        say('    hides from the client: /cw stat wind 83, or now, or off')
+        say('    hides from the client: /pw stat wind 83, or now, or off')
         say('  reset - clear burden, costs and counters')
         say('  sync - burden to zero')
         say('Everything else is on the Settings tab: logging, the sidebar,')

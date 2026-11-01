@@ -1,13 +1,13 @@
--- cw/reading.lua - what the client says about the automaton, its target and its
+-- pw/reading.lua - what the client says about the automaton, its target and its
 -- gear. Exports petInfo, equippedNames, equippedAttachments, hasAttachment,
 -- ownedAttachments, oilCounts and partyIds; publishes tm.mobHpp, tm.mobSlot and
 -- tm.deploySlot. The packet thread must never call into here: a native read
--- racing zone-in entity churn is an SEH fault (see tm.snap in cw/state.lua).
+-- racing zone-in entity churn is an SEH fault (see tm.snap in pw/state.lua).
 local ffi = require('ffi')
-local D  = require('cw.data')
+local D  = require('pw.data')
 local ATTACH_OFFSET, EQUIP_OFFSET, OIL_IDS = D.ATTACH_OFFSET, D.EQUIP_OFFSET, D.OIL_IDS
-local tm = require('cw.state')
-local U  = require('cw.util')
+local tm = require('pw.state')
+local U  = require('pw.util')
 local safe, player, isPup = U.safe, U.player, U.isPup
 local ids = tm.ids
 

@@ -1,7 +1,7 @@
--- cw/demo.lua - made-up automatons, so the HUD can be looked at without being on
+-- pw/demo.lua - made-up automatons, so the HUD can be looked at without being on
 -- Puppetmaster with a pet out and something to fight. Owns tm.demo and the four
--- scenarios; exports enable, disable, cycle (/cw demo) and tick (once a frame,
--- from cw/frame.lua).
+-- scenarios; exports enable, disable, cycle (/pw demo) and tick (once a frame,
+-- from pw/frame.lua).
 --
 -- What this is NOT: a second model. Everything the panel shows is still computed
 -- by the real code from these inputs - burden decays, the ladder picks a spell,
@@ -13,10 +13,10 @@
 -- Runtime only, and never written to the settings file: a reload turns it off.
 -- Demo state that survived a restart would be indistinguishable from a broken
 -- addon, and every number on the panel would be a lie you had to remember.
-local D  = require('cw.data')
-local tm = require('cw.state')
-local P  = require('cw.pet')
-local S  = require('cw.sets')
+local D  = require('pw.data')
+local tm = require('pw.state')
+local P  = require('pw.pet')
+local S  = require('pw.sets')
 local ELEMENTS, ATTACH_OFFSET, EQUIP_OFFSET = D.ELEMENTS, D.ATTACH_OFFSET, D.EQUIP_OFFSET
 
 -- One per shape of automaton, because each lights a different part of the panel:
@@ -110,7 +110,7 @@ local SCENARIOS = {
 }
 
 -- The master's own job abilities, for the `you` group under the maneuver table
--- (cw/cooldowns.lua): the same on every automaton, because they are yours, not
+-- (pw/cooldowns.lua): the same on every automaton, because they are yours, not
 -- the frame's. Five are learned. Lengths are LSB's recastTime
 -- (sql/abilities.sql), keyed by its recastId as the client's table is.
 local JA_HAS = { activate = true, dea = true, repair = true, maneuver = true, overdrive = true }
@@ -272,7 +272,7 @@ local function disable()
     end
 end
 
--- /cw demo walks the list and then turns itself off, so the command is one key
+-- /pw demo walks the list and then turns itself off, so the command is one key
 -- rather than one per automaton and there is always a way back out of it.
 local function cycle()
     local at = tm.demo and tm.demo.which or 0

@@ -1,14 +1,14 @@
--- cw/util.lua - the guarded native reads everything else is built on, and the
+-- pw/util.lua - the guarded native reads everything else is built on, and the
 -- atomic file write. Publishes tm.swallowed; exports safe, player, the login and
 -- job checks, equippedItemId, itemName, equippedThreshold, equippedManeuverBonus
 -- and writeFile, which writes through a temp file that the local replaceFile
 -- (MoveFileExA) swaps in.
 local ffi = require('ffi')
-local config = require('cw.config')
-local D  = require('cw.data')
+local config = require('pw.config')
+local D  = require('pw.data')
 local OVERLOAD_GEAR, SLOT_HANDS, SLOT_NECK = D.OVERLOAD_GEAR, D.SLOT_HANDS, D.SLOT_NECK
 local MANEUVER_GEAR = D.MANEUVER_GEAR
-local tm = require('cw.state')
+local tm = require('pw.state')
 
 -- ============================================================= utilities =
 -- Every native read goes through here, because the render and packet threads

@@ -1,18 +1,18 @@
--- cw/timers.lua - recast clocks for the automaton's own abilities, which the
+-- pw/timers.lua - recast clocks for the automaton's own abilities, which the
 -- server never reports. Owns tm.usedAt, tm.gaps, tm.model and tm.rows; publishes
 -- tm.ability, tm.order and tm.timerRows (render thread); returns noteUse (packet
 -- thread) and timersClear.
-local config = require('cw.config')
-local D  = require('cw.data')
+local config = require('pw.config')
+local D  = require('pw.data')
 local MOBSKILL_RANGED = D.MOBSKILL_RANGED
-local tm = require('cw.state')
-local A  = require('cw.attachments')
+local tm = require('pw.state')
+local A  = require('pw.attachments')
 local attachMods = A.attachMods
-local L  = require('cw.log')
+local L  = require('pw.log')
 local logEvent, flagAnomaly = L.logEvent, L.flagAnomaly
-local R  = require('cw.reading')
+local R  = require('pw.reading')
 local hasAttachment = R.hasAttachment
-local B  = require('cw.burden')
+local B  = require('pw.burden')
 local maneuverCounts = B.maneuverCounts
 
 -- The automaton's own abilities, each on a recast the server never reports:

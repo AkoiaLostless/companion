@@ -1,10 +1,10 @@
 -- ------------------------------------------------- the gear you have on --
--- cw/gear.lua: memory's stat total is for the gear worn at the last 0x061,
+-- pw/gear.lua: memory's stat total is for the gear worn at the last 0x061,
 -- and no 0x061 follows an equip. The read takes that gear's plain stat lines
 -- back out and puts the worn gear's in, so a maneuver set swapped on for the
 -- maneuver is seen without opening a menu.
 do
-    local G = require('cw.gear')
+    local G = require('pw.gear')
 
     -- the item text: plain stat lines count, conditional sections do not
     local p = G.parseStats('DEF:20 STR+3 DEX+2 INT-1')
@@ -52,7 +52,7 @@ do
     check('the swap is seen with no 0x061', api.myStat('Wind'), 73 - 2 + 5 + 4)
     send044({ head = 2, frame = 33, stats = { AGI = 78 } })
     handlers['d3d_present']()
-    handlers['command']({ command = '/cw reset' })
+    handlers['command']({ command = '/pw reset' })
     check('...so the check is won', (api.computeCost('Wind')), 15)
 
     -- the maneuver resolves with the set on: that is the stat it keeps
@@ -79,19 +79,19 @@ do
     world.stats = { [3] = 80, [0] = 61 }
     check('a stat no gear moves is left alone', api.myStat('Fire'), 61)
 
-    -- /cw stat now takes the corrected read, no menu needed
+    -- /pw stat now takes the corrected read, no menu needed
     world.gear = WIND
-    handlers['command']({ command = '/cw stat wind now' })
+    handlers['command']({ command = '/pw stat wind now' })
     check('now takes the set you have on', cfg.stat_check.Wind, 80)
-    handlers['command']({ command = '/cw stat wind off' })
+    handlers['command']({ command = '/pw stat wind off' })
 
     -- a number you typed still outranks the read
-    handlers['command']({ command = '/cw stat wind 70' })
+    handlers['command']({ command = '/pw stat wind 70' })
     check('a typed stat outranks the gear read', select(2, api.computeCost('Wind')), 70)
-    handlers['command']({ command = '/cw stat wind off' })
+    handlers['command']({ command = '/pw stat wind off' })
 
     check('no native read failed', api.swallowed(), 0)
     world.gear, world.itemDesc = nil, nil
     cfg.stat_check, world.stats = was, wasStats
-    handlers['command']({ command = '/cw reset' })
+    handlers['command']({ command = '/pw reset' })
 end

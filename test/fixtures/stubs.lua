@@ -61,7 +61,7 @@ local realPrint = print
 print = function(s) printed[#printed + 1] = tostring(s) end
 
 package.preload['common'] = function()
-    -- the one common extension the addon uses: '/cw a b':args()
+    -- the one common extension the addon uses: '/pw a b':args()
     string.args = function(s) local t = {} for w in s:gmatch('%S+') do t[#t + 1] = w end return t end
     string.totable = function(s) local t = {} for i = 1, #s do t[i] = s:byte(i) end return t end
     return {}
@@ -80,7 +80,7 @@ package.preload['d3d8'] = function()
     return { get_device = function() return nil end, gc_safe_release = function(x) return x end }
 end
 -- LuaJIT's own ffi, captured before the stub takes its place: the file
--- replace in cw/util.lua goes through kernel32's MoveFileExA, and the stub
+-- replace in pw/util.lua goes through kernel32's MoveFileExA, and the stub
 -- hands that one call to the real thing - with a switch to make it fail.
 -- require(), then forget it was loaded: the loader registers the real module
 -- in package.loaded, and left there the addon's own require('ffi') got the
@@ -524,7 +524,7 @@ AshitaCore = {
             GetItemById = function(_, id)
                 local n = ITEMS[id]
                 -- world.itemDesc: item id -> description text, for the gear
-                -- a fixture wears to move a stat (cw/gear.lua)
+                -- a fixture wears to move a stat (pw/gear.lua)
                 local desc = world.itemDesc and world.itemDesc[id]
                 if n == nil and desc == nil then return nil end
                 -- Bitmap/ImageSize are real IItem fields and are what the
