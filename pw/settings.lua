@@ -45,6 +45,8 @@ local PERSIST = {
     -- your own job abilities in the recast column (pw/cooldowns.lua)
     cd_hide_ready     = { 'bool' },
     cd_dials          = { 'bool' },
+    cd_list           = { 'bool' },
+    pet_window        = { 'bool' },
     cd_activate       = { 'bool' },
     cd_dea            = { 'bool' },
     cd_repair         = { 'bool' },
@@ -158,6 +160,46 @@ tm.loadSettings = function()
         -- Those stats decide each element's cost, and nothing else would
         -- recompute them until the next 0x044 arrived.
         tm.refreshStatChecks()
+        return true
+    end, false)
+end
+
+-- First load after Clockwork: your settings and saved sets come across from
+-- config/addons/clockwork/, once. Only while petworks has no settings file of
+-- its own, and a set already in petworks/sets/ is never overwritten. Clockwork's
+-- folder is left as it was.
+local function exists(path)
+    local f = io.open(path, 'r')
+    if f == nil then return false end
+    f:close()
+    return true
+end
+local function copyFile(from, to)
+    local f = io.open(from, 'rb')
+    if f == nil then return false end
+    local text = f:read('*a')
+    f:close()
+    return U.writeFile(to, text)
+end
+tm.migrateFromClockwork = function()
+    return safe(function()
+        if exists(tm.settingsPath()) then return false end
+        local old = ('%s/config/addons/clockwork/'):format(tm.installRoot())
+        if not exists(old .. 'settings.txt') then return false end
+        local new = tm.settingsPath():gsub('settings%.txt$', '')
+        ashita.fs.create_directory(new)
+        ashita.fs.create_directory(new .. 'sets/')
+        copyFile(old .. 'settings.txt', tm.settingsPath())
+        local n = 0
+        for _, f in ipairs(ashita.fs.get_directory(old .. 'sets/', '.*.txt', false) or {}) do
+            local name = f:match('([^/\\]+%.txt)$')
+            if name ~= nil and not exists(new .. 'sets/' .. name)
+               and copyFile(old .. 'sets/' .. name, new .. 'sets/' .. name) then
+                n = n + 1
+            end
+        end
+        print(chat.header('petworks'):append(chat.message(
+            ('brought your Clockwork settings and %d saved sets across'):format(n))))
         return true
     end, false)
 end

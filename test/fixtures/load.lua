@@ -23,6 +23,16 @@ chunk()
 -- fake clock standing still. A suite that tests the pacing sets them back.
 require('pw.state').modelEvery = 0
 require('pw.state').hiddenEvery = 0
+-- The suites written before the recast list was the default test the icon
+-- cells and dials, so they run with it off; suites/19 turns it on.
+-- Restore defaults (the api's and the Settings tab's button, both through
+-- tm) puts it back off as well.
+require('pw.config').cd_list = false
+do
+    local tm, config = require('pw.state'), require('pw.config')
+    local restore = tm.restoreDefaults
+    tm.restoreDefaults = function() restore() config.cd_list = false end
+end
 -- The api the suites reach the addon's internals through, built from the
 -- loaded modules: require hands back the instances the addon itself loaded.
 local api = (function()

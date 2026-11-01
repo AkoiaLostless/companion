@@ -1,14 +1,22 @@
 # petworks
 
-> This is a fork of [patheed-ffxi/petworks](https://github.com/patheed-ffxi/petworks),
-> which is **approved for use on HorizonXI**. The fork adds gear-aware stat reads (see
-> *Gear swaps* below); that change has not been reviewed by Horizon staff.
+> petworks is built from [Clockwork](https://github.com/patheed-ffxi/clockwork) by Pathead,
+> which is **approved for use on HorizonXI**, by way of the
+> [AkoiaLostless/clockwork](https://github.com/AkoiaLostless/clockwork) fork. It adds
+> gear-aware stat reads, a lighter per-frame load, recasts laid out as a list, and a pet
+> window for Beastmaster, Summoner and Dragoon. None of those changes has been reviewed by
+> Horizon staff.
 
 An [Ashita](https://www.ashitaxi.com/) 4.3 addon for [HorizonXI](https://horizonxi.com/):
-a HUD for **Puppetmaster**. It shows you what your automaton is actually doing —
-burden and overload risk per element, which maneuvers are up, what weaponskill is coming
-next, what your attachments are worth right now — and it can log every case where its own
-prediction did *not* match the server, so the model can be corrected from real play.
+one HUD for every pet.
+
+- On **Puppetmaster** it shows you what your automaton is actually doing: burden and
+  overload risk per element, which maneuvers are up, what weaponskill is coming next, what
+  your attachments are worth right now. It can log every case where its own prediction
+  did *not* match the server, so the model can be corrected from real play.
+- On **Beastmaster, Summoner and Dragoon** it shows a pet window instead: the pet's HP,
+  MP and TP, how far it is, what it is fighting, what is on it, a jug pet's time left, and
+  your pet abilities' recasts.
 
 ![The Status tab](screenshots/status.png)
 
@@ -30,14 +38,16 @@ prediction did *not* match the server, so the model can be corrected from real p
   rate — the Heatsink behaviour this model assumes for Horizon, not upstream's.
 - **Weaponskill prediction.** What the automaton will use next, and why, with skillchain
   properties for automaton skills, player weaponskills and avatar skills.
-- **Recast clocks.** Live timers for the automaton's abilities and its ranged shot, and
-  under the maneuver table, headed `you`, your own job abilities' recasts, read straight
-  from the client, each on a dial that sweeps down as it runs: Activate, Deus Ex
-  Automata, Repair, Maneuver, Role Reversal, Ventriloquy, Overdrive and the rest. The
-  compact strip lists them too, under itself. Each one has a switch (Retrieve and
-  Deactivate start off), **hide when ready** leaves a ready one out, and **as dials**
-  draws each as a dial alone, the time on it and a short name under it, instead of the
-  dial, the name and the time (Settings tab, **display**).
+- **Recasts as a list.** Live timers for the automaton's abilities and its ranged shot
+  beside the maneuver table, and under it, headed `you`, your own job abilities' recasts,
+  read straight from the client: Activate, Deus Ex Automata, Repair, Maneuver, Role
+  Reversal, Ventriloquy, Overdrive and the rest. Each is a row the way PetsReborn lays its
+  recasts out: the time first, right-aligned in its own column, then the name. **Ready**
+  is green, a recast in its last 30% is amber, and one still counting is white. Each of
+  your abilities has a switch (Retrieve and Deactivate start off), and **hide when ready**
+  leaves a ready one out (Settings tab, **display**). Turning **as a list** off goes back
+  to Clockwork's icon cells and dials; the compact strip always uses those, since it has
+  no room for names.
 - **Loadout tab.** Head, frame and every attachment with its live modifier values, plus
   capacity per element. Saved attachment sets with a preview and a confirmed apply,
   paced a second a step as pupsets is — from the tab's Apply button, or from a macro
@@ -47,8 +57,42 @@ prediction did *not* match the server, so the model can be corrected from real p
 - **Anomaly log.** A JSONL record of every maneuver and automaton weaponskill, with
   mismatches between prediction and reality flagged. Off by default; turn it on from
   the Settings tab.
+- **Pet window for other jobs.** See *Beastmaster, Summoner and Dragoon* below.
 - **Demo mode.** `/pw demo` walks four made-up automatons so you can see and size the HUD
   without being on PUP.
+
+## Beastmaster, Summoner and Dragoon
+
+When the pet out is not an automaton, petworks draws a smaller pet window where the
+Puppetmaster panel goes:
+
+- **The pet's name**, how many yalms away it is, and what kind of pet it is (`jug`,
+  `charmed`, `avatar` or `wyvern`).
+- **A jug pet's time left**, counting down from its jug's duration (30, 60, 90, 120 or
+  180 minutes), amber in the last 5 minutes and red in the last minute. It starts when
+  you use Call Beast or Bestial Loyalty, and it survives zoning and an addon reload. A
+  jug pet that was already out when petworks loaded has no timer until the next one.
+- **A charmed pet's time since the charm**, counting up. When a charm breaks depends on
+  your CHR and the pet's level, so petworks does not guess.
+- **HP and TP bars**, plus **MP** for avatars and for any pet that reports MP.
+- **What is on the pet**: buffs on the left and debuffs on the right, the same strip the
+  automaton gets.
+- **What the pet is fighting**, and that mob's HP.
+- **Your recasts for that job**, as the list above. Beastmaster: Call Beast, Bestial
+  Loyalty, Charm, Reward, Sic (or Ready), Snarl, Feral Howl, Killer Instinct, Familiar.
+  Summoner: Blood Pact: Rage and Ward, Apogee, Elemental Siphon, Avatar's Favor, Astral
+  Flow. Dragoon: Call Wyvern, Spirit Link, Steady Wing, Deep Breathing, Jump, High Jump,
+  Super Jump, Angon, Spirit Surge. Only abilities you have learned at your current level
+  are listed.
+
+With Beastmaster, Summoner or Dragoon as your main job the window stays up with no pet
+out, so the recast that brings one back is in view. A pet you get from a subjob (Charm
+on /BST, say) gets the window only while it is out. An automaton always gets the full
+Puppetmaster panel, on PUP main or /PUP.
+
+The pet window draws with the game's own status icons and Windows' Segoe UI, like the
+rest of petworks: it needs no extra fonts or images. **pet window** on the Settings tab
+(or `/pw pets`) turns it off, for example if another addon draws your pets.
 
 ## Screenshots
 
@@ -72,14 +116,17 @@ or the `1` button, goes back to one.
 ## Install
 
 1. On [github.com/AkoiaLostless/petworks](https://github.com/AkoiaLostless/petworks),
-   press **Code → Download ZIP**, or clone this repo. (The original's
-   [Releases](https://github.com/patheed-ffxi/petworks/releases) do not have the
-   gear-aware stats.)
+   press **Code → Download ZIP**, or clone this repo.
 2. Put the `petworks` folder into your Ashita `addons` directory, so that you have
    `addons/petworks/petworks.lua` with `pw/` and `assets/` beside it.
-3. In game: `/addon load petworks`
+3. In game: `/addon unload clockwork` if you run it, then `/addon load petworks`.
 
-To load it every time, add `/addon load petworks` to your Ashita script.
+petworks replaces Clockwork, so load one or the other, not both. To load it every time,
+put `/addon load petworks` in your Ashita script in place of `/addon load clockwork`.
+
+The first time it loads, petworks copies your Clockwork settings and saved attachment
+sets from `config/addons/clockwork/` into its own folder. Clockwork's folder is left as
+it was.
 
 ## Commands
 
@@ -87,7 +134,8 @@ To load it every time, add `/addon load petworks` to your Ashita script.
 
 | Command | Does |
 |---|---|
-| `/pw show` | the panel on or off (the model and the log run either way) |
+| `/pw show` | the panel (or the pet window) on or off (the model and the log run either way) |
+| `/pw pets` | the pet window for Beastmaster, Summoner and Dragoon on or off |
 | `/pw compact` | the compact strip instead of the full panel; `/pw compact 2` for two rows, `/pw compact 1` for one |
 | `/pw demo` | made-up automatons, for looking at the HUD off PUP; each `/pw demo` is the next one, then off again |
 | `/pw attachments` | the attachments you own |
@@ -111,6 +159,9 @@ petworks writes these under your Ashita config directory:
   line. Off by default: turn it on from the Settings tab.
 - `config/addons/petworks/sets/<name>.txt` — saved attachment sets, one item name per
   line: the same format the `pupsets` addon uses, so a file copied either way just works.
+- `config/addons/petworks/pet.txt` — the jug or charmed pet out now and when it came
+  out, one line, so its timer survives a zone or a reload. Written only when a new pet
+  comes out.
 
 ## Accuracy — please read
 
@@ -153,11 +204,11 @@ wind now` takes the corrected read, and `/pw stat wind off` goes back to reading
 
 ## Reporting a wrong prediction
 
-A stat read wrong after a gear swap comes from this fork, not the original, so do not
-report it upstream; note the item's name and its description text, which is what the read
-is taken from. Anything else can go to the original at
-[github.com/patheed-ffxi/petworks/issues](https://github.com/patheed-ffxi/petworks/issues),
-with:
+Report problems at
+[github.com/AkoiaLostless/petworks/issues](https://github.com/AkoiaLostless/petworks/issues),
+not to Clockwork's author: petworks has changed things the original does not have. For a
+stat read wrong after a gear swap, note the item's name and its description text, which is
+what the read is taken from. For anything else, include:
 
 - the petworks version (`addon.version` at the top of `petworks.lua`);
 - your automaton's head, frame and attachments (`/pw equipped`), and which maneuvers were up;
@@ -184,12 +235,18 @@ abilities involved — check an excerpt before you post it.
 
 petworks stands on other people's work:
 
-- **petworks** (Pathead, [patheed-ffxi/petworks](https://github.com/patheed-ffxi/petworks))
-  — the original addon this fork is built from; everything but the gear-aware stat read
-  is theirs.
+- **Clockwork** (Pathead, [patheed-ffxi/clockwork](https://github.com/patheed-ffxi/clockwork))
+  — the Puppetmaster HUD petworks is built from. Everything on the Puppetmaster side but
+  the gear-aware stat read, the lighter frame and the recast list is theirs.
+- **PetsReborn** (Zaldas) — the idea of one pet window for every pet job, and the recast
+  list's layout: the time, then the name, green when ready. petworks borrows those ideas
+  only. None of PetsReborn's code, data, fonts or images is in petworks, which is why
+  petworks can stay under the MIT License while PetsReborn is GPL-3.0.
 - **[LandSandBoat](https://github.com/LandSandBoat/server)** — the burden, overload,
   weaponskill, spell and attachment logic is re-implemented from its
-  `automatonentity.cpp`, `automaton_controller.cpp`, `automaton.lua` and SQL tables.
+  `automatonentity.cpp`, `automaton_controller.cpp`, `automaton.lua` and SQL tables, and
+  the pet window's ability recast ids and jug pet durations come from its
+  `abilities.sql` and `pet_list.sql`.
   Where this model departs from it for Horizon, the departure is a model assumption.
 - **chains** (Ivaar) — the skillchain properties of player weaponskills, automaton skills
   and avatar skills, which are era-tuned and differ from upstream on several skills.
@@ -203,7 +260,7 @@ petworks stands on other people's work:
 
 ## License
 
-petworks's code is released under the [MIT License](LICENSE). That license covers the
+petworks' code is released under the [MIT License](LICENSE), as Clockwork's is. That license covers the
 code in this repository, not Square Enix's artwork: the element gems in
 `assets/elements/` are Final Fantasy XI's own art, redistributed as other Ashita addons
 do, and remain Square Enix's property.

@@ -660,7 +660,7 @@ tm.targetRow = function()
     -- going well. One colour, the game's own enemy-bar convention.
     tm.bar(nil, hpp / 100, ('%d%%'):format(hpp), COL_MOB,
            hudInner() - nameW - tm.width('label', '100%') - pad, 6)
-    tip('What the automaton last acted on - not necessarily your target.')
+    tip('What your pet last acted on - not necessarily your target.')
 end
 
 -- Which effects are debuffs: XIUI's classification (libs/bufftable.lua,
@@ -881,6 +881,12 @@ end
 -- labelW pads every label to the widest in its group, so the values end level
 -- however the abilities are named.
 tm.recastCell = function(r, labelW)
+    if config.cd_list then
+        tm.listCell(r.label, r.state, r.remaining, r.model, tm.listTimeW())
+        tip(('%s: %ds recast. Ready means usable, not that it is about to\nfire. ? = not used since the addon loaded.')
+            :format(r.name, r.model))
+        return
+    end
     local txt = (r.state == 'counting' and tm.fmtLeft(r.remaining))
              or (r.state == 'ready' and 'ready') or '?'
     abilityCell(r)
@@ -891,6 +897,31 @@ tm.recastCell = function(r, labelW)
     tip(('%s: %ds recast. Ready means usable, not that it is about to\nfire. ? = not used since the addon loaded.')
         :format(r.name, r.model))
 end
+-- One recast as a list row, the way PetsReborn lays its recasts out: the
+-- time right-aligned in a column `timeW` wide, then the name. Green Ready,
+-- amber once it is in the last LIST_NEAR of its recast, white while it
+-- counts, dim when it has not been seen since the addon loaded. `total` is
+-- the whole recast, or nil when it is not known (no amber then).
+local LIST_NEAR = 0.30
+tm.listTimeW = function()
+    return math.max(tm.width('text', 'Ready'), tm.width('text', '00:00'))
+end
+tm.listCell = function(label, state, remaining, total, timeW)
+    local txt = (state == 'counting' and tm.fmtLeft(remaining))
+             or (state == 'ready' and 'Ready') or '?'
+    local col = COL_DIM
+    if state == 'ready' then
+        col = COL_GOOD
+    elseif state == 'counting' then
+        col = (total ~= nil and total > 0 and remaining / total <= LIST_NEAR) and COL_WARN or COL_TEXT
+    end
+    imgui.Dummy({ math.max(0, timeW - tm.width('text', txt)), 0 })
+    imgui.SameLine(0, 0)
+    tm.text('text', col, txt)
+    imgui.SameLine(0, tm.s(6))
+    tm.text('label', (state == 'ready') and COL_TEXT or COL_DIM, label)
+end
+
 -- What is left on one of your own abilities, or that it is ready, on hover.
 local function jaTip(r)
     if r.state == 'counting' then
@@ -957,10 +988,38 @@ end
 -- The compact strip draws them too, under itself: from x0, `width` wide, and
 -- with no label. Each of its lines needs an item that is not SameLine to begin
 -- it - lineStart, which is the rail's slot - and then is placed like the rest.
-tm.jaGrid = function(x0, width, lineStart)
-    local rows = tm.jaRows
+-- `rows` defaults to tm.jaRows; the other pet jobs' window hands its own.
+tm.jaGrid = function(x0, width, lineStart, rows)
+    rows = rows or tm.jaRows
     if #rows == 0 then return end
     x0, width = x0 or hudPad(), width or hudInner()
+    -- The list, in columns read top to bottom, as many columns as the width
+    -- holds. Not on the compact strip (lineStart): it has no room for names.
+    if config.cd_list and lineStart == nil then
+        local timeW, labelW = tm.listTimeW(), 0
+        for _, r in ipairs(rows) do
+            local w = tm.width('label', r.label)
+            if w > labelW then labelW = w end
+        end
+        local cell, gap = timeW + tm.s(6) + labelW, tm.s(14)
+        local cols = math.max(1, math.min(#rows, math.floor((width + gap) / (cell + gap))))
+        local per = math.ceil(#rows / cols)
+        tm.text('label', COL_DIM, 'you')
+        tip('Your own job abilities\' recasts, straight from the client. Which\nones, and whether a ready one is listed: Settings, display.')
+        for c = 0, cols - 1 do
+            if c * per < #rows then
+                if c > 0 then imgui.SameLine(x0 + c * (cell + gap), 0) end
+                imgui.BeginGroup()
+                for i = c * per + 1, math.min(#rows, (c + 1) * per) do
+                    local r = rows[i]
+                    tm.listCell(r.label, r.state, r.remaining, r.total, timeW)
+                    jaTip(r)
+                end
+                imgui.EndGroup()
+            end
+        end
+        return
+    end
     local labelW, cell, gap = 0, cellW(), tm.s(3)
     if not config.cd_dials then
         for _, r in ipairs(rows) do
