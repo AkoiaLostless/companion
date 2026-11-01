@@ -889,12 +889,15 @@ local function drawStatus(pet, maneuvers, overload)
     -- place however many maneuvers are up (Ross, 1.2.0).
     drawRecastColumn(cx, #rows + 1, {})
     tm.jaGrid()   -- your own recasts, under the table and its column
-    if config.show_gives then drawGives(buffs) end
 
+    -- attachment notes (Flame Holder) between the cooldowns and the Stats
+    -- line, where Ross wants them
     if hasFire and hasAttachment('Flame Holder') then
         tm.text('text', COL_WARN, 'Flame Holder: the weaponskill will eat your Fire maneuvers')
         tip('+25% weaponskill damage per Fire maneuver consumed.')
     end
+
+    if config.show_gives then drawGives(buffs) end
     if config.show_oils then drawOils() end
 end
 
