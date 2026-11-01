@@ -1,11 +1,11 @@
--- pw/log.lua - the JSONL session log and the anomaly channel. Owns the file
+-- cmp/log.lua - the JSONL session log and the anomaly channel. Owns the file
 -- handle, kept on tm.logFile (with the tm.logDay/logId/logDir its name was built
 -- from), and publishes tm.installRoot. Exports logPath, logOpen, logEvent,
 -- flagAnomaly and close, which the entry file calls on unload.
 local chat = require('chat')
-local config = require('pw.config')
-local tm = require('pw.state')
-local U  = require('pw.util')
+local config = require('cmp.config')
+local tm = require('cmp.state')
+local U  = require('cmp.util')
 local safe = U.safe
 local ids = tm.ids
 
@@ -24,7 +24,7 @@ local function logPath()
         local d = config.log_dir:gsub('\\', '/')
         return (d:sub(-1) == '/') and d or (d .. '/')
     end
-    return ('%s/config/addons/petworks/'):format(tm.installRoot())
+    return ('%s/config/addons/companion/'):format(tm.installRoot())
 end
 
 -- Is the JSONL wanted at all? Routine records need `logging`; anomalies need
@@ -57,7 +57,7 @@ local function logOpen()
             -- What this handle's filename says, so logEvent can tell when the
             -- name has stopped being true.
             tm.logDay, tm.logId, tm.logDir = day, ids.self_id, dir
-            print(chat.header('petworks'):append(chat.message('logging to ' .. path)))
+            print(chat.header('companion'):append(chat.message('logging to ' .. path)))
         end
     end)
 end
@@ -67,7 +67,7 @@ local function logEvent(kind, tbl)
     -- flagAnomaly stamps tbl.anomaly before it calls in, so the two channels
     -- need no separate entry point.
     if not logWanted(tbl.anomaly) then return end
-    if type(PETWORKS_TEST) == 'table' then PETWORKS_TEST.last = { kind = kind, rec = tbl } end
+    if type(COMPANION_TEST) == 'table' then COMPANION_TEST.last = { kind = kind, rec = tbl } end
     -- The filename bakes in a date and a character name, so both are checked
     -- per record: otherwise a session that crosses midnight would append its
     -- after-midnight records to yesterday's file, where they sort before the
@@ -141,7 +141,7 @@ local function flagAnomaly(kind, tbl)
         said = (' - %s'):format(tostring(tbl.note))
     end
     if config.anomaly_chat then
-        print(chat.header('petworks'):append(chat.error(('ANOMALY %s'):format(kind)))
+        print(chat.header('companion'):append(chat.error(('ANOMALY %s'):format(kind)))
             :append(chat.message(said)))
     end
 end

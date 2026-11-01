@@ -1,18 +1,18 @@
--- pw/pets.lua - every pet that is not an automaton: a BST jug or charmed
+-- cmp/pets.lua - every pet that is not an automaton: a BST jug or charmed
 -- pet, a SMN avatar or spirit, a DRG wyvern. Works out which kind of pet is
--- out (tm.petKind), and for the pet window (pw/ui/petframe.lua) builds
+-- out (tm.petKind), and for the pet window (cmp/ui/petframe.lua) builds
 -- tm.petView: the pet's vitals, its timer and your own recasts for its job.
--- Native reads, so render thread only, at the model's pace (pw/frame.lua).
--- The packet thread only stamps tm.petSummonAt (pw/inbound.lua).
+-- Native reads, so render thread only, at the model's pace (cmp/frame.lua).
+-- The packet thread only stamps tm.petSummonAt (cmp/inbound.lua).
 --
 -- The tables below are written for this addon from LandSandBoat's
 -- sql/abilities.sql (abilityId and recastId) and sql/pet_list.sql (jug pet
--- names and durations), the same sources pw/cooldowns.lua cites.
-local config = require('pw.config')
-local tm = require('pw.state')
-local U  = require('pw.util')
+-- names and durations), the same sources cmp/cooldowns.lua cites.
+local config = require('cmp.config')
+local tm = require('cmp.state')
+local U  = require('cmp.util')
 local safe, player = U.safe, U.player
-local R  = require('pw.reading')
+local R  = require('cmp.reading')
 local petInfo = R.petInfo
 local ids = tm.ids
 
@@ -20,7 +20,7 @@ local JOB_BST, JOB_SMN, JOB_DRG, JOB_PUP = 9, 15, 14, 18
 
 -- ------------------------------------------------------------- the data --
 -- Your abilities for each kind of pet, in the order the window lists them,
--- shaped as tm.jaList's (pw/cooldowns.lua): `ability` is LSB's abilityId,
+-- shaped as tm.jaList's (cmp/cooldowns.lua): `ability` is LSB's abilityId,
 -- `timer` its recastId. Only what you have learned is listed (HasAbility), so
 -- a subjob, a level sync or an ability Horizon does not grant simply leaves a
 -- row out. The pet commands with a few seconds' recast (Fight, Heel, Stay,
@@ -62,7 +62,7 @@ local WYVERN = {
 local LISTS = { jug = BEAST, charmed = BEAST, avatar = AVATAR, wyvern = WYVERN }
 
 -- The abilities that bring a pet out, by abilityId: the packet thread stamps
--- tm.petSummonAt when you use one (pw/inbound.lua), which is how a new pet is
+-- tm.petSummonAt when you use one (cmp/inbound.lua), which is how a new pet is
 -- told from one that was already out when the addon loaded.
 local SUMMONS = { [85] = true, [387] = true, [52] = true, [61] = true }
 
@@ -124,7 +124,7 @@ local saved = nil   -- the file's record, read once
 local timerFor = nil   -- the pet id `timer` was settled for
 
 local function timerPath()
-    return ('%s/config/addons/petworks/pet.txt'):format(tm.installRoot())
+    return ('%s/config/addons/companion/pet.txt'):format(tm.installRoot())
 end
 local function readSaved()
     if saved ~= nil then return saved end

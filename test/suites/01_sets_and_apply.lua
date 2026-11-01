@@ -534,7 +534,7 @@ do
     check('a crashed apply says what happened', a.failed:match('equipex blew up') ~= nil, true)
     check('a crashed apply sent nothing', #world.equipCalls, 0)
 
-    -- /pw load <name>: the Apply button's checks and the same apply, from a
+    -- /cmp load <name>: the Apply button's checks and the same apply, from a
     -- chat line - which a macro can send and a button cannot. A refusal
     -- prints the reason and starts nothing.
     local function cw(line) printed = {} handlers['command']({ command = line }) end
@@ -559,7 +559,7 @@ do
 
     -- the rest of the line is the name, so one with a space needs no quotes
     reset()
-    cw('/pw load VE swap')
+    cw('/cmp load VE swap')
     check('load says it started', said('VE swap'), true)
     pump()
     a = api.state().apply
@@ -570,14 +570,14 @@ do
 
     -- the lookup ignores case, as Windows does; the apply carries the saved name
     reset()
-    cw('/pw load ve SWAP')
+    cw('/cmp load ve SWAP')
     pump()
     check('load ignores case', api.state().apply.set, 'VE swap')
 
     -- PUP as a sub job is PUP enough, as it is for the button
     reset()
     world.mainjob, world.subjob = 1, 18
-    cw('/pw load VE swap')
+    cw('/cmp load VE swap')
     pump()
     check('load works with PUP sub', api.state().apply.done and api.state().apply.failed == nil, true)
     check('load sends the sub-job flag', world.equipCalls[1] and world.equipCalls[1][1], 1)
@@ -585,15 +585,15 @@ do
 
     -- nothing to change: said, not silent
     reset()
-    cw('/pw load same')
+    cw('/cmp load same')
     check('load of what is worn says so', said('already equipped'), true)
     check('load of what is worn sends nothing', #world.equipCalls, 0)
 
     -- one apply at a time: a second load leaves the running one alone
     reset()
-    cw('/pw load VE swap')
+    cw('/cmp load VE swap')
     local first = api.state().apply
-    cw('/pw load VE swap')
+    cw('/cmp load VE swap')
     check('a second load says one is running', said('running'), true)
     check('a second load leaves the first', api.state().apply, first)
     pump()
@@ -601,22 +601,22 @@ do
 
     -- every reason the button gives, given in chat instead
     reset()
-    refused('unknown name', '/pw load nope', 'nope')
-    refused('bad file', '/pw load broken', 'broken')
-    refused('unknown head', '/pw load odd head', 'unknown head or frame')
-    refused('head not owned', '/pw load storm', 'head or frame not owned')
-    refused('over capacity', '/pw load hot', 'over capacity')
+    refused('unknown name', '/cmp load nope', 'nope')
+    refused('bad file', '/cmp load broken', 'broken')
+    refused('unknown head', '/cmp load odd head', 'unknown head or frame')
+    refused('head not owned', '/cmp load storm', 'head or frame not owned')
+    refused('over capacity', '/cmp load hot', 'over capacity')
     petOut()
-    refused('automaton out', '/pw load VE swap', 'deactivate first')
+    refused('automaton out', '/cmp load VE swap', 'deactivate first')
     petIn()
     world.mainjob = 1
-    refused('not PUP', '/pw load VE swap', 'not PUP')
+    refused('not PUP', '/cmp load VE swap', 'not PUP')
     world.mainjob = 18
     api.clear044()
-    refused('no 0x044', '/pw load VE swap', 'no automaton data')
+    refused('no 0x044', '/cmp load VE swap', 'no automaton data')
 
     -- bare, it lists what there is to load
-    cw('/pw load')
+    cw('/cmp load')
     check('bare load lists the sets', said('VE swap') and said('VE tank'), true)
 
     for _, n in ipairs({ 'VE swap', 'same', 'odd head', 'storm', 'hot', 'broken' }) do api.deleteSet(n) end

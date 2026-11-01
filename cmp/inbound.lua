@@ -1,37 +1,37 @@
--- pw/inbound.lua - the packet thread: the 0x044 (automaton stats and loadout),
+-- cmp/inbound.lua - the packet thread: the 0x044 (automaton stats and loadout),
 -- 0x00A (zone), 0x029 (battle message) and 0x028 (action) handlers, which
 -- onPacket dispatches to by packet id. Writes tm.auto044, tm.resonance,
 -- tm.petTarget, tm.deployTo, the summon seeds and the effect tables; returns
 -- unpackAction and onPacket.
 
--- THIS FILE MUST NOT REQUIRE pw.reading. It runs on the packet thread and may
+-- THIS FILE MUST NOT REQUIRE cmp.reading. It runs on the packet thread and may
 -- read only what d3d_present published into tm.snap and the model tables; a
--- native read here is the SEH fault described in pw/state.lua. The harness
+-- native read here is the SEH fault described in cmp/state.lua. The harness
 -- checks the require list.
 local chat = require('chat')
-local config = require('pw.config')
-local D  = require('pw.data')
+local config = require('cmp.config')
+local D  = require('cmp.data')
 local ELEMENTS, MSG_OVERLOAD_CHANCE, MSG_OVERLOADED, ABIL_MANEUVER_FIRST = D.ELEMENTS, D.MSG_OVERLOAD_CHANCE, D.MSG_OVERLOADED, D.ABIL_MANEUVER_FIRST
 local ABIL_DEA, ABIL_ACTIVATE, CAT_ABILITY, CAT_MOBSKILL = D.ABIL_DEA, D.ABIL_ACTIVATE, D.CAT_ABILITY, D.CAT_MOBSKILL
 local CAT_WS, CAT_AVATAR, CAT_MAGIC, CAT_MAGIC_START = D.CAT_WS, D.CAT_AVATAR, D.CAT_MAGIC, D.CAT_MAGIC_START
 local PET_MOBSKILL, MOBSKILL_RANGED, SC_NAME, MOBSKILL_SC = D.PET_MOBSKILL, D.MOBSKILL_RANGED, D.SC_NAME, D.MOBSKILL_SC
 local WS_SC, AVATAR_SC = D.WS_SC, D.AVATAR_SC
-local tm = require('pw.state')
-local U  = require('pw.util')
+local tm = require('cmp.state')
+local U  = require('cmp.util')
 local safe = U.safe
-local L  = require('pw.log')
+local L  = require('cmp.log')
 local logEvent, flagAnomaly = L.logEvent, L.flagAnomaly
-local B  = require('pw.burden')
+local B  = require('cmp.burden')
 local reconcile, formSkillchain, rawResonance, liveResonance = B.reconcile, B.formSkillchain, B.rawResonance, B.liveResonance
-local T  = require('pw.timers')
+local T  = require('cmp.timers')
 local noteUse, timersClear = T.noteUse, T.timersClear
-local P  = require('pw.pet')
+local P  = require('cmp.pet')
 local MSG_STATUS_OFF, MSG_DEATH, petEffects, clearPetEffects = P.MSG_STATUS_OFF, P.MSG_DEATH, P.petEffects, P.clearPetEffects
 local notePetStatus = P.notePetStatus
--- Tables with a stable identity (see pw/state.lua), so safe to alias here.
+-- Tables with a stable identity (see cmp/state.lua), so safe to alias here.
 local burden, cost, ids, snap = tm.burden, tm.cost, tm.ids, tm.snap
 local burdenVerified, seededBy = tm.burdenVerified, tm.seededBy
-require('pw.spell')   -- tm.spellObserve and tm.noteMob are bound through tm
+require('cmp.spell')   -- tm.spellObserve and tm.noteMob are bound through tm
                       -- and must be loaded before the first packet arrives
 
 -- 0x028 bit layout: fancychat/lib/combat_packets.lua
@@ -585,7 +585,7 @@ local function onPetMobskill(act, priorRes, priorAge)
         else
             logEvent('pet_ws', rec)
             if config.debug_predictions and expected ~= nil then
-                local line = chat.header('petworks')
+                local line = chat.header('companion')
                     :append(chat.success(('%s as predicted'):format(name)))
                 if config.show_reasoning then
                     line = line:append(chat.message(('- %s'):format(
@@ -756,7 +756,7 @@ local function onPetSpell(act)
             rec.missed_uncertain = (unsure or cureUnsure) or nil
             logEvent('pet_spell', rec)
             if config.debug_predictions then
-                local line = chat.header('petworks')
+                local line = chat.header('companion')
                     :append(chat.success(('%s as %s'):format(rec.name,
                                          hedged and 'hedged'
                                          or unsure and 'one of two'
@@ -773,7 +773,7 @@ local function onPetSpell(act)
 end
 
 -- 0x028 for every other pet (snap.other: a jug, a charmed pet, an avatar, a
--- wyvern - pw/pets.lua). None of the automaton's model: only what the pet
+-- wyvern - cmp/pets.lua). None of the automaton's model: only what the pet
 -- window shows. Your own summoning abilities, for its timer; what the pet
 -- acts on, for its target row; and what lands on it, for its status strip,
 -- through the same inference the automaton's strip uses. Nothing is parsed
@@ -827,7 +827,7 @@ local function onAction(data)
     local isSelf = (snap.self_id ~= 0 and act.actor_id == snap.self_id)
     local isMine = (snap.pet_id  ~= 0 and act.actor_id == snap.pet_id)
     -- Our own action or the automaton's: the next frame re-runs the model
-    -- (pw/frame.lua) rather than waiting out its interval. Anyone else's
+    -- (cmp/frame.lua) rather than waiting out its interval. Anyone else's
     -- is picked up at the model's own pace.
     if isSelf or isMine then tm.modelDirty = true end
 
@@ -906,7 +906,7 @@ end
 -- packet_in: drops injected packets, then hands each packet we read to its
 -- handler by id.
 -- Every id handled here but 0x028 also marks the model dirty, so the next
--- frame re-runs it (pw/frame.lua); onAction does it for our own actions only.
+-- frame re-runs it (cmp/frame.lua); onAction does it for our own actions only.
 local DIRTIES = { [0x044] = true, [0x00A] = true, [0x029] = true, [0x076] = true, [0x061] = true }
 local function onPacket(e)
     if e.injected then return end
@@ -923,7 +923,7 @@ local function onPacket(e)
         onPartyBuffs(e.data)
     elseif e.id == 0x061 then
         -- Your stats. The gear they were taken with is recorded on the next
-        -- frame (pw/gear.lua): the client has applied the packet by then, and
+        -- frame (cmp/gear.lua): the client has applied the packet by then, and
         -- a frame does not run while a zone-in is still loading the gear.
         tm.statRefreshPending = true
     end

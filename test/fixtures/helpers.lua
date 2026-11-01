@@ -260,7 +260,7 @@ end
 -- The last log record of a kind, read back from the file the addon writes,
 -- and one recast row by ability id.
 local function lastLog(kind)
-    local f = io.open(SCRATCH .. '/config/addons/petworks/Harness_' .. os.date('%Y.%m.%d') .. '.jsonl', 'r')
+    local f = io.open(SCRATCH .. '/config/addons/companion/Harness_' .. os.date('%Y.%m.%d') .. '.jsonl', 'r')
     if f == nil then return nil end
     local hit = nil
     for line in f:lines() do

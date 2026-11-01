@@ -19,12 +19,12 @@ do
     check('the published pick is uncertain', api.spellSnapshot().mode, 'uncertain')
     check('...and names the tier it reached', api.spellSnapshot().name, 'Stone IV')
     api.spellCountersReset()
-    PETWORKS_TEST.last = nil
+    COMPANION_TEST.last = nil
     send028(act(8, 151, MOB + 64))                -- it casts the other candidate
-    check('an uncertain miss is not an anomaly', PETWORKS_TEST.last.kind, 'pet_spell')
+    check('an uncertain miss is not an anomaly', COMPANION_TEST.last.kind, 'pet_spell')
     check('...and the record still names what was expected',
-          PETWORKS_TEST.last.rec.expected, 'Stone IV')
-    check('...and marks it a miss', PETWORKS_TEST.last.rec.missed_uncertain, true)
+          COMPANION_TEST.last.rec.expected, 'Stone IV')
+    check('...and marks it a miss', COMPANION_TEST.last.rec.missed_uncertain, true)
     frame('uncertain counters')
     check('it is not counted against the model', saw('spells 1, mispredicted 0'), true)
     -- a CONFIDENT wrong answer is still an anomaly
@@ -34,7 +34,7 @@ do
     api.spellCountersReset()
     advance(6)
     send028(act(8, 159, MOB + 64))                -- a tier nobody predicted
-    check('a confident miss still is an anomaly', PETWORKS_TEST.last.kind, 'spell_mispredicted')
+    check('a confident miss still is an anomaly', COMPANION_TEST.last.kind, 'spell_mispredicted')
     frame('confident counters')
     check('and it counts', saw('spells 1, mispredicted 1'), true)
     world.icons, world.timers = nil, nil
@@ -98,7 +98,7 @@ end
 -- Both spell families check the OTHER one's tier before touching it: Dia is
 -- tier 1, Bio 2, Dia II 3, Bio II 4, Dia III 5, Bio III 6, and each script
 -- replaces the opposite effect only when its tier is strictly lower. Otherwise
--- it deals its damage and changes nothing at all - no delete, no add. petworks
+-- it deals its damage and changes nothing at all - no delete, no add. companion
 -- deleted the opposite unconditionally, on the mob and on the automaton, so a
 -- Dia I into a standing Bio II wiped a debuff the mob still had and recorded
 -- one it never got. XIUI, HXUI and kazenoeye all have the same bug; the server
@@ -214,7 +214,7 @@ do
 end
 
 -- ------------------------------------ a resonance belongs to the mob it is on --
--- The skillchain is a status effect on the MOB, but petworks kept one global
+-- The skillchain is a status effect on the MOB, but companion kept one global
 -- slot with no target on it: a chain opened on mob A still promised a closer
 -- while the automaton was fighting mob B, and it outlived a resummon and a
 -- zone as well. It is the last piece of per-mob state that 1.9.0's rewrite
@@ -282,9 +282,9 @@ do
     petOut(PET + 51, MOB + 51)
     advance(7)
     send028(act(11, 1945, MOB + 51))
-    check('the first use logs an edge', PETWORKS_TEST.last.kind, 'recast_edge')
+    check('the first use logs an edge', COMPANION_TEST.last.kind, 'recast_edge')
     -- the despawn belongs to the zone that caused it, so the zone keeps the name
-    check('the edge is named', PETWORKS_TEST.last.rec.edge, 'zone')
+    check('the edge is named', COMPANION_TEST.last.rec.edge, 'zone')
 
     -- ...and the zone keeps its provenance whichever side of it the frame
     -- notices on. The despawn a zone causes is not a despawn - the automaton
@@ -296,15 +296,15 @@ do
     petOut(PET + 60, MOB + 60)
     advance(5)
     send028(act(11, 1945, MOB + 60))
-    check('a late despawn does not steal the zone', PETWORKS_TEST.last.rec.edge, 'zone')
-    check('and does not move its clock', PETWORKS_TEST.last.rec.since_edge, 8)
+    check('a late despawn does not steal the zone', COMPANION_TEST.last.rec.edge, 'zone')
+    check('and does not move its clock', COMPANION_TEST.last.rec.since_edge, 8)
     -- a REAL dismissal well after the zone is still its own edge
     advance(60)
     petIn()
     petOut(PET + 61, MOB + 61)
     advance(4)
     send028(act(11, 1945, MOB + 61))
-    check('a later dismissal is its own edge', PETWORKS_TEST.last.rec.edge, 'pet_despawn')
+    check('a later dismissal is its own edge', COMPANION_TEST.last.rec.edge, 'pet_despawn')
 
     -- order two: the frame notices first, then the packet lands
     send028(act(11, 1944, MOB + 51))              -- Shield Bash: 180 s on the clock
@@ -315,9 +315,9 @@ do
     petOut(PET + 52, MOB + 52)
     advance(9)
     send028(act(11, 1944, MOB + 52))
-    check('the second use logs an edge too', PETWORKS_TEST.last.kind, 'recast_edge')
-    check('measured from the zone', PETWORKS_TEST.last.rec.since_edge, 9)
-    check('and the zone is named', PETWORKS_TEST.last.rec.edge, 'zone')
+    check('the second use logs an edge too', COMPANION_TEST.last.kind, 'recast_edge')
+    check('measured from the zone', COMPANION_TEST.last.rec.since_edge, 9)
+    check('and the zone is named', COMPANION_TEST.last.rec.edge, 'zone')
 
     -- a summon names itself, so a zone reading and a fresh-automaton reading
     -- are never mixed in the calibration set
@@ -327,14 +327,14 @@ do
               targets = { { id = 0x01000001, actions = { { message = 0 } } } } })
     petOut(PET + 53, MOB + 53)
     send028(act(11, 1945, MOB + 53))
-    check('an Activate edge is named', PETWORKS_TEST.last.rec.edge, 'activate')
+    check('an Activate edge is named', COMPANION_TEST.last.rec.edge, 'activate')
     petIn()
     advance(6)
     send028({ actor = 0x01000001, category = 6, param = 310,
               targets = { { id = 0x01000001, actions = { { message = 0 } } } } })
     petOut(PET + 54, MOB + 54)
     send028(act(11, 1945, MOB + 54))
-    check('a Deus Ex edge is named', PETWORKS_TEST.last.rec.edge, 'dea')
+    check('a Deus Ex edge is named', COMPANION_TEST.last.rec.edge, 'dea')
     world.buffer = { 2, 33, 5, 4, 1, 2, 3, 0, 0, 0, 0, 0, 0, 0 }
     advance(2.5)
 end
@@ -576,7 +576,7 @@ do
     advance(25)
     handlers['d3d_present']()
     send028(act(8, 59, MOB + 75))
-    local last = PETWORKS_TEST.last
+    local last = COMPANION_TEST.last
     check('mp logged on the cast', last.rec.maxmp, 300)
     check('mp is the live half of the pool', last.rec.mp, 150)
     -- ...and it follows the percent, which is the live half of the reading
@@ -584,7 +584,7 @@ do
     advance(25)
     handlers['d3d_present']()
     send028(act(8, 56, MOB + 75))
-    last = PETWORKS_TEST.last
+    last = COMPANION_TEST.last
     check('mp follows the percent', last.rec.mp, 60)
     -- and it is a GATE, not decoration. Both sides hold a Regen so the rung
     -- goes straight to Protect, and the master is the one without it: at a
@@ -607,7 +607,7 @@ do
     advance(25)
     handlers['d3d_present']()
     send028(act(8, 254, MOB + 75))
-    last = PETWORKS_TEST.last
+    last = COMPANION_TEST.last
     check('mp unknown says so', last.rec.mp, -1)
     check('mp unknown max says so', last.rec.maxmp, -1)
     world.petMpp = 100
@@ -652,9 +652,9 @@ do
     check('the flagged heal is published', api.spellSnapshot().rung, 'heal')
     check('...flagged', api.spellSnapshot().mode, 'uncertain')
     api.spellCountersReset()
-    PETWORKS_TEST.last = nil
+    COMPANION_TEST.last = nil
     send028(act(8, 4, STONEY))                                  -- a Cure IV on Stoney
-    local last = PETWORKS_TEST.last
+    local last = COMPANION_TEST.last
     check('another Cure for a flagged heal is no anomaly', last.kind, 'pet_spell')
     check('...but is marked a miss', last.rec.missed_uncertain, true)
     check('the record names the target', last.rec.target, 'Stoney')
@@ -667,8 +667,8 @@ do
     handlers['d3d_present']()
     check('the flagged heal again', api.spellSnapshot().rung, 'heal')
     send028(act(8, 56, MOB + 96))                               -- Slow instead
-    check('a non-Cure for a flagged heal is an anomaly', PETWORKS_TEST.last.kind, 'spell_mispredicted')
-    check('...aimed at the mob', PETWORKS_TEST.last.rec.target, 'mob')
+    check('a non-Cure for a flagged heal is an anomaly', COMPANION_TEST.last.kind, 'spell_mispredicted')
+    check('...aimed at the mob', COMPANION_TEST.last.rec.target, 'mob')
     world.party, world.partyHp, world.partyNames, world.partyIds = nil, nil, nil, nil
     world.icons, world.timers = nil, nil
 end

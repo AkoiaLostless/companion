@@ -1,33 +1,33 @@
--- pw/burden.lua - the overload model: the stat check and the cost of a maneuver,
+-- cmp/burden.lua - the overload model: the stat check and the cost of a maneuver,
 -- burden and its decay, the live maneuvers, and the weaponskill predictor.
 -- Exports those functions (return table at the end); publishes
--- tm.dropLearnedCosts, tm.refreshStatChecks (pw/settings.lua calls it when a
+-- tm.dropLearnedCosts, tm.refreshStatChecks (cmp/settings.lua calls it when a
 -- saved stat lands), tm.frameNow and tm.scMiss, and writes the weaponskill
 -- snapshot the packet thread reads (tm.predSnapshot, tm.predWhy, tm.predMode).
-local config = require('pw.config')
-local D  = require('pw.data')
+local config = require('cmp.config')
+local D  = require('cmp.data')
 local ELEMENTS, EFFECT_OVERLOAD, EFFECT_MANEUVER_1, SC_NAME = D.ELEMENTS, D.EFFECT_OVERLOAD, D.EFFECT_MANEUVER_1, D.SC_NAME
 local SC_PAIRS, MOBSKILL_SC, MANEUVER_STAT = D.SC_PAIRS, D.MOBSKILL_SC, D.MANEUVER_STAT
 local SLOT_HANDS, WS_LISTS = D.SLOT_HANDS, D.WS_LISTS
-local tm = require('pw.state')
-local U  = require('pw.util')
+local tm = require('cmp.state')
+local U  = require('cmp.util')
 local safe, player, equippedItemId, itemName = U.safe, U.player, U.equippedItemId, U.itemName
 local equippedThreshold, equippedManeuverBonus = U.equippedThreshold, U.equippedManeuverBonus
-local L  = require('pw.log')
+local L  = require('cmp.log')
 local logEvent, flagAnomaly = L.logEvent, L.flagAnomaly
-local R  = require('pw.reading')
+local R  = require('cmp.reading')
 local equippedNames, hasAttachment = R.equippedNames, R.hasAttachment
-local A  = require('pw.attachments')
+local A  = require('cmp.attachments')
 local maneuverStep = A.maneuverStep
-local G  = require('pw.gear')
--- The shared tables, never reassigned after pw/state.lua creates them.
+local G  = require('cmp.gear')
+-- The shared tables, never reassigned after cmp/state.lua creates them.
 local burden, cost, samples, ids = tm.burden, tm.cost, tm.samples, tm.ids
 local snap, costSource, costDispute, burdenVerified = tm.snap, tm.costSource, tm.costDispute, tm.burdenVerified
 local castThresh, castStat, seededBy, lastReconcile = tm.castThresh, tm.castStat, tm.seededBy, tm.lastReconcile
 local waterSince = tm.waterSince
 local castBonus = tm.castBonus
 
--- Your side of the stat check, with the gear you have on now: pw/gear.lua
+-- Your side of the stat check, with the gear you have on now: cmp/gear.lua
 -- corrects the stale total in memory by what was swapped since it arrived.
 local function myStat(el)
     local statName = MANEUVER_STAT[el]
@@ -40,7 +40,7 @@ end
 
 -- The stat you have on when this element's maneuver goes off, when you have
 -- told the addon what it is (config.stat_check as a number). It outranks the
--- live read, which now follows a gear-swap set (pw/gear.lua) but only counts
+-- live read, which now follows a gear-swap set (cmp/gear.lua) but only counts
 -- an item's plain stat lines - a number you typed is taken as the truth. Dark
 -- is excluded - it compares MP, which is read live and current.
 local function statOverride(el)
@@ -88,7 +88,7 @@ local function applyStatCheck(el)
         return
     end
     -- A cost the server taught us outranks one we computed: the computation
-    -- is the thing under suspicion. /pw reset clears it, and so does a frame
+    -- is the thing under suspicion. /cmp reset clears it, and so does a frame
     -- change - see tm.dropLearnedCosts.
     if costSource[el] == 'observed' then return end
     -- Your side of the check is the number you set for this element, and
@@ -421,7 +421,7 @@ end
 -- sidebar each ask several times in one frame and the answer cannot change
 -- inside it, so the first ask reads the status icons and timers and the rest
 -- share that answer. Outside a frame (tm.inFrame, set around d3d_present by
--- petworks.lua) every ask reads afresh. Callers only read the list.
+-- companion.lua) every ask reads afresh. Callers only read the list.
 local memoFrame, memoOut, memoOverload = nil, nil, nil
 local function activeManeuvers()
     if tm.demo ~= nil then return tm.demo.maneuvers, tm.demo.overload end

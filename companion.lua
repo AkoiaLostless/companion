@@ -1,4 +1,4 @@
-addon.name    = 'petworks'
+addon.name    = 'companion'
 addon.author  = 'Pathead (Clockwork), AkoiaLostless'
 addon.version = '1.0.0'
 addon.desc    = 'Puppetmaster burden, maneuvers, weaponskill prediction and loadout, and a pet window for BST, SMN and DRG.'
@@ -7,47 +7,47 @@ require('common')
 local chat  = require('chat')
 
 -- The modules, in dependency order: each requires only modules above it,
--- which keeps the graph acyclic. The shared state is pw/state.lua (`tm`). A
+-- which keeps the graph acyclic. The shared state is cmp/state.lua (`tm`). A
 -- function a module publishes on tm is looked up at call time, which is how a
 -- module calls one defined below it (tm.saveSettings, tm.sidebarInvalidate).
-require('pw.config')
-require('pw.data')
-local tm     = require('pw.state')
-local U      = require('pw.util')
-local L      = require('pw.log')
-require('pw.reading')
-require('pw.gear')       -- publishes tm.statBasis
-require('pw.cooldowns')  -- publishes tm.jaList and tm.jaRefresh
-require('pw.attachments')
-require('pw.burden')
-require('pw.timers')
-local P      = require('pw.pet')
-require('pw.pets')       -- publishes tm.petRefresh and tm.noteSummon
-require('pw.spell')      -- publishes tm.fn, tm.predictSpell and the rest
-require('pw.settings')   -- publishes tm.loadSettings, tm.saveSettings, tm.restoreDefaults
-local S      = require('pw.sets')
-require('pw.demo')
-local IN     = require('pw.inbound')
-local C      = require('pw.commands')
-local F      = require('pw.frame')
-require('pw.ui.surface')
-require('pw.ui.whatif')  -- publishes tm.whatIf, tm.sidebarRows and the rest
-require('pw.ui.loadout')
-local PN     = require('pw.ui.panel')
-local PF     = require('pw.ui.petframe')
+require('cmp.config')
+require('cmp.data')
+local tm     = require('cmp.state')
+local U      = require('cmp.util')
+local L      = require('cmp.log')
+require('cmp.reading')
+require('cmp.gear')       -- publishes tm.statBasis
+require('cmp.cooldowns')  -- publishes tm.jaList and tm.jaRefresh
+require('cmp.attachments')
+require('cmp.burden')
+require('cmp.timers')
+local P      = require('cmp.pet')
+require('cmp.pets')       -- publishes tm.petRefresh and tm.noteSummon
+require('cmp.spell')      -- publishes tm.fn, tm.predictSpell and the rest
+require('cmp.settings')   -- publishes tm.loadSettings, tm.saveSettings, tm.restoreDefaults
+local S      = require('cmp.sets')
+require('cmp.demo')
+local IN     = require('cmp.inbound')
+local C      = require('cmp.commands')
+local F      = require('cmp.frame')
+require('cmp.ui.surface')
+require('cmp.ui.whatif')  -- publishes tm.whatIf, tm.sidebarRows and the rest
+require('cmp.ui.loadout')
+local PN     = require('cmp.ui.panel')
+local PF     = require('cmp.ui.petframe')
 
-ashita.events.register('packet_in', 'petworks_packet', IN.onPacket)
+ashita.events.register('packet_in', 'companion_packet', IN.onPacket)
 
 -- tm.frameId numbers the frames, and tm.inFrame says one is being drawn:
 -- reads that cannot change inside a frame are made once per frame id
--- (activeManeuvers in pw/burden.lua). Cleared even when the frame errors.
+-- (activeManeuvers in cmp/burden.lua). Cleared even when the frame errors.
 tm.frameId, tm.inFrame = 0, false
 local function present()
     if F.tick() then
         if tm.view == 'pet' then PF.draw() else PN.draw() end
     end
 end
-ashita.events.register('d3d_present', 'petworks_present', function()
+ashita.events.register('d3d_present', 'companion_present', function()
     tm.frameId, tm.inFrame = tm.frameId + 1, true
     local ok, err = pcall(present)
     tm.inFrame = false
@@ -56,12 +56,12 @@ end)
 
 -- A command can change what the model shows (a stat, a set, demo mode), so
 -- the next frame re-runs it rather than waiting out its interval.
-ashita.events.register('command', 'petworks_cmd', function(e)
+ashita.events.register('command', 'companion_cmd', function(e)
     tm.modelDirty = true
     C.onCommand(e)
 end)
 
-ashita.events.register('load', 'petworks_load', function()
+ashita.events.register('load', 'companion_load', function()
     P.resolveIds()
     -- BEFORE logOpen: `logging` and `anomaly_file` decide whether a file is
     -- opened at all, and the saved values are the ones that should decide it.
@@ -74,10 +74,10 @@ ashita.events.register('load', 'petworks_load', function()
     -- element after a (re)load is a reseed, not an anomaly. Mark the edge in
     -- the log.
     L.logEvent('load', { version = addon.version, pet = (tm.ids.pet_id ~= 0) })
-    print(chat.header('petworks'):append(chat.message(
-        'loaded. /pw show - /pw attachments')))
+    print(chat.header('companion'):append(chat.message(
+        'loaded. /cmp show - /cmp attachments')))
 end)
 
-ashita.events.register('unload', 'petworks_unload', function()
+ashita.events.register('unload', 'companion_unload', function()
     L.close()
 end)
