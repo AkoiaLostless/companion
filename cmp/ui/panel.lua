@@ -517,7 +517,7 @@ local function displayView()
     toggle('weaponskill prediction', 'show_ws',
            'The WS line on the Status tab, and the weaponskill on the compact\nstrip. Off hides it only: it is still predicted and logged.')
     toggle('what maneuvers give', 'show_gives',
-           'The gives list on the Status tab: what your maneuvers are adding\nright now.')
+           'The Stats line on the Status tab: what your maneuvers are adding\nright now.')
     toggle('oil counts', 'show_oils',
            'The oils line on the Status tab, and its warning when you have none.')
     toggle('hide burden at 0% OL', 'hide_zero_ol_rows',
@@ -813,15 +813,19 @@ local function drawRecastColumn(cx, lines, buffs)
     return mods
 end
 
--- The 'gives' line: the spilled mods, wrapped to the panel's width. Draws
--- nothing when the column held them all.
+-- The Stats line: every mod your maneuvers add, wrapped to the panel's
+-- width, under the cooldowns. Drawn even with nothing up, so it never moves.
 local function drawGives(mods)
-    if #mods == 0 then return end
     local cond = false
     local avail, pad = hudInner(), tm.s(12)
-    local caption = 'gives'
+    local caption = 'Stats'
     tm.text('label', COL_DIM, caption)
     tip('What your maneuvers are adding right now. Let them drop and you\nlose this much. The stat beside each one (+6 at 75) is on top of\nthis, not counted in it.')
+    if #mods == 0 then
+        imgui.SameLine(0, pad)
+        tm.text('text', COL_DIM, 'none from maneuvers')
+        return
+    end
     local x = tm.width('label', caption) + pad
     for _, b in ipairs(mods) do
         local txt = fmtMod(b) .. (b[4] and '*' or '')
@@ -880,15 +884,17 @@ local function drawStatus(pet, maneuvers, overload)
     local buffs = config.show_gives and buffSummary(equippedAttachments(), maneuverCounts(), {}) or {}
     local cx = tm.elCols()
     drawManeuverTable(rows, cx, hid)
-    local mods = drawRecastColumn(cx, #rows + 1, buffs)
+    -- The column beside the table holds only the recast cells: every stat
+    -- goes on the Stats line under the cooldowns, so it is always in one
+    -- place however many maneuvers are up (Ross, 1.2.0).
+    drawRecastColumn(cx, #rows + 1, {})
     tm.jaGrid()   -- your own recasts, under the table and its column
+    if config.show_gives then drawGives(buffs) end
 
     if hasFire and hasAttachment('Flame Holder') then
         tm.text('text', COL_WARN, 'Flame Holder: the weaponskill will eat your Fire maneuvers')
         tip('+25% weaponskill damage per Fire maneuver consumed.')
     end
-
-    drawGives(mods)
     if config.show_oils then drawOils() end
 end
 
