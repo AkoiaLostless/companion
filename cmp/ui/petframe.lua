@@ -14,7 +14,7 @@ local hudPad, hudInner, tip = SF.hudPad, SF.hudInner, SF.tip
 local petStatusStrip = SF.petStatusStrip
 
 -- The window's width at 100%, against the panel's config.base_width.
-local PET_WIDTH = 260
+local PET_WIDTH = 420
 
 local KIND_TAG = { jug = 'Jug', charmed = 'Charmed', avatar = 'Avatar', wyvern = 'Wyvern' }
 local NO_PET = { charmed = 'No Pet Out', avatar = 'No Avatar Out', wyvern = 'No Wyvern Out' }

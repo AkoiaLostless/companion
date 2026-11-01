@@ -954,10 +954,15 @@ tm.listCell = function(r, boxW, nameW)
         dl:AddText({ tx + tm.s(1), ty + tm.s(1) }, tm.SHADOW, s)
         dl:AddText({ tx, ty }, tm.u32(c), s)
     end
-    put(x + pad, r.label, (state == 'ready') and COL_TEXT or COL_DIM)
-    if r.charges ~= nil then
-        put(x + pad + nameW + tm.s(6), ('%d/%d'):format(r.charges, r.maxCharges),
-            (r.charges > 0) and COL_GOOD or COL_DIM)
+    -- The name gets the box less the time column (and the charges slot when
+    -- this row has charges); one that does not fit is cut, never overlapped.
+    local chargeTxt = r.charges ~= nil and ('%d/%d'):format(r.charges, r.maxCharges) or nil
+    local room = boxW - pad * 2 - tm.s(10) - tm.listTimeW()
+    if chargeTxt ~= nil then room = room - imgui.CalcTextSize('0/3') - tm.s(6) end
+    local nameX = math.min(nameW, room)
+    put(x + pad, tm.fit(r.label, room, 'text'), (state == 'ready') and COL_TEXT or COL_DIM)
+    if chargeTxt ~= nil then
+        put(x + pad + nameX + tm.s(6), chargeTxt, (r.charges > 0) and COL_GOOD or COL_DIM)
     end
     put(x + boxW - pad - imgui.CalcTextSize(txt), txt, col)
     imgui.PopFont()
@@ -1041,26 +1046,26 @@ tm.jaGrid = function(x0, width, lineStart, rows)
     rows = rows or tm.jaRows
     if #rows == 0 then return end
     x0, width = x0 or hudPad(), width or hudInner()
-    -- The list, in columns read top to bottom, as many columns as the width
-    -- holds. Not on the compact strip (lineStart): it has no room for names.
+    -- The list, as a grid of boxes. Not on the compact strip (lineStart): it
+    -- has no room for names.
     if config.cd_list and lineStart == nil then
-        local nameW, _, cell = tm.listWidths(rows)
-        local gap = tm.s(8)
-        local cols = math.max(1, math.min(#rows, math.floor((width + gap) / (cell + gap))))
-        local per = math.ceil(#rows / cols)
+        -- A grid of equal boxes, filled left to right: as many columns as
+        -- the width holds, but at least three (fewer only when there are
+        -- fewer rows), each stretched so the row fills the window's width. A
+        -- name too long for its box is cut to fit rather than pushing the
+        -- time out.
+        local nameW, _, natural = tm.listWidths(rows)
+        local gap = tm.s(6)
+        local cols = math.floor((width + gap) / (natural + gap))
+        cols = math.max(math.min(3, #rows), math.min(#rows, cols))
+        local cell = (width - gap * (cols - 1)) / cols
         tm.text('label', COL_DIM, 'Cooldowns')
         tip('Your own job abilities\' recasts, straight from the client. Which\nones, and whether a ready one is listed: Settings, display.')
-        for c = 0, cols - 1 do
-            if c * per < #rows then
-                if c > 0 then imgui.SameLine(x0 + c * (cell + gap), 0) end
-                imgui.BeginGroup()
-                for i = c * per + 1, math.min(#rows, (c + 1) * per) do
-                    local r = rows[i]
-                    tm.listCell(r, cell, nameW)
-                    jaTip(r)
-                end
-                imgui.EndGroup()
-            end
+        for i, r in ipairs(rows) do
+            local c = (i - 1) % cols
+            if c > 0 then imgui.SameLine(x0 + c * (cell + gap), 0) end
+            tm.listCell(r, cell, nameW)
+            jaTip(r)
         end
         return
     end
