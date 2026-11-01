@@ -70,10 +70,24 @@ do
     frame('pets: the jug after a reload')
     check('pets: the saved clock is believed', saw('30:00') or saw('29:59'), true)
 
-    -- Ready instead of Sic where the server grants it
+    -- Ready instead of Sic where the server grants it: listed with Ready
+    -- alone learned, with its charges
+    world.abilities[0x200 + 72] = nil
     world.abilities[0x200 + 251] = true
-    frame('pets: Ready')
-    check('pets: Sic reads Ready when you have it', saw('Ready'), true)
+    world.recast = {}
+    frame('pets: Ready, full')
+    check('pets: Ready listed with only Ready learned', saw('Ready'), true)
+    check('pets: three charges', saw('3/3'), true)
+    world.recast = { [2] = { 102, 60 * 40 } }     -- one used: 40 s to refill (learns 40 s a charge)
+    frame('pets: Ready, one used')
+    check('pets: two charges left', saw('2/3'), true)
+    check('pets: time to the next charge', saw('40s'), true)
+    world.recast = { [2] = { 102, 60 * 100 } }    -- two more used: 100 s for all three back
+    frame('pets: Ready, none left')
+    check('pets: none left', saw('0/3'), true)
+    check('pets: the next charge in 20s', saw('20s'), true)
+    world.recast = { [1] = { 104, 60 * 200 } }
+    world.abilities[0x200 + 72] = true
 
     -- the pet's target and its status, through the light path
     send028({ actor = world.petId, category = 1, param = 0,

@@ -906,9 +906,12 @@ local LIST_NEAR = 0.30
 tm.listTimeW = function()
     return math.max(tm.width('text', 'Ready'), tm.width('text', '00:00'))
 end
-tm.listCell = function(label, state, remaining, total, timeW)
+tm.listCell = function(label, state, remaining, total, timeW, charges, maxCharges)
     local txt = (state == 'counting' and tm.fmtLeft(remaining))
              or (state == 'ready' and 'Ready') or '?'
+    -- A charge ability (Ready): usable with charges in stock while the next
+    -- one still refills, so the time to that next charge shows in green.
+    if charges ~= nil and remaining ~= nil and remaining > 0 then txt = tm.fmtLeft(remaining) end
     local col = COL_DIM
     if state == 'ready' then
         col = COL_GOOD
@@ -920,10 +923,20 @@ tm.listCell = function(label, state, remaining, total, timeW)
     tm.text('text', col, txt)
     imgui.SameLine(0, tm.s(6))
     tm.text('label', (state == 'ready') and COL_TEXT or COL_DIM, label)
+    if charges ~= nil then
+        imgui.SameLine(0, tm.s(4))
+        tm.text('text', (charges > 0) and COL_GOOD or COL_DIM, ('%d/%d'):format(charges, maxCharges))
+    end
 end
 
 -- What is left on one of your own abilities, or that it is ready, on hover.
 local function jaTip(r)
+    if r.charges ~= nil then
+        tip(('%s: %d of %d charges.%s'):format(r.name, r.charges, r.maxCharges,
+            (r.remaining ~= nil and r.remaining > 0)
+                and (' Next in %s (%s a charge).'):format(tm.fmtLeft(r.remaining), tm.fmtLeft(r.total)) or ''))
+        return
+    end
     if r.state == 'counting' then
         local left = tm.fmtLeft(r.remaining)
         tip(r.total ~= nil and ('%s: %s left of %s.'):format(r.name, left, tm.fmtLeft(r.total))
@@ -1012,7 +1025,7 @@ tm.jaGrid = function(x0, width, lineStart, rows)
                 imgui.BeginGroup()
                 for i = c * per + 1, math.min(#rows, (c + 1) * per) do
                     local r = rows[i]
-                    tm.listCell(r.label, r.state, r.remaining, r.total, timeW)
+                    tm.listCell(r.label, r.state, r.remaining, r.total, timeW, r.charges, r.maxCharges)
                     jaTip(r)
                 end
                 imgui.EndGroup()
