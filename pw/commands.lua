@@ -255,6 +255,14 @@ local function onCommand(e)
             'panel ' .. tostring(config.show_window)
             .. ' - the model and the log run either way')))
 
+    elseif sub == 'pets' or sub == 'pet' then
+        -- The one Settings switch with a command too: the pet window has no
+        -- Settings tab, so off a pet job this is the only way back to it.
+        config.pet_window = not config.pet_window
+        tm.saveSettings()
+        print(chat.header('petworks'):append(chat.message(
+            'pet window for BST, SMN and DRG ' .. (config.pet_window and 'on' or 'off'))))
+
     else
         -- Plain switches the Settings tab owns - logging, verbose, sidebar,
         -- predictions, size - have no command. Two ways to set one thing is one
@@ -262,8 +270,9 @@ local function onCommand(e)
         -- and shows the current value. What is here either shows you something,
         -- changes a mode, puts on a set, or is destructive.
         local function say(line) print(chat.header('petworks'):append(chat.message(line))) end
-        say('/pw - what the automaton is doing')
+        say('/pw - what your automaton or other pet is doing')
         say('  show - the panel on or off')
+        say('  pets - the pet window for BST, SMN and DRG on or off')
         say('  compact - the compact strip; compact 2 for two rows,')
         say('    compact 1 for one')
         say('  demo - made-up automatons, for looking at the HUD off PUP;')

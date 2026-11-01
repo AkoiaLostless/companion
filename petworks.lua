@@ -1,7 +1,7 @@
 addon.name    = 'petworks'
 addon.author  = 'Pathead (Clockwork), AkoiaLostless'
-addon.version = '1.23.0'
-addon.desc    = 'Puppetmaster burden, maneuvers, weaponskill prediction, loadout and anomaly logging.'
+addon.version = '1.0.0'
+addon.desc    = 'Puppetmaster burden, maneuvers, weaponskill prediction and loadout, and a pet window for BST, SMN and DRG.'
 
 require('common')
 local chat  = require('chat')
@@ -22,6 +22,7 @@ require('pw.attachments')
 require('pw.burden')
 require('pw.timers')
 local P      = require('pw.pet')
+require('pw.pets')       -- publishes tm.petRefresh and tm.noteSummon
 require('pw.spell')      -- publishes tm.fn, tm.predictSpell and the rest
 require('pw.settings')   -- publishes tm.loadSettings, tm.saveSettings, tm.restoreDefaults
 local S      = require('pw.sets')
@@ -33,6 +34,7 @@ require('pw.ui.surface')
 require('pw.ui.whatif')  -- publishes tm.whatIf, tm.sidebarRows and the rest
 require('pw.ui.loadout')
 local PN     = require('pw.ui.panel')
+local PF     = require('pw.ui.petframe')
 
 ashita.events.register('packet_in', 'petworks_packet', IN.onPacket)
 
@@ -41,7 +43,9 @@ ashita.events.register('packet_in', 'petworks_packet', IN.onPacket)
 -- (activeManeuvers in pw/burden.lua). Cleared even when the frame errors.
 tm.frameId, tm.inFrame = 0, false
 local function present()
-    if F.tick() then PN.draw() end
+    if F.tick() then
+        if tm.view == 'pet' then PF.draw() else PN.draw() end
+    end
 end
 ashita.events.register('d3d_present', 'petworks_present', function()
     tm.frameId, tm.inFrame = tm.frameId + 1, true
@@ -61,6 +65,7 @@ ashita.events.register('load', 'petworks_load', function()
     P.resolveIds()
     -- BEFORE logOpen: `logging` and `anomaly_file` decide whether a file is
     -- opened at all, and the saved values are the ones that should decide it.
+    tm.migrateFromClockwork()   -- once, before the settings it may bring are read
     tm.loadSettings()
     tm.fontLoad()
     L.logOpen()

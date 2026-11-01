@@ -61,6 +61,7 @@ FILES = [
     ("suites/16_ja_cooldowns.lua", "your own job abilities' recasts: the read, the switches, the column, the Settings block"),
     ("suites/17_gear_stats.lua", "your stat with the gear on now: item text, the 0x061 basis, a maneuver set the client never sees"),
     ("suites/18_pacing.lua", "the model's pace between packets, the per-frame maneuver read, the target's slot from its id"),
+    ("suites/19_pets_and_recast_list.lua", "the pet window for BST, SMN and DRG, its timer and light packet path, and the recast list"),
     ("fixtures/report.lua", "the totals; any failure makes the run fail"),
 ]
 

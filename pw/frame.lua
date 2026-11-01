@@ -228,7 +228,7 @@ local function tick()
     -- and at the model's pace, not every frame.
     if jaDue then
         jaDue = false
-        tm.jaRefresh()
+        if tm.view == 'pup' then tm.jaRefresh() end
     end
     return true
 end
@@ -280,6 +280,15 @@ function model()
         tm.statsDirty = false
         refreshStatChecks()   -- needs player() reads, so it happens here
     end
+    -- Every other pet: the pet window (pw/pets.lua), and none of the
+    -- automaton's model below. snap.other turns the packet thread's light
+    -- path on and snap.is_pup its automaton path off. Not under demo, which
+    -- plays an automaton.
+    if tm.demo == nil and tm.petRefresh() then
+        snap.is_pup, snap.other, tm.view = false, true, 'pet'
+        return true
+    end
+    snap.other, tm.view = false, 'pup'
     if not snap.is_pup then return false end
     -- Render-thread snapshot for the packet handler: it must never do the
     -- native reads (PUP buffer, resources, status icons) itself. Runs even

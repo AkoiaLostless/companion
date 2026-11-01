@@ -545,7 +545,12 @@ local function displayView()
            'List an ability only while it is on recast. Off lists every one\nswitched on below, ready or not.')
     imgui.SameLine(hudPad() + tm.s(180), 0)
     toggle('as dials', 'cd_dials',
-           'Each ability as a dial alone: the time on it while it counts, a\nshort name under it. Off: a dial, the full name and the time. The\nStatus tab and the compact strip both.')
+           'Each ability as a dial alone: the time on it while it counts, a\nshort name under it. Off: a dial, the full name and the time. The\ncompact strip, and the Status tab when the list is off.')
+    toggle('as a list', 'cd_list',
+           'Recasts as a list, the way PetsReborn lays them out: the time,\nthen the name. Green Ready, amber when nearly ready. The automaton\'s\nand yours in the Status tab, and the pet window for other jobs.')
+    imgui.SameLine(hudPad() + tm.s(180), 0)
+    toggle('pet window', 'pet_window',
+           'A window for BST, SMN and DRG pets: HP, MP, TP, its target, its\nstatus and your pet abilities\' recasts. Off for when another addon\ndraws those pets.')
     local list = tm.jaList
     local half = math.ceil(#list / 2)
     imgui.BeginGroup()

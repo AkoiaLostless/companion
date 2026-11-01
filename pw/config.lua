@@ -155,6 +155,17 @@ local config =
     -- Each as a dial alone - the time on it, a short name under it - rather than
     -- a dial, the name and the time. The Status tab and the compact strip both.
     cd_dials         = false,
+    -- Recasts as a list, the way PetsReborn lays them out: the time in a
+    -- column of its own, right-aligned, then the ability's name - green
+    -- Ready, amber in its last 30%, white while counting. The automaton's
+    -- recasts beside the maneuver table and your own under it, in the full
+    -- panel and the pet window; the compact strip keeps its icons, having no
+    -- room for names. Off goes back to the icon cells (or dials, above).
+    cd_list          = true,
+    -- The pet window for every pet that is not an automaton: a BST jug or
+    -- charmed pet, a SMN avatar, a DRG wyvern (pw/pets.lua). Off leaves those
+    -- jobs without a window, for when another addon draws their pets.
+    pet_window       = true,
     cd_activate      = true,
     cd_dea           = true,
     cd_repair        = true,

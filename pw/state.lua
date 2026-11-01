@@ -113,7 +113,10 @@ tm.predWhy       = nil -- the reason behind predSnapshot, for the record
 -- exactly this reason: a native read racing zone-in entity churn is an SEH
 -- fault, which pcall cannot catch, and it surfaces as an unattributed crash.
 tm.snap = { self_id = 0, pet_id = 0, is_pup = false, thresh = config.threshold,
-            bonus = 0, party = {} }   -- the party's ServerIds as a set: a member's blow counts as ours
+            bonus = 0, party = {},
+            -- a pet that is not an automaton is out (pw/pets.lua): the
+            -- packet thread follows it for the pet window, and only that
+            other = false }   -- the party's ServerIds as a set: a member's blow counts as ours
 -- [mob server id] = os.clock() of the last blow the master, the automaton or
 -- the party landed on it: evidence that the mob's enmity list is not empty,
 -- which a Deploy alone is not. Dropped with the mob's death and on zone.
@@ -171,5 +174,12 @@ tm.activateAt = nil    -- os.clock() of the last Activate seen in the 0x028 stre
 
 -- the running or finished apply, for the Loadout tab and the hook
 tm.applyState = nil
+
+-- Which window the frame draws: 'pup' (the panel) or 'pet' (the pet window
+-- for every other pet, pw/ui/petframe.lua). Set by the model (pw/frame.lua).
+tm.view = 'pup'
+-- When you last used an ability that brings a pet out (pw/pets.lua), and the
+-- kind of pet out now and what its window shows.
+tm.petSummonAt, tm.petKind, tm.petView = nil, nil, nil
 
 return tm

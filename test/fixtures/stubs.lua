@@ -460,6 +460,8 @@ AshitaCore = {
                 -- automaton, and a single answer could not tell them apart.
                 GetName = function(_, i)
                     if i == world.mobIndex then return world.mobName or 'Steelshell Crab' end
+                    -- world.petName plays a pet that is not the automaton
+                    if i == world.petIndex and world.petName ~= nil then return world.petName end
                     return 'Bobeche'
                 end,
                 GetServerId = function(_, i)

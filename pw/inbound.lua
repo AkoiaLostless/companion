@@ -772,6 +772,42 @@ local function onPetSpell(act)
     end
 end
 
+-- 0x028 for every other pet (snap.other: a jug, a charmed pet, an avatar, a
+-- wyvern - pw/pets.lua). None of the automaton's model: only what the pet
+-- window shows. Your own summoning abilities, for its timer; what the pet
+-- acts on, for its target row; and what lands on it, for its status strip,
+-- through the same inference the automaton's strip uses. Nothing is parsed
+-- while no pet is out but your own abilities, and those are told by the
+-- actor id alone.
+local function onOtherPet(data)
+    if snap.self_id == 0 then return end
+    if snap.pet_id == 0 then
+        -- the actor, read as unpackAction reads it, off the first nine bytes
+        -- rather than the whole packet
+        local head = { data:byte(1, 9) }
+        if #head < 9 then return end
+        local actor = safe(function() return ashita.bits.unpack_be(head, 40, 32) end, 0)
+        if actor ~= snap.self_id then return end
+    end
+    local act = safe(function() return unpackAction(data) end, nil)
+    if act == nil then return end
+    local isSelf = (act.actor_id == snap.self_id)
+    local isMine = (snap.pet_id ~= 0 and act.actor_id == snap.pet_id)
+    if isSelf and act.category == CAT_ABILITY then tm.noteSummon(act.param) end
+    if isSelf or isMine then tm.modelDirty = true end
+    if snap.pet_id == 0 then return end
+    if isMine then
+        -- Whatever it swings at, breathes on or blood-pacts. Not you, not
+        -- itself and not the party, which is where its heals and buffs go.
+        local t = act.targets[1]
+        if t ~= nil and t.server_id ~= 0 and t.server_id ~= snap.pet_id
+           and t.server_id ~= snap.self_id and not snap.party[t.server_id] then
+            tm.petTarget = t.server_id
+        end
+    end
+    notePetEffects(act, isMine)
+end
+
 -- 0x028 (action): the parts about anybody's action run first, then the gate
 -- to our own character and automaton, then the parts about us.
 local function onAction(data)
@@ -780,7 +816,10 @@ local function onAction(data)
     -- rule, and each one is deliberate: reconcile() reads inventory, stats and
     -- resources (its own comment accepts the risk) and logOpen resolves the
     -- character's name. Everything else reads the snapshot.
-    if not snap.is_pup then return end
+    if not snap.is_pup then
+        if snap.other then onOtherPet(data) end
+        return
+    end
 
     local act = safe(function() return unpackAction(data) end, nil)
     if act == nil then return end

@@ -2,7 +2,8 @@
 -- recast column. The client keeps these itself, so they are READ, not
 -- modelled: nothing here is logged, and there is nothing to calibrate. Native
 -- reads, so render thread only - the packet thread must never require this
--- file. Publishes tm.jaList and tm.jaRefresh; tm.jaRefresh writes tm.jaRows.
+-- file. Publishes tm.jaList, tm.jaBuild and tm.jaRefresh; tm.jaRefresh writes
+-- tm.jaRows.
 local config = require('pw.config')
 local tm = require('pw.state')
 local U  = require('pw.util')
@@ -68,40 +69,51 @@ local function learned(d, p, ja)
     return p:HasAbility(JA_RESOURCE + ja.ability)
 end
 
--- Render thread, once a frame from frame.tick, below its visibility gates:
--- this is display only, so it has no reason to run with the window down. One
--- safe() round the lot, so a failed read is an empty group and one count in
--- tm.swallowed.
+-- The client's recast table, read once: what is left on each timer and the
+-- longest each has been seen at, by timer id. Under /pw demo the made-up
+-- master answers instead (pw/demo.lua), whole lengths included: a demo opens
+-- mid-recast, where first sight would start each dial full. `longest` is the
+-- client's and is left be. Also answers the player, for learned().
+local function readRecasts()
+    local d = tm.demo and tm.demo.ja
+    if d ~= nil then return d.left, d.total, nil, d end
+    local left, p = recastLeft(), player()
+    for timer in pairs(longest) do
+        if left[timer] == nil then longest[timer] = nil end
+    end
+    for timer, rem in pairs(left) do
+        if rem > (longest[timer] or 0) then longest[timer] = rem end
+    end
+    return left, longest, p, nil
+end
+
+-- The rows for `list` (entries shaped as tm.jaList's), keeping those `on`
+-- accepts and you have learned, and leaving a ready one out under
+-- cd_hide_ready. The other pet jobs' window (pw/pets.lua) builds its rows
+-- here too, from its own lists.
+tm.jaBuild = function(list, on)
+    local left, total, p, d = readRecasts()
+    local rows = {}
+    for _, ja in ipairs(list) do
+        local rem = left[ja.timer]
+        if on(ja) and learned(d, p, ja)
+           and (rem ~= nil or not config.cd_hide_ready) then
+            rows[#rows + 1] = { key = ja.key, label = ja.label, short = ja.short, name = ja.name,
+                                state = (rem ~= nil) and 'counting' or 'ready',
+                                remaining = rem, total = total[ja.timer] }
+        end
+    end
+    return rows
+end
+
+local function switchedOn(ja) return config['cd_' .. ja.key] end
+
+-- Render thread, at the model's pace from frame.tick, below its visibility
+-- gates: this is display only, so it has no reason to run with the window
+-- down. One safe() round the lot, so a failed read is an empty group and one
+-- count in tm.swallowed.
 tm.jaRefresh = function()
-    tm.jaRows = safe(function()
-        -- Under /pw demo the made-up master answers every read (pw/demo.lua),
-        -- whole lengths included: a demo opens mid-recast, where first sight
-        -- would start each dial full. `longest` is the client's and is left be.
-        local d = tm.demo and tm.demo.ja
-        local left, total, p, rows
-        if d ~= nil then
-            left, total = d.left, d.total
-        else
-            left, total, p = recastLeft(), longest, player()
-            for timer in pairs(longest) do
-                if left[timer] == nil then longest[timer] = nil end
-            end
-            for timer, rem in pairs(left) do
-                if rem > (longest[timer] or 0) then longest[timer] = rem end
-            end
-        end
-        rows = {}
-        for _, ja in ipairs(tm.jaList) do
-            local rem = left[ja.timer]
-            if config['cd_' .. ja.key] and learned(d, p, ja)
-               and (rem ~= nil or not config.cd_hide_ready) then
-                rows[#rows + 1] = { key = ja.key, label = ja.label, short = ja.short, name = ja.name,
-                                    state = (rem ~= nil) and 'counting' or 'ready',
-                                    remaining = rem, total = total[ja.timer] }
-            end
-        end
-        return rows
-    end, {})
+    tm.jaRows = safe(function() return tm.jaBuild(tm.jaList, switchedOn) end, {})
 end
 
 return {}
