@@ -224,7 +224,7 @@ do
     frame('list: status tab')
     check('list: your counting ability shows its time', saw('47s'), true)
     check('list: a ready one says Ready', saw('Ready'), true)
-    check('list: the you label', saw('you'), true)
+    check('list: the you label', saw('cooldowns'), true)
     check('list: no dial wedges', saw('WEDGE'), false)
     config.cd_list = false
     world.recast, world.abilities = {}, {}
