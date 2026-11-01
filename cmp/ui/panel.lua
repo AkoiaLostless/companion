@@ -814,18 +814,14 @@ local function drawRecastColumn(cx, lines, buffs)
 end
 
 -- The Stats line: every mod your maneuvers add, wrapped to the panel's
--- width, under the cooldowns. Drawn even with nothing up, so it never moves.
+-- width, under the cooldowns. Nothing at all while no maneuver adds a stat.
 local function drawGives(mods)
+    if #mods == 0 then return end
     local cond = false
     local avail, pad = hudInner(), tm.s(12)
     local caption = 'Stats'
     tm.text('label', COL_DIM, caption)
     tip('What your maneuvers are adding right now. Let them drop and you\nlose this much. The stat beside each one (+6 at 75) is on top of\nthis, not counted in it.')
-    if #mods == 0 then
-        imgui.SameLine(0, pad)
-        tm.text('text', COL_DIM, 'none from maneuvers')
-        return
-    end
     local x = tm.width('label', caption) + pad
     for _, b in ipairs(mods) do
         local txt = fmtMod(b) .. (b[4] and '*' or '')
