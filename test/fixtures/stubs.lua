@@ -460,6 +460,9 @@ AshitaCore = {
             GetRecast = function() return permissive({
                 GetAbilityTimerId = function(_, i) return (world.recast[i] or { 0, 0 })[1] end,
                 GetAbilityTimer   = function(_, i) return (world.recast[i] or { 0, 0 })[2] end,
+                -- the per-charge seconds beside a charge ability's timer: the
+                -- slot's third value, 0 when a fixture gives none
+                GetAbilityCalc2   = function(_, i) return (world.recast[i] or { 0, 0, 0 })[3] or 0 end,
             }) end,
             GetEntity = function() return permissive({
                 -- Per index, not one name for the whole table: the header's
