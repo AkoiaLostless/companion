@@ -54,10 +54,9 @@ local function vitals(pet, showMp)
 end
 
 -- The kind tag; a jug or charmed one is a filled bubble, light green or gold
--- inside a white rim, with the word in near-black on it so it reads against
+-- with no rim, with the word in near-black on it so it reads against
 -- the light fill. Drawn straight onto the draw list, with no shadow, since a
 -- shadow under dark text on a light fill only smudges it.
-local BUBBLE_RIM  = { 1, 1, 1, 0.95 }
 local BUBBLE_TEXT = { 0.05, 0.05, 0.05, 1 }
 local function tagText(kind)
     local fill = KIND_EDGE[kind]
@@ -73,7 +72,6 @@ local function tagText(kind)
     local dl = imgui.GetWindowDrawList()
     local r = (h + padY * 2) / 2
     dl:AddRectFilled({ x, y - padY }, { x + w + padX * 2, y + h + padY }, tm.u32(fill), r)
-    dl:AddRect({ x, y - padY }, { x + w + padX * 2, y + h + padY }, tm.u32(BUBBLE_RIM), r, 0, tm.s(1))
     dl:AddText({ x + padX, y }, tm.u32(BUBBLE_TEXT), s)
     imgui.PopFont()
     imgui.Dummy({ w + padX * 2, h })
