@@ -181,6 +181,10 @@ do
     frame('charm: charmed')
     check('charm: charmed tag', saw('charmed'), true)
     check('charm: counts down from the estimate', saw('~3:44') or saw('~3:43'), true)
+    -- Familiar: about thirty minutes from its use
+    tm.noteSummon(24)
+    frame('charm: Familiar')
+    check('charm: Familiar puts it at thirty minutes', saw('~30:00') or saw('~29:59'), true)
     world.stats, world.statMods = nil, nil
 
     -- the light path parses nothing with no pet out but your own abilities
