@@ -1,11 +1,11 @@
 -- ------------------------------------------- the pet window and the list --
--- pw/pets.lua and pw/ui/petframe.lua: which pet is which, the window every
+-- cmp/pets.lua and cmp/ui/petframe.lua: which pet is which, the window every
 -- pet but the automaton gets, its timer, the packet thread's light path for
 -- it; and the recasts as a PetsReborn-style list (config.cd_list).
 do
-    local tm     = require('pw.state')
-    local config = require('pw.config')
-    local PETS   = require('pw.pets')
+    local tm     = require('cmp.state')
+    local config = require('cmp.config')
+    local PETS   = require('cmp.pets')
     local kindOf = PETS.kindOf
     local BST, SMN, DRG, PUP, WAR, WHM = 9, 15, 14, 18, 1, 3
 
@@ -49,7 +49,7 @@ do
     check('pets: the view is the pet window', tm.view, 'pet')
     check('pets: the packet thread follows it', tm.snap.other, true)
     check('pets: ...and not as an automaton', tm.snap.is_pup, false)
-    check('pets: the window is drawn', saw('WINDOW:petworks'), true)
+    check('pets: the window is drawn', saw('WINDOW:companion'), true)
     check('pets: its name', saw('CourierCarrie'), true)
     check('pets: tagged as a jug', saw('jug'), true)
     check('pets: the jug clock starts full', saw('30:00'), true)
@@ -116,13 +116,13 @@ do
     -- ...but not for a job that only charms on the side
     world.mainjob, world.subjob = WAR, BST
     frame('pets: WAR/BST, no pet')
-    check('pets: no window for /BST with nothing out', saw('WINDOW:petworks'), false)
+    check('pets: no window for /BST with nothing out', saw('WINDOW:companion'), false)
 
     -- switched off
     petAs('CourierCarrie', BST, WHM)
     config.pet_window = false
     frame('pets: switched off')
-    check('pets: pet_window off draws nothing', saw('WINDOW:petworks'), false)
+    check('pets: pet_window off draws nothing', saw('WINDOW:companion'), false)
     check('pets: ...and the packet thread stands down', tm.snap.other, false)
     config.pet_window = true
 
@@ -173,9 +173,9 @@ end
 
 -- ------------------------------------------ settings from Clockwork --
 -- The first load after Clockwork brings its settings file and saved sets
--- across, once, and never over petworks' own.
+-- across, once, and never over Companion's own.
 do
-    local tm = require('pw.state')
+    local tm = require('cmp.state')
     local old = SCRATCH .. '/config/addons/clockwork/'
     handlers['load']()   -- nothing to bring: no Clockwork folder
     os.execute(POSIX and ('mkdir -p "' .. old .. 'sets"') or ('mkdir "' .. (old .. 'sets'):gsub('/', '\\') .. '"'))
@@ -183,7 +183,7 @@ do
     local function read(path) local f = io.open(path, 'r') if f == nil then return nil end local t = f:read('*a') f:close() return t end
     put(old .. 'settings.txt', 'ui_scale = 130\n')
     put(old .. 'sets/tank.txt', 'head = Valoredge Head\n')
-    check('migrate: petworks already has settings, so nothing comes', tm.migrateFromClockwork(), false)
+    check('migrate: companion already has settings, so nothing comes', tm.migrateFromClockwork(), false)
     os.remove(tm.settingsPath())
     printed = {}
     check('migrate: with none of its own, it brings them', tm.migrateFromClockwork(), true)
@@ -196,11 +196,11 @@ do
     os.remove(setsDir .. 'tank.txt')
 end
 
--- ------------------------------------------------------- /pw pets --
+-- ------------------------------------------------------- /cmp pets --
 do
-    local config = require('pw.config')
-    handlers['command']({ command = '/pw pets' })
-    check('/pw pets turns the pet window off', config.pet_window, false)
-    handlers['command']({ command = '/pw pets' })
+    local config = require('cmp.config')
+    handlers['command']({ command = '/cmp pets' })
+    check('/cmp pets turns the pet window off', config.pet_window, false)
+    handlers['command']({ command = '/cmp pets' })
     check('...and on again', config.pet_window, true)
 end

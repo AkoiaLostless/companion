@@ -1,6 +1,6 @@
-# petworks
+# Companion
 
-> petworks is built from [Clockwork](https://github.com/patheed-ffxi/clockwork) by Pathead,
+> Companion is built from [Clockwork](https://github.com/patheed-ffxi/clockwork) by Pathead,
 > which is **approved for use on HorizonXI**, by way of the
 > [AkoiaLostless/clockwork](https://github.com/AkoiaLostless/clockwork) fork. It adds
 > gear-aware stat reads, a lighter per-frame load, recasts laid out as a list, and a pet
@@ -51,19 +51,19 @@ one HUD for every pet.
 - **Loadout tab.** Head, frame and every attachment with its live modifier values, plus
   capacity per element. Saved attachment sets with a preview and a confirmed apply,
   paced a second a step as pupsets is — from the tab's Apply button, or from a macro
-  with `/pw load <name>`.
+  with `/cmp load <name>`.
 - **What-if sidebar.** For each of the eight elements, what using that maneuver *right
   now* would change and what it would cost.
 - **Anomaly log.** A JSONL record of every maneuver and automaton weaponskill, with
   mismatches between prediction and reality flagged. Off by default; turn it on from
   the Settings tab.
 - **Pet window for other jobs.** See *Beastmaster, Summoner and Dragoon* below.
-- **Demo mode.** `/pw demo` walks four made-up automatons so you can see and size the HUD
+- **Demo mode.** `/cmp demo` walks four made-up automatons so you can see and size the HUD
   without being on PUP.
 
 ## Beastmaster, Summoner and Dragoon
 
-When the pet out is not an automaton, petworks draws a smaller pet window where the
+When the pet out is not an automaton, Companion draws a smaller pet window where the
 Puppetmaster panel goes:
 
 - **The pet's name**, how many yalms away it is, and what kind of pet it is (`jug`,
@@ -71,9 +71,9 @@ Puppetmaster panel goes:
 - **A jug pet's time left**, counting down from its jug's duration (30, 60, 90, 120 or
   180 minutes), amber in the last 5 minutes and red in the last minute. It starts when
   you use Call Beast or Bestial Loyalty, and it survives zoning and an addon reload. A
-  jug pet that was already out when petworks loaded has no timer until the next one.
+  jug pet that was already out when Companion loaded has no timer until the next one.
 - **A charmed pet's time since the charm**, counting up. When a charm breaks depends on
-  your CHR and the pet's level, so petworks does not guess.
+  your CHR and the pet's level, so Companion does not guess.
 - **HP and TP bars**, plus **MP** for avatars and for any pet that reports MP.
 - **What is on the pet**: buffs on the left and debuffs on the right, the same strip the
   automaton gets.
@@ -91,8 +91,8 @@ on /BST, say) gets the window only while it is out. An automaton always gets the
 Puppetmaster panel, on PUP main or /PUP.
 
 The pet window draws with the game's own status icons and Windows' Segoe UI, like the
-rest of petworks: it needs no extra fonts or images. **pet window** on the Settings tab
-(or `/pw pets`) turns it off, for example if another addon draws your pets.
+rest of Companion: it needs no extra fonts or images. **pet window** on the Settings tab
+(or `/cmp pets`) turns it off, for example if another addon draws your pets.
 
 ## Screenshots
 
@@ -103,69 +103,69 @@ rest of petworks: it needs no extra fonts or images. **pet window** on the Setti
 | **Tuning → model** — automaton skill, the overload threshold, anomalies and spell windows | **Tuning → maneuver cost** — each element's stat check and what its 1st, 2nd and 3rd maneuver costs |
 | ![The Tuning tab, model view](screenshots/tuning_model.png) | ![The Tuning tab, maneuver cost view](screenshots/tuning_maneuver_cost.png) |
 
-**Compact** (`/pw compact`) — the whole HUD on one line:
+**Compact** (`/cmp compact`) — the whole HUD on one line:
 
 ![The compact layout](screenshots/compact.png)
 
-`/pw compact 2`, or the strip's `2` button, puts it on two rows instead: the gems over
-the recasts and the buttons, the bars over the weaponskill and spell. `/pw compact 1`,
+`/cmp compact 2`, or the strip's `2` button, puts it on two rows instead: the gems over
+the recasts and the buttons, the bars over the weaponskill and spell. `/cmp compact 1`,
 or the `1` button, goes back to one.
 
 ![The compact layout on two rows](screenshots/compact_two_rows.png)
 
 ## Install
 
-1. On [github.com/AkoiaLostless/petworks](https://github.com/AkoiaLostless/petworks),
+1. On [github.com/AkoiaLostless/companion](https://github.com/AkoiaLostless/companion),
    press **Code → Download ZIP**, or clone this repo.
-2. Put the `petworks` folder into your Ashita `addons` directory, so that you have
-   `addons/petworks/petworks.lua` with `pw/` and `assets/` beside it.
-3. In game: `/addon unload clockwork` if you run it, then `/addon load petworks`.
+2. Put the `companion` folder into your Ashita `addons` directory, so that you have
+   `addons/companion/companion.lua` with `cmp/` and `assets/` beside it.
+3. In game: `/addon unload clockwork` if you run it, then `/addon load companion`.
 
-petworks replaces Clockwork, so load one or the other, not both. To load it every time,
-put `/addon load petworks` in your Ashita script in place of `/addon load clockwork`.
+Companion replaces Clockwork, so load one or the other, not both. To load it every time,
+put `/addon load companion` in your Ashita script in place of `/addon load clockwork`.
 
-The first time it loads, petworks copies your Clockwork settings and saved attachment
+The first time it loads, Companion copies your Clockwork settings and saved attachment
 sets from `config/addons/clockwork/` into its own folder. Clockwork's folder is left as
 it was.
 
 ## Commands
 
-`/petworks` and `/pw` are the same command. Bare `/pw` prints this list.
+`/companion` and `/cmp` are the same command. Bare `/cmp` prints this list.
 
 | Command | Does |
 |---|---|
-| `/pw show` | the panel (or the pet window) on or off (the model and the log run either way) |
-| `/pw pets` | the pet window for Beastmaster, Summoner and Dragoon on or off |
-| `/pw compact` | the compact strip instead of the full panel; `/pw compact 2` for two rows, `/pw compact 1` for one |
-| `/pw demo` | made-up automatons, for looking at the HUD off PUP; each `/pw demo` is the next one, then off again |
-| `/pw attachments` | the attachments you own |
-| `/pw equipped` | head, frame and attachments |
-| `/pw load <name>` | put a saved attachment set on the automaton, as the Loadout tab's Apply does — the same checks, the same apply, so the automaton has to be deactivated first. Works from a macro; a name with a space needs no quotes. Bare `/pw load` lists your sets |
-| `/pw stat` | the stat you wear when each maneuver goes off, read off your gear — or set it: `/pw stat wind 83`, `now` to take what you are wearing, `off` to go back to reading it. See *Gear swaps* below |
-| `/pw reset` | clear burden, learned costs and counters |
-| `/pw sync` | burden to zero — manual resync only |
+| `/cmp show` | the panel (or the pet window) on or off (the model and the log run either way) |
+| `/cmp pets` | the pet window for Beastmaster, Summoner and Dragoon on or off |
+| `/cmp compact` | the compact strip instead of the full panel; `/cmp compact 2` for two rows, `/cmp compact 1` for one |
+| `/cmp demo` | made-up automatons, for looking at the HUD off PUP; each `/cmp demo` is the next one, then off again |
+| `/cmp attachments` | the attachments you own |
+| `/cmp equipped` | head, frame and attachments |
+| `/cmp load <name>` | put a saved attachment set on the automaton, as the Loadout tab's Apply does — the same checks, the same apply, so the automaton has to be deactivated first. Works from a macro; a name with a space needs no quotes. Bare `/cmp load` lists your sets |
+| `/cmp stat` | the stat you wear when each maneuver goes off, read off your gear — or set it: `/cmp stat wind 83`, `now` to take what you are wearing, `off` to go back to reading it. See *Gear swaps* below |
+| `/cmp reset` | clear burden, learned costs and counters |
+| `/cmp sync` | burden to zero — manual resync only |
 
 ## Settings and files
 
-petworks writes these under your Ashita config directory:
+Companion writes these under your Ashita config directory:
 
-- `config/addons/petworks/settings.txt` — plain `key = value`, one per line, saved
+- `config/addons/companion/settings.txt` — plain `key = value`, one per line, saved
   whenever you change a setting in game. A whitelist of display and reporting keys only;
   the model constants are deliberately *not* reachable from the UI, so an old settings
   file can never resurrect a value that has since been corrected.
   Unknown keys and wrong types are ignored. The one thing saved here that is not a
-  display key is `stat_<Element>` — your own stat for that maneuver, from `/pw stat`.
-- `config/addons/petworks/<Character>_YYYY.MM.DD.jsonl` — the log, one JSON object per
+  display key is `stat_<Element>` — your own stat for that maneuver, from `/cmp stat`.
+- `config/addons/companion/<Character>_YYYY.MM.DD.jsonl` — the log, one JSON object per
   line. Off by default: turn it on from the Settings tab.
-- `config/addons/petworks/sets/<name>.txt` — saved attachment sets, one item name per
+- `config/addons/companion/sets/<name>.txt` — saved attachment sets, one item name per
   line: the same format the `pupsets` addon uses, so a file copied either way just works.
-- `config/addons/petworks/pet.txt` — the jug or charmed pet out now and when it came
+- `config/addons/companion/pet.txt` — the jug or charmed pet out now and when it came
   out, one line, so its timer survives a zone or a reload. Written only when a new pet
   comes out.
 
 ## Accuracy — please read
 
-petworks re-implements a slice of the server's Puppetmaster logic on the client. It does
+Companion re-implements a slice of the server's Puppetmaster logic on the client. It does
 not read the server's mind.
 
 Where this model departs from upstream LandSandBoat for HorizonXI — the Heatsink decay,
@@ -185,7 +185,7 @@ for the maneuver changes the answer.
 The client is only told your stats when it asks (opening the status or equipment menu) or
 when something like a level or zoning makes the server send them, and *never* because you
 swapped gear. What it *does* see straight away is what is in each equipment slot. So
-petworks remembers the gear you had on the last time the server sent your stats, and
+Companion remembers the gear you had on the last time the server sent your stats, and
 corrects the stat in memory by the difference:
 
     your stat now = stat in memory − that gear's stats + the stats of what you wear now
@@ -194,25 +194,25 @@ A LuAshitacast or GearSwap maneuver set is therefore counted with no menu openin
 setting. The gear's stats are read from each item's description, plain lines only
 (`STR+3`, `AGI-2`, `All attributes +1`): latent effects, set bonuses and automaton/pet
 lines are conditional and are left out, and food, buffs and merits ride along inside the
-number in memory. If you load petworks mid-session it assumes the gear on at load is what
+number in memory. If you load Companion mid-session it assumes the gear on at load is what
 your last stat refresh saw; open the equipment menu once if you loaded it in other gear.
 
 If the read is still wrong for you — a set bonus or latent that matters — tell it what you
-wear: `/pw stat wind 83`. A typed number outranks the read, and is compared against the
-automaton's live stat, so the check is still lost once that element is stacked. `/pw stat
-wind now` takes the corrected read, and `/pw stat wind off` goes back to reading it.
+wear: `/cmp stat wind 83`. A typed number outranks the read, and is compared against the
+automaton's live stat, so the check is still lost once that element is stacked. `/cmp stat
+wind now` takes the corrected read, and `/cmp stat wind off` goes back to reading it.
 
 ## Reporting a wrong prediction
 
 Report problems at
-[github.com/AkoiaLostless/petworks/issues](https://github.com/AkoiaLostless/petworks/issues),
-not to Clockwork's author: petworks has changed things the original does not have. For a
+[github.com/AkoiaLostless/companion/issues](https://github.com/AkoiaLostless/companion/issues),
+not to Clockwork's author: Companion has changed things the original does not have. For a
 stat read wrong after a gear swap, note the item's name and its description text, which is
 what the read is taken from. For anything else, include:
 
-- the petworks version (`addon.version` at the top of `petworks.lua`);
-- your automaton's head, frame and attachments (`/pw equipped`), and which maneuvers were up;
-- what petworks predicted, and what the automaton or the server actually did;
+- the Companion version (`addon.version` at the top of `companion.lua`);
+- your automaton's head, frame and attachments (`/cmp equipped`), and which maneuvers were up;
+- what Companion predicted, and what the automaton or the server actually did;
 - a short excerpt of the log around it. Turn on **write a log file** (or **anomalies to
   the file**) on the Settings tab first; the records where the prediction missed are
   tagged `burden_mismatch`, `ws_mispredicted`, `spell_mispredicted` or `recast_early`.
@@ -233,15 +233,15 @@ abilities involved — check an excerpt before you post it.
 
 ## Credits
 
-petworks stands on other people's work:
+Companion stands on other people's work:
 
 - **Clockwork** (Pathead, [patheed-ffxi/clockwork](https://github.com/patheed-ffxi/clockwork))
-  — the Puppetmaster HUD petworks is built from. Everything on the Puppetmaster side but
+  — the Puppetmaster HUD Companion is built from. Everything on the Puppetmaster side but
   the gear-aware stat read, the lighter frame and the recast list is theirs.
 - **PetsReborn** (Zaldas) — the idea of one pet window for every pet job, and the recast
-  list's layout: the time, then the name, green when ready. petworks borrows those ideas
-  only. None of PetsReborn's code, data, fonts or images is in petworks, which is why
-  petworks can stay under the MIT License while PetsReborn is GPL-3.0.
+  list's layout: the time, then the name, green when ready. Companion borrows those ideas
+  only. None of PetsReborn's code, data, fonts or images is in Companion, which is why
+  Companion can stay under the MIT License while PetsReborn is GPL-3.0.
 - **[LandSandBoat](https://github.com/LandSandBoat/server)** — the burden, overload,
   weaponskill, spell and attachment logic is re-implemented from its
   `automatonentity.cpp`, `automaton_controller.cpp`, `automaton.lua` and SQL tables, and
@@ -260,7 +260,7 @@ petworks stands on other people's work:
 
 ## License
 
-petworks' code is released under the [MIT License](LICENSE), as Clockwork's is. That license covers the
+Companion's code is released under the [MIT License](LICENSE), as Clockwork's is. That license covers the
 code in this repository, not Square Enix's artwork: the element gems in
 `assets/elements/` are Final Fantasy XI's own art, redistributed as other Ashita addons
 do, and remain Square Enix's property.

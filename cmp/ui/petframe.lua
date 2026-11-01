@@ -1,13 +1,13 @@
--- pw/ui/petframe.lua - the pet window for every pet that is not an automaton
--- (pw/pets.lua decides which, and builds tm.petView): the pet's name, how far
+-- cmp/ui/petframe.lua - the pet window for every pet that is not an automaton
+-- (cmp/pets.lua decides which, and builds tm.petView): the pet's name, how far
 -- it is and its timer; HP, MP and TP; what is on it; what it is fighting; and
 -- your recasts for its job as a list. Drawn in the main panel's window, so it
 -- sits where the panel sits, and narrower than the panel: it carries less.
 -- Exports draw().
 local imgui = require('imgui')
-local config = require('pw.config')
-local tm = require('pw.state')
-local SF = require('pw.ui.surface')
+local config = require('cmp.config')
+local tm = require('cmp.state')
+local SF = require('cmp.ui.surface')
 local COL_TEXT, COL_DIM, COL_GOOD, COL_WARN, COL_BAD = SF.COL_TEXT, SF.COL_DIM, SF.COL_GOOD, SF.COL_WARN, SF.COL_BAD
 local COL_MP, COL_TP, COL_TPUP, HUD_FLAGS = SF.COL_MP, SF.COL_TP, SF.COL_TPUP, SF.HUD_FLAGS
 local hudPad, hudInner, tip = SF.hudPad, SF.hudInner, SF.tip
@@ -103,7 +103,7 @@ local function draw()
     tm.panelPush()
     imgui.SetNextWindowSize({ tm.s(PET_WIDTH), 0 }, ImGuiCond_FirstUseEver)
     local ok, err = true, nil
-    if imgui.Begin('petworks', nil, HUD_FLAGS) then
+    if imgui.Begin('companion', nil, HUD_FLAGS) then
         ok, err = pcall(body, v)
     end
     imgui.End()

@@ -1,8 +1,8 @@
--- pw/state.lua - `tm`, the one table every module shares; returns it. Written on
+-- cmp/state.lua - `tm`, the one table every module shares; returns it. Written on
 -- the packet thread and read on the render thread. Fields are documented where
 -- they are set; the modules that own them also publish their functions onto it
 -- (tm.timerRows, tm.petLive, tm.noteMob, ...). Defines tm.clear.
-local config = require('pw.config')
+local config = require('cmp.config')
 
 -- Aliasing. Only these tables keep one identity for the life of the addon -
 -- created here, never reassigned, and reset in place (tm.clear, or key by key) -
@@ -114,7 +114,7 @@ tm.predWhy       = nil -- the reason behind predSnapshot, for the record
 -- fault, which pcall cannot catch, and it surfaces as an unattributed crash.
 tm.snap = { self_id = 0, pet_id = 0, is_pup = false, thresh = config.threshold,
             bonus = 0, party = {},
-            -- a pet that is not an automaton is out (pw/pets.lua): the
+            -- a pet that is not an automaton is out (cmp/pets.lua): the
             -- packet thread follows it for the pet window, and only that
             other = false }   -- the party's ServerIds as a set: a member's blow counts as ours
 -- [mob server id] = os.clock() of the last blow the master, the automaton or
@@ -138,7 +138,7 @@ tm.auto044 = nil      -- last PUP extended-job packet (0x044): skills, stats, ow
 tm.auto044Seq = 0     -- bumped per 0x044, so an apply step can wait for the reply to ITS packet
 tm.zoneSeq = 0        -- bumped per 0x00A, so an apply can notice it zoned
 tm.statsDirty = false -- set by the packet thread, consumed on d3d_present
-tm.statRefreshPending = false -- a 0x061 arrived; the next frame records the gear (pw/gear.lua)
+tm.statRefreshPending = false -- a 0x061 arrived; the next frame records the gear (cmp/gear.lua)
 tm.eqCache, tm.eqCacheAt   = nil, 0
 tm.eqCacheSeq = -1      -- the 0x044 sequence the cache was built against
 tm.oilCache, tm.oilCacheAt = nil, 0
@@ -148,7 +148,7 @@ tm.oilCache, tm.oilCacheAt = nil, 0
 -- 'cast' (the same comparison, with your stat as worn when the element last
 -- resolved); 'learned' (inferred from a verified burden reading while no 0x044
 -- has arrived); 'observed' (a run of readings overruled the comparison - frozen
--- until /pw reset or a frame change); 'assumed' (no comparison possible, so the
+-- until /cmp reset or a frame change); 'assumed' (no comparison possible, so the
 -- losing cost). nil reads as 'assumed'.
 tm.costSource = {}
 -- Consecutive observations that contradict a COMPUTED cost, per element.
@@ -176,9 +176,9 @@ tm.activateAt = nil    -- os.clock() of the last Activate seen in the 0x028 stre
 tm.applyState = nil
 
 -- Which window the frame draws: 'pup' (the panel) or 'pet' (the pet window
--- for every other pet, pw/ui/petframe.lua). Set by the model (pw/frame.lua).
+-- for every other pet, cmp/ui/petframe.lua). Set by the model (cmp/frame.lua).
 tm.view = 'pup'
--- When you last used an ability that brings a pet out (pw/pets.lua), and the
+-- When you last used an ability that brings a pet out (cmp/pets.lua), and the
 -- kind of pet out now and what its window shows.
 tm.petSummonAt, tm.petKind, tm.petView = nil, nil, nil
 

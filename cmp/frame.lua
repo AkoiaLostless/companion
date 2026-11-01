@@ -1,27 +1,27 @@
--- pw/frame.lua - the render thread's per-frame model work, and whether to draw
+-- cmp/frame.lua - the render thread's per-frame model work, and whether to draw
 -- at all. Owns the visibility checks and target expiry. Exports tick(), which
 -- refreshes the snapshot the packet thread reads (tm.snap, tm.spell,
 -- tm.predManeuvers) and returns true only when the HUD should draw.
-local config = require('pw.config')
-local D  = require('pw.data')
+local config = require('cmp.config')
+local D  = require('cmp.data')
 local ELEMENTS = D.ELEMENTS
-local tm = require('pw.state')
-local U  = require('pw.util')
+local tm = require('cmp.state')
+local U  = require('cmp.util')
 local safe, isPup, isPupSub, equippedThreshold = U.safe, U.isPup, U.isPupSub, U.equippedThreshold
 local equippedManeuverBonus = U.equippedManeuverBonus
 local isLoggedIn, atCharacterSelect = U.isLoggedIn, U.atCharacterSelect
-local L  = require('pw.log')
+local L  = require('cmp.log')
 local logEvent = L.logEvent
-local R  = require('pw.reading')
+local R  = require('cmp.reading')
 local hasAttachment, partyIds = R.hasAttachment, R.partyIds
-local B  = require('pw.burden')
+local B  = require('cmp.burden')
 local refreshStatChecks, activeManeuvers, maneuverCounts, decay = B.refreshStatChecks, B.activeManeuvers, B.maneuverCounts, B.decay
 local refreshPrediction = B.refreshPrediction
-local P  = require('pw.pet')
-local DEMO = require('pw.demo')
-local G  = require('pw.gear')
+local P  = require('cmp.pet')
+local DEMO = require('cmp.demo')
+local G  = require('cmp.gear')
 local resolveIds, forgetCharacter = P.resolveIds, P.forgetCharacter
--- The shared tables, never reassigned after pw/state.lua creates them.
+-- The shared tables, never reassigned after cmp/state.lua creates them.
 local ids, snap = tm.ids, tm.snap
 
 -- ------------------------------------------------------------ visibility --
@@ -208,7 +208,7 @@ local function tick()
     end
     -- The model below does not need 60 answers a second: nothing it shows
     -- moves faster than a second, and every packet it cares about marks it
-    -- dirty (tm.modelDirty, set in pw/inbound.lua and by every command), so
+    -- dirty (tm.modelDirty, set in cmp/inbound.lua and by every command), so
     -- a cast, a maneuver or a stat refresh is still seen on the very next
     -- frame. Between those it runs every tm.modelEvery seconds; the frames in
     -- between only draw what it last worked out.
@@ -223,7 +223,7 @@ local function tick()
     -- Everything above this line is the model and the logger: they keep
     -- running with the window down. Only the drawing stops.
     if uiHidden() then return false end
-    -- Your own job abilities' recasts (pw/cooldowns.lua) are display only, so
+    -- Your own job abilities' recasts (cmp/cooldowns.lua) are display only, so
     -- they are read here, below the gates, and not with the model above -
     -- and at the model's pace, not every frame.
     if jaDue then
@@ -280,7 +280,7 @@ function model()
         tm.statsDirty = false
         refreshStatChecks()   -- needs player() reads, so it happens here
     end
-    -- Every other pet: the pet window (pw/pets.lua), and none of the
+    -- Every other pet: the pet window (cmp/pets.lua), and none of the
     -- automaton's model below. snap.other turns the packet thread's light
     -- path on and snap.is_pup its automaton path off. Not under demo, which
     -- plays an automaton.

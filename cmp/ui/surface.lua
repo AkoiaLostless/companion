@@ -1,4 +1,4 @@
--- pw/ui/surface.lua - how the HUD draws: the palette, the scale, the fonts and
+-- cmp/ui/surface.lua - how the HUD draws: the palette, the scale, the fonts and
 -- shadowed text, bars, squares, gems and the cog, the icon loaders, and the
 -- vitals, target, status and recast strips built from them. Nothing here knows
 -- what a number means. Publishes the draw primitives and tab state on tm; returns
@@ -7,21 +7,21 @@ local imgui = require('imgui')
 local d3d8  = require('d3d8')
 local ffi   = require('ffi')
 local chat  = require('chat')
-local config = require('pw.config')
-local D  = require('pw.data')
+local config = require('cmp.config')
+local D  = require('cmp.data')
 local ELEMENTS, EFFECT_MANEUVER_1 = D.ELEMENTS, D.EFFECT_MANEUVER_1
 local ATTACH_OFFSET, EQUIP_OFFSET = D.ATTACH_OFFSET, D.EQUIP_OFFSET
 local ABILITY_ICON = D.ABILITY_ICON
-local tm = require('pw.state')
-local A  = require('pw.attachments')
+local tm = require('cmp.state')
+local A  = require('cmp.attachments')
 local fmtMod = A.fmtMod
-local U  = require('pw.util')
+local U  = require('cmp.util')
 local safe = U.safe
-local P  = require('pw.pet')
+local P  = require('cmp.pet')
 local MAX_EFFECT_AGE, petEffects = P.MAX_EFFECT_AGE, P.petEffects
--- for the name -> item id map behind the ability icons. pw/sets.lua requires
+-- for the name -> item id map behind the ability icons. cmp/sets.lua requires
 -- nothing from the UI, so this stays acyclic.
-local S  = require('pw.sets')
+local S  = require('cmp.sets')
 
 -- Element colours, matching the in-game elemental palette.
 local EL_COLOR =
@@ -43,7 +43,7 @@ local COL_TP   = { 0.80, 0.66, 0.24, 1.0 }
 local COL_TPUP = { 1.00, 0.86, 0.32, 1.0 }   -- TP >= 1000: a WS can fire
 
 -- A HUD, not a form: no title bar or border, sized to its content. Drag
--- anywhere on the panel to move it; /pw show hides it.
+-- anywhere on the panel to move it; /cmp show hides it.
 local HUD_FLAGS = bit.bor(ImGuiWindowFlags_NoTitleBar, ImGuiWindowFlags_NoCollapse,
                           ImGuiWindowFlags_NoScrollbar, ImGuiWindowFlags_AlwaysAutoResize)
 
@@ -147,7 +147,7 @@ tm.fontLoad = function()
     tm.font     = load(config.font_regular)
     tm.fontBold = load(config.font_bold)
     if #missing > 0 then
-        print(chat.header('petworks'):append(chat.error(
+        print(chat.header('companion'):append(chat.error(
             ('font not found in C:\\Windows\\Fonts: %s - using the default font')
             :format(table.concat(missing, ', ')))))
     end
@@ -287,7 +287,7 @@ tm.tabButtons = function()
         config.compact = true
         tm.saveSettings()
     end
-    tip('Shrink to the one-line strip. Same as /pw compact.')
+    tip('Shrink to the one-line strip. Same as /cmp compact.')
     -- Drawn, not lettered: the same height as a SmallButton so the row sits
     -- level, and an InvisibleButton to own the click. The cog is drawn well
     -- inside its square, at 0.26 of it: any larger and, with the teeth, it
@@ -305,7 +305,7 @@ tm.tabButtons = function()
         config.show_window = false
         tm.saveSettings()
     end
-    tip('Hide the panel. Logging keeps running. /pw show brings it back.')
+    tip('Hide the panel. Logging keeps running. /cmp show brings it back.')
     imgui.PopFont()
 end
 

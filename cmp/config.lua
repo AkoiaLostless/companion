@@ -1,6 +1,6 @@
--- pw/config.lua - the defaults: the burden model's constants, the
+-- cmp/config.lua - the defaults: the burden model's constants, the
 -- logging switches and the display options; returns the table. Edit a value,
--- then /addon reload petworks. The exception is every key in pw/settings.lua's
+-- then /addon reload companion. The exception is every key in cmp/settings.lua's
 -- PERSIST list (the Settings tab's switches, ui_scale, warn_at): the Settings
 -- tab writes those into this table, and a saved settings file overrides them.
 local config =
@@ -66,7 +66,7 @@ local config =
     -- set's stats never reach it. The number is compared against the
     -- automaton's LIVE stat, so it still wins the first check of an element and
     -- loses once that element is stacked - which 'win' and 'lose' cannot say.
-    -- Set it in game with `/pw stat <element> <number|now|off>`, which
+    -- Set it in game with `/cmp stat <element> <number|now|off>`, which
     -- remembers it in settings.txt; editing it here is the same thing without
     -- the file. Dark is ignored - it compares MP, which is read live.
     stat_check =
@@ -114,7 +114,7 @@ local config =
     show_reasoning = true,
     burden_tolerance = 2,   -- pp of error before it counts as an anomaly
     recast_tolerance = 2,   -- seconds early before an ability use counts as an anomaly
-    log_dir        = nil,   -- nil = <ashita>/config/addons/petworks/
+    log_dir        = nil,   -- nil = <ashita>/config/addons/companion/
 
     -- Display -----------------------------------------------------------
     warn_at     = 25,
@@ -146,7 +146,7 @@ local config =
     -- existed.
     show_ol_secs = true,
     -- Your own job abilities' recasts, listed under the automaton's in the
-    -- Status tab's recast column (pw/cooldowns.lua): a switch for each, and one
+    -- Status tab's recast column (cmp/cooldowns.lua): a switch for each, and one
     -- that leaves an ability out while it is ready. That one ships off, so
     -- every ability switched on is listed all the time, `ready` or counting.
     -- Retrieve and Deactivate ship off. The Settings tab's ability cooldowns
@@ -163,7 +163,7 @@ local config =
     -- room for names. Off goes back to the icon cells (or dials, above).
     cd_list          = true,
     -- The pet window for every pet that is not an automaton: a BST jug or
-    -- charmed pet, a SMN avatar, a DRG wyvern (pw/pets.lua). Off leaves those
+    -- charmed pet, a SMN avatar, a DRG wyvern (cmp/pets.lua). Off leaves those
     -- jobs without a window, for when another addon draws their pets.
     pet_window       = true,
     cd_activate      = true,
@@ -195,7 +195,7 @@ local config =
     -- window, so its position is remembered apart from the panel's.
     compact     = false,
     -- ...on one line, or on two: the gems over the recasts, the bars over the
-    -- answers. The strip's 1 / 2 button and /pw compact 1 or 2 set it.
+    -- answers. The strip's 1 / 2 button and /cmp compact 1 or 2 set it.
     compact_rows = 1,
     -- How big the HUD draws, as a percent. 100 is the size every offset in
     -- this addon was laid out at; the Settings tab sets it. Everything

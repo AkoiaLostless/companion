@@ -1,5 +1,5 @@
 """
-Offline test run for the petworks addon.
+Offline test run for the companion addon.
 
 No standalone Lua interpreter is needed: the addon is loaded into lupa's
 embedded LuaJIT 2.1 - the Lua Ashita runs; lupa's default runtime may be a
@@ -35,7 +35,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 
 # Which copy of the addon to test.
 TARGET = os.path.normpath(os.path.join(HERE, ".."))
-# TARGET = r"<your ashita folder>\addons\petworks"   # to test a deployed copy
+# TARGET = r"<your ashita folder>\addons\companion"   # to test a deployed copy
 
 # The harness, in the order it runs.
 FILES = [
@@ -89,7 +89,7 @@ def locate(message, origin):
 
 def main():
     source, origin = build()
-    scratch = tempfile.mkdtemp(prefix="petworks-test-")
+    scratch = tempfile.mkdtemp(prefix="companion-test-")
     runtime = lupa.LuaRuntime(unpack_returned_tuples=True)
     run = runtime.eval(
         "function(src, dir, scratch) return assert(load(src, 'harness'))(dir, scratch) end"

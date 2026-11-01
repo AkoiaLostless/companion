@@ -23,7 +23,7 @@ do
     check('debug pred snapshot', (api.predictSpell()), 'Regen')
     printed = {}
     send028(act(8, 108))                  -- cast what the snapshot named
-    check('debug pred logged', PETWORKS_TEST.last.kind, 'pet_spell')
+    check('debug pred logged', COMPANION_TEST.last.kind, 'pet_spell')
     check('debug pred announced', said('as predicted'), true)
     -- off: the record still lands, the chat line does not
     advance(20)                           -- every window this head has reopens
@@ -31,7 +31,7 @@ do
     printed = {}
     check('debug pred snapshot again', (api.predictSpell()), 'Regen')
     send028(act(8, 108, MOB + 11))        -- a different target dodges isDuplicate
-    check('debug pred off still logs', PETWORKS_TEST.last.kind, 'pet_spell')
+    check('debug pred off still logs', COMPANION_TEST.last.kind, 'pet_spell')
     check('debug pred off is silent', said('as predicted'), false)
     cfg.debug_predictions = true
 
@@ -51,7 +51,7 @@ do
     send028(act(8, 108, MOB + 12))
     check('reason off keeps the name', said('Regen as predicted'), true)
     check('reason off drops the why', said('no Regen on you or automaton'), false)
-    check('reason off keeps the record', PETWORKS_TEST.last.rec.expected_why,
+    check('reason off keeps the record', COMPANION_TEST.last.rec.expected_why,
           'enhance · no Regen on you or automaton (hate picks which)')
     advance(20)
     cfg.show_reasoning = true
@@ -68,20 +68,20 @@ do
     local function anomaly(target)
         advance(20)
         printed = {}
-        PETWORKS_TEST.last = nil
+        COMPANION_TEST.last = nil
         check('anomaly fixture snapshot', (api.predictSpell()), 'Regen')
         send028(act(8, 43, target))       -- Protect, not the Regen predicted
     end
     anomaly(MOB + 14)
     check('anomaly reaches chat when on', said('ANOMALY spell_mispredicted'), true)
-    check('anomaly reaches the file when on', PETWORKS_TEST.last.kind, 'spell_mispredicted')
+    check('anomaly reaches the file when on', COMPANION_TEST.last.kind, 'spell_mispredicted')
     check('anomaly chat carries the reason', said('no Regen on you or automaton'), true)
 
     -- chat off: the record still lands
     cfg.anomaly_chat = false
     anomaly(MOB + 15)
     check('anomaly chat off is silent', said('ANOMALY'), false)
-    check('anomaly chat off still records', PETWORKS_TEST.last.kind, 'spell_mispredicted')
+    check('anomaly chat off still records', COMPANION_TEST.last.kind, 'spell_mispredicted')
     cfg.anomaly_chat = true
 
     -- show_reasoning also governs the anomaly line's tail
@@ -95,16 +95,16 @@ do
     -- the quiet-disk mode: routine records stop, anomalies do not
     cfg.logging = false
     advance(20)
-    PETWORKS_TEST.last = nil
+    COMPANION_TEST.last = nil
     check('quiet snapshot', (api.predictSpell()), 'Regen')
     send028(act(8, 108, MOB + 17))        -- a HIT: routine, so nothing written
-    check('quiet disk drops a routine record', PETWORKS_TEST.last, nil)
+    check('quiet disk drops a routine record', COMPANION_TEST.last, nil)
     anomaly(MOB + 18)
-    check('quiet disk keeps the anomaly', PETWORKS_TEST.last.kind, 'spell_mispredicted')
+    check('quiet disk keeps the anomaly', COMPANION_TEST.last.kind, 'spell_mispredicted')
     -- ...and with both off, nothing reaches the file at all
     cfg.anomaly_file = false
     anomaly(MOB + 19)
-    check('both off writes nothing', PETWORKS_TEST.last, nil)
+    check('both off writes nothing', COMPANION_TEST.last, nil)
     cfg.logging, cfg.anomaly_file = true, true
     -- The handle is opened once and kept. log.lua read an undeclared global
     -- `ids` where every other module localises tm.ids, so the first open
@@ -113,7 +113,7 @@ do
     -- file behind another swallowed error.
     api.resetSwallowed()
     send028(act(8, 108, MOB + 20))
-    check('a routine record is written', PETWORKS_TEST.last ~= nil, true)
+    check('a routine record is written', COMPANION_TEST.last ~= nil, true)
     check('...and swallows no error on the way', api.swallowed(), 0)
 end
 
