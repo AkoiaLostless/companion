@@ -268,7 +268,12 @@ local function sicRow(row, kind)
     if not hasReady then return end
     if kind ~= 'charmed' then row.label, row.short, row.name = 'Ready', 'Rdy', 'Ready' end
     local rem = row.remaining or 0
-    if sicWas == 0 and rem > 0 and rem <= 120 then chargeSecs = math.max(5, math.ceil(rem)) end
+    -- the client's own per-charge figure when it gives one; else learned
+    if tm.recastCalc[102] ~= nil then
+        chargeSecs = tm.recastCalc[102]
+    elseif sicWas == 0 and rem > 0 and rem <= 120 then
+        chargeSecs = math.max(5, math.ceil(rem))
+    end
     sicWas = rem
     local missing = math.min(READY_MAX, math.ceil(rem / chargeSecs - 0.01))
     row.charges, row.maxCharges = READY_MAX - math.max(0, missing), READY_MAX

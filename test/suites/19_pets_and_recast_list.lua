@@ -86,6 +86,12 @@ do
     frame('pets: Ready, none left')
     check('pets: none left', saw('0/3'), true)
     check('pets: the next charge in 20s', saw('20s'), true)
+    -- the client's own per-charge figure beats the learned one: 30 s a
+    -- charge, all three used, 70 s to go: none left, 10 s to the next
+    world.recast = { [2] = { 102, 60 * 70, 30 } }
+    frame('pets: Ready, the client says 30 s a charge')
+    check('pets: none left by the client\'s figure', saw('0/3'), true)
+    check('pets: ...the next in 10s', saw('10s'), true)
     world.recast = { [1] = { 104, 60 * 200 } }
     world.abilities[0x200 + 72] = true
 

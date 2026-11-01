@@ -46,11 +46,27 @@ local JA_RESOURCE = 0x200
 -- ability holds no slot at all. Slot 0 is the two-hour and its timer id is 0,
 -- which in any other slot means empty - hence (id ~= 0 or i == 0), the guard
 -- Ashita's own recast addon uses. The timer counts 1/60 s ticks.
+-- The client also keeps, beside each timer, the seconds one charge of a
+-- charge ability takes: RecastCalc2, an int16 in the same 8-byte entry as the
+-- timer id (Ashita SDK ffxi/player.h abilityrecast_t; IRecast GetAbilityCalc2;
+-- PetsReborn reads it the same way for Ready). Kept in tm.recastCalc by timer
+-- id while it counts; an answer that is not a plausible charge time leaves it
+-- out, and Ready falls back to learning it (cmp/pets.lua).
+tm.recastCalc = {}
+local function calcOf(r, i)
+    local ok, v = pcall(function() return r:GetAbilityCalc2(i) end)
+    if ok and type(v) == 'number' and v >= 5 and v <= 300 then return v end
+    return nil
+end
 local function recastLeft()
     local r, left = AshitaCore:GetMemoryManager():GetRecast(), {}
+    tm.clear(tm.recastCalc)
     for i = 0, 31 do
         local id, ticks = r:GetAbilityTimerId(i), r:GetAbilityTimer(i)
-        if (id ~= 0 or i == 0) and ticks > 0 then left[id] = ticks / 60 end
+        if (id ~= 0 or i == 0) and ticks > 0 then
+            left[id] = ticks / 60
+            if id == 102 then tm.recastCalc[id] = calcOf(r, i) end
+        end
     end
     return left
 end
