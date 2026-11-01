@@ -19,11 +19,10 @@ local PET_WIDTH = 420
 local KIND_TAG = { jug = 'Jug', charmed = 'Charmed', avatar = 'Avatar', wyvern = 'Wyvern' }
 local NO_PET = { charmed = 'No Pet Out', avatar = 'No Avatar Out', wyvern = 'No Wyvern Out' }
 
--- The tag after the name is boxed in green for a jug pet and in gold for a
--- charmed one, so which kind is out reads at a glance. Avatar and wyvern tags
--- stay plain.
-local COL_GOLD = { 1.00, 0.78, 0.25, 1.0 }
-local KIND_EDGE = { jug = COL_GOOD, charmed = COL_GOLD }
+-- The tag after the name is a bubble, light green for a jug pet and gold for
+-- a charmed one, so which kind is out reads at a glance. Avatar and wyvern
+-- tags stay plain.
+local KIND_EDGE = { jug = { 0.55, 0.90, 0.55, 1.0 }, charmed = { 1.00, 0.80, 0.30, 1.0 } }
 
 -- HP and TP, and MP when the pet has a pool to show: an avatar always (its MP
 -- is yours, but a summoner reads it there), anything else only once it
@@ -54,27 +53,30 @@ local function vitals(pet, showMp)
     under(n, 'TP', ('%d'):format(tp))
 end
 
--- The kind tag; a jug or charmed one gets an outlined box of its color,
--- padded so the line around it clears the letters.
+-- The kind tag; a jug or charmed one is a filled bubble, light green or gold
+-- inside a white rim, with the word in near-black on it so it reads against
+-- the light fill. Drawn straight onto the draw list, with no shadow, since a
+-- shadow under dark text on a light fill only smudges it.
+local BUBBLE_RIM  = { 1, 1, 1, 0.95 }
+local BUBBLE_TEXT = { 0.05, 0.05, 0.05, 1 }
 local function tagText(kind)
-    local edge = KIND_EDGE[kind]
-    if edge == nil then
+    local fill = KIND_EDGE[kind]
+    if fill == nil then
         tm.text('label', COL_DIM, KIND_TAG[kind])
         return
     end
     local s = KIND_TAG[kind]
-    local padX, padY = tm.s(4), tm.s(1)
+    local padX, padY = tm.s(6), tm.s(1)
     imgui.PushFont(tm.font, tm.px('label'))
     local w, h = imgui.CalcTextSize(s)
-    imgui.PopFont()
     local x, y = imgui.GetCursorScreenPos()
-    imgui.GetWindowDrawList():AddRect({ x, y - padY }, { x + w + padX * 2, y + h + padY },
-        tm.u32(edge), tm.s(3), 0, tm.s(1))
-    imgui.Dummy({ padX, h })
-    imgui.SameLine(0, 0)
-    tm.text('label', edge, s)
-    imgui.SameLine(0, 0)
-    imgui.Dummy({ padX, h })
+    local dl = imgui.GetWindowDrawList()
+    local r = (h + padY * 2) / 2
+    dl:AddRectFilled({ x, y - padY }, { x + w + padX * 2, y + h + padY }, tm.u32(fill), r)
+    dl:AddRect({ x, y - padY }, { x + w + padX * 2, y + h + padY }, tm.u32(BUBBLE_RIM), r, 0, tm.s(1))
+    dl:AddText({ x + padX, y }, tm.u32(BUBBLE_TEXT), s)
+    imgui.PopFont()
+    imgui.Dummy({ w + padX * 2, h })
 end
 
 -- The jug's time left, or the charm's time so far, at the end of the name line.
