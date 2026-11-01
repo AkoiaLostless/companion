@@ -909,7 +909,7 @@ tm.listTimeW = function()
 end
 
 -- Each recast as a box of its own, a faint panel with a bar down its left
--- edge in its state's colour, so neighbouring abilities can never run into
+-- edge in its state's color, so neighbouring abilities can never run into
 -- each other. Inside, one typeface and one baseline for everything: the
 -- name from the left edge, the charges (Ready's n/3) after it in a slot of
 -- their own, and the time right-aligned against the box's right edge, so the
