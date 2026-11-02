@@ -30,6 +30,8 @@ local BEAST = {
     { key = 'call_beast',      label = 'Call Beast', short = 'Call', name = 'Call Beast',      ability = 85,  timer = 104 },
     { key = 'bestial_loyalty', label = 'Loyalty',    short = 'BL',   name = 'Bestial Loyalty', ability = 387, timer = 94 },
     { key = 'charm',           label = 'Charm',      short = 'Chm',  name = 'Charm',           ability = 52,  timer = 97 },
+    { key = 'gauge',           label = 'Gauge',      short = 'Gau',  name = 'Gauge',           ability = 53,  timer = 98 },
+    { key = 'tame',            label = 'Tame',       short = 'Tam',  name = 'Tame',            ability = 54,  timer = 99 },
     { key = 'reward',          label = 'Reward',     short = 'Rwd',  name = 'Reward',          ability = 78,  timer = 103 },
     -- Sic, and Ready where the server grants it instead: one timer, listed
     -- when you have either, and the label and charges follow which (sicRow)
