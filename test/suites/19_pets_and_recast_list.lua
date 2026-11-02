@@ -40,8 +40,9 @@ do
     config.cd_list = true
     api.resetSwallowed()
     PETS.resetTimer()
-    world.abilities = { [0x200 + 85] = true, [0x200 + 78] = true, [0x200 + 72] = true }
-    world.recast = { [1] = { 104, 60 * 200 } }    -- Call Beast, 200 s
+    world.abilities = { [0x200 + 85] = true, [0x200 + 78] = true, [0x200 + 72] = true,
+                       [0x200 + 53] = true, [0x200 + 54] = true }
+    world.recast = { [1] = { 104, 60 * 200 }, [2] = { 99, 60 * 425 } }    -- Call Beast 200 s, Tame 425 s
     tm.petSummonAt = nil
     tm.noteSummon(85)                              -- you just used Call Beast
     petAs('CourierCarrie', BST, WHM)
@@ -60,6 +61,9 @@ do
     check('pets: Reward ready', saw('Reward'), true)
     check('pets: ready reads Ready', saw('Ready'), true)
     check('pets: unlearned Charm is left out', saw('Charm'), false)
+    check('pets: Gauge listed', saw('Gauge'), true)
+    check('pets: Tame listed', saw('Tame'), true)
+    check('pets: Tame counting', saw('7:05'), true)
     check('pets: no maneuver table', saw('burden'), false)
     check('pets: no swallowed reads', api.swallowed(), 0)
 

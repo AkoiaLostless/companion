@@ -86,7 +86,7 @@ Puppetmaster panel goes:
   automaton gets.
 - **What the pet is fighting**, and that mob's HP.
 - **Your recasts for that job**, as the list above. Beastmaster: Call Beast, Bestial
-  Loyalty, Charm, Reward, Sic (or Ready), Snarl, Feral Howl, Killer Instinct, Familiar.
+  Loyalty, Charm, Gauge, Tame, Reward, Sic (or Ready), Snarl, Feral Howl, Killer Instinct, Familiar.
   Summoner: Blood Pact: Rage and Ward, Apogee, Elemental Siphon, Avatar's Favor, Astral
   Flow. Dragoon: Call Wyvern, Spirit Link, Steady Wing, Deep Breathing, Jump, High Jump,
   Super Jump, Angon, Spirit Surge. Only abilities you have learned at your current level
