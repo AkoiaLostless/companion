@@ -1,25 +1,25 @@
--- cw/ui/panel.lua - the windows: the compact strip, the full panel with its
+-- cmp/ui/panel.lua - the windows: the compact strip, the full panel with its
 -- header and tab dispatch, the Status, Tuning and Settings tab bodies, the Spell
 -- line, and the what-if window's frame. Publishes tm.railColour, tm.drawCompact,
 -- tm.settingsTab and tm.spellLine; returns { draw }, run once a frame when
 -- frame.tick says the HUD should show.
 local imgui = require('imgui')
 local chat  = require('chat')
-local config = require('cw.config')
-local D  = require('cw.data')
+local config = require('cmp.config')
+local D  = require('cmp.data')
 local ELEMENTS, MANEUVER_STAT = D.ELEMENTS, D.MANEUVER_STAT
-local tm = require('cw.state')
-local A  = require('cw.attachments')
+local tm = require('cmp.state')
+local A  = require('cmp.attachments')
 local fmtMod, buffSummary = A.fmtMod, A.buffSummary
-local R  = require('cw.reading')
+local R  = require('cmp.reading')
 local petInfo, hasAttachment, oilCounts, equippedAttachments = R.petInfo, R.hasAttachment, R.oilCounts, R.equippedAttachments
-local B  = require('cw.burden')
+local B  = require('cmp.burden')
 local computeCost, predict, overloadDuration, meanAbsError = B.computeCost, B.predict, B.overloadDuration, B.meanAbsError
 local activeManeuvers, maneuverCounts, decayRate, predictWS = B.activeManeuvers, B.maneuverCounts, B.decayRate, B.predictWS
 local costLadder = B.costLadder
-local P  = require('cw.pet')
+local P  = require('cmp.pet')
 local resetModel = P.resetModel
-local SF = require('cw.ui.surface')
+local SF = require('cmp.ui.surface')
 local EL_COLOR, COL_GOOD, COL_WARN, COL_BAD = SF.EL_COLOR, SF.COL_GOOD, SF.COL_WARN, SF.COL_BAD
 local COL_DIM, COL_TEXT, COL_MP, COL_TP = SF.COL_DIM, SF.COL_TEXT, SF.COL_MP, SF.COL_TP
 local COL_TPUP, COL_MOB, HUD_FLAGS = SF.COL_TPUP, SF.COL_MOB, SF.HUD_FLAGS
@@ -27,9 +27,9 @@ local hudPad, hudInner, hudText = SF.hudPad, SF.hudInner, SF.hudText
 local tip, vitals = SF.tip, SF.vitals
 local abilityCell, cellW, abilityArt = SF.abilityCell, SF.cellW, SF.abilityArt
 local petStatusStrip = SF.petStatusStrip
-local LO = require('cw.ui.loadout')
+local LO = require('cmp.ui.loadout')
 local NO_DATA, drawLoadoutTab = LO.NO_DATA, LO.drawLoadoutTab
--- The shared tables, never reassigned after cw/state.lua creates them.
+-- The shared tables, never reassigned after cmp/state.lua creates them.
 local burden, cost, samples, snap = tm.burden, tm.cost, tm.samples, tm.snap
 local costSource, castStat = tm.costSource, tm.castStat
 
@@ -295,20 +295,20 @@ local function buttons()
         config.compact_rows = other
         tm.saveSettings()
     end
-    tip((other == 2) and 'Two rows instead of one. Same as /cw compact 2.'
-                      or 'Back to one row. Same as /cw compact 1.')
+    tip((other == 2) and 'Two rows instead of one. Same as /cmp compact 2.'
+                      or 'Back to one row. Same as /cmp compact 1.')
     imgui.SameLine(0, tm.s(3))
     if imgui.SmallButton('full##cw_layout') then
         config.compact = false
         tm.saveSettings()
     end
-    tip('Back to the full panel. Same as /cw compact.')
+    tip('Back to the full panel. Same as /cmp compact.')
     imgui.SameLine(0, tm.s(3))
     if imgui.SmallButton('x##cw_close') then
         config.show_window = false
         tm.saveSettings()
     end
-    tip('Hide the strip. /cw show brings it back.')
+    tip('Hide the strip. /cmp show brings it back.')
     imgui.PopFont()
 end
 
@@ -379,7 +379,7 @@ tm.drawCompact = function()
     local maneuvers, overload = activeManeuvers()
     tm.panelPush()
     local wx, wy = nil, nil
-    if imgui.Begin('clockwork compact', nil, HUD_FLAGS) then
+    if imgui.Begin('companion compact', nil, HUD_FLAGS) then
         if pet == nil then
             tm.text('text', COL_DIM, 'no automaton out')
             imgui.SameLine(0, tm.s(12))
@@ -402,9 +402,9 @@ end
 --
 -- What is deliberately NOT here: the burden model's constants. activate_burden,
 -- dea_burden, heatsink_decay, the stat checks and the tolerances are model
--- values, each documented in cw/config.lua with the reasoning behind it. A knob
+-- values, each documented in cmp/config.lua with the reasoning behind it. A knob
 -- on those would silently invalidate the model and every log it then produced,
--- and the reader would have no way to tell which. They stay in cw/config.lua
+-- and the reader would have no way to tell which. They stay in cmp/config.lua
 -- rather than pretending to be preferences.
 
 -- One stable { text } buffer per key. ImGui writes into these in place - each
@@ -517,7 +517,7 @@ local function displayView()
     toggle('weaponskill prediction', 'show_ws',
            'The WS line on the Status tab, and the weaponskill on the compact\nstrip. Off hides it only: it is still predicted and logged.')
     toggle('what maneuvers give', 'show_gives',
-           'The gives list on the Status tab: what your maneuvers are adding\nright now.')
+           'The Stats line on the Status tab: what your maneuvers are adding\nright now.')
     toggle('oil counts', 'show_oils',
            'The oils line on the Status tab, and its warning when you have none.')
     toggle('hide burden at 0% OL', 'hide_zero_ol_rows',
@@ -545,7 +545,14 @@ local function displayView()
            'List an ability only while it is on recast. Off lists every one\nswitched on below, ready or not.')
     imgui.SameLine(hudPad() + tm.s(180), 0)
     toggle('as dials', 'cd_dials',
-           'Each ability as a dial alone: the time on it while it counts, a\nshort name under it. Off: a dial, the full name and the time. The\nStatus tab and the compact strip both.')
+           'Each ability as a dial alone: the time on it while it counts, a\nshort name under it. Off: a dial, the full name and the time. The\ncompact strip, and the Status tab when the list is off.')
+    toggle('as a list', 'cd_list',
+           'Recasts as a list, the way PetsReborn lays them out: the time,\nthen the name. Green Ready, amber when nearly ready. The automaton\'s\nand yours in the Status tab, and the pet window for other jobs.')
+    imgui.SameLine(hudPad() + tm.s(180), 0)
+    toggle('pet window', 'pet_window',
+           'A window for BST, SMN and DRG pets: HP, MP, TP, its target, its\nstatus and your pet abilities\' recasts. Off for when another addon\ndraws those pets.')
+    toggle('charm check', 'charm_check',
+           'When you Charm, send a /check of the mob so the charmed pet\'s\nwindow can count the charm down. Off: only your own /check counts.')
     local list = tm.jaList
     local half = math.ceil(#list / 2)
     imgui.BeginGroup()
@@ -577,15 +584,15 @@ tm.settingsTab = function()
     imgui.Separator()
     tm.text('label', COL_DIM, 'model')
     imgui.PushFont(tm.font, tm.px('text'))
-    -- No `Reset model` here: `/cw reset` runs the identical code, and every
+    -- No `Reset model` here: `/cmp reset` runs the identical code, and every
     -- figure either of them clears is in-memory, so a plain
-    -- `/addon reload clockwork` does it as well. Two destructive buttons
+    -- `/addon reload companion` does it as well. Two destructive buttons
     -- side by side, one of them redundant twice over, is a mis-click
     -- waiting to happen.
     if imgui.Button(label('sync', 'Really zero?', 'Zero burden')) then
         if arm('sync') then
             resetModel('manual')
-            print(chat.header('clockwork'):append(chat.message(
+            print(chat.header('companion'):append(chat.message(
                 'burden zeroed - manual resync only')))
         end
     end
@@ -599,8 +606,8 @@ tm.settingsTab = function()
     if imgui.Button(label('defaults', 'Really restore?', 'Restore defaults')) then
         if arm('defaults') then
             tm.restoreDefaults()
-            print(chat.header('clockwork'):append(chat.message(
-                'settings back to the defaults in cw/config.lua')))
+            print(chat.header('companion'):append(chat.message(
+                'settings back to the defaults in cmp/config.lua')))
         end
     end
     tip('Put every switch in Settings, display and logging both, back to its\ndefault. Nothing else is touched. Click twice.')
@@ -806,13 +813,13 @@ local function drawRecastColumn(cx, lines, buffs)
     return mods
 end
 
--- The 'gives' line: the spilled mods, wrapped to the panel's width. Draws
--- nothing when the column held them all.
+-- The Stats line: every mod your maneuvers add, wrapped to the panel's
+-- width, under the cooldowns. Nothing at all while no maneuver adds a stat.
 local function drawGives(mods)
     if #mods == 0 then return end
     local cond = false
     local avail, pad = hudInner(), tm.s(12)
-    local caption = 'gives'
+    local caption = 'Stats'
     tm.text('label', COL_DIM, caption)
     tip('What your maneuvers are adding right now. Let them drop and you\nlose this much. The stat beside each one (+6 at 75) is on top of\nthis, not counted in it.')
     local x = tm.width('label', caption) + pad
@@ -873,15 +880,20 @@ local function drawStatus(pet, maneuvers, overload)
     local buffs = config.show_gives and buffSummary(equippedAttachments(), maneuverCounts(), {}) or {}
     local cx = tm.elCols()
     drawManeuverTable(rows, cx, hid)
-    local mods = drawRecastColumn(cx, #rows + 1, buffs)
+    -- The column beside the table holds only the recast cells: every stat
+    -- goes on the Stats line under the cooldowns, so it is always in one
+    -- place however many maneuvers are up (Ross, 1.2.0).
+    drawRecastColumn(cx, #rows + 1, {})
     tm.jaGrid()   -- your own recasts, under the table and its column
 
+    -- attachment notes (Flame Holder) between the cooldowns and the Stats
+    -- line, where Ross wants them
     if hasFire and hasAttachment('Flame Holder') then
         tm.text('text', COL_WARN, 'Flame Holder: the weaponskill will eat your Fire maneuvers')
         tip('+25% weaponskill damage per Fire maneuver consumed.')
     end
 
-    drawGives(mods)
+    if config.show_gives then drawGives(buffs) end
     if config.show_oils then drawOils() end
 end
 
@@ -970,7 +982,7 @@ local function drawTuningCost()
         -- tooltip below spells all five out.
         tm.text('text', COL_DIM, tm.costWord(costSource[el]))
     end
-    tip('Beat the automaton\'s stat and the maneuver costs 15 burden; lose and\nit costs 20. Dark compares MP, at 10 and 15. Green is the low cost.\nThe three numbers are the 1st, 2nd and 3rd maneuver of that element:\neach one raises the automaton\'s own stat, so a check won bare can be\nlost by the third. The step you are on is the model\'s own cost; ? is a\nstep with nothing to compare.\n\nYour side is the stat you wore when that element last resolved, so a\n? there means you have not used it yet. A gear-swap set is counted off\nits item text; /cw stat wind 83 tells it what you wear when that is off.\n\nWhere the cost came from: from the server (what it charged), learned\n(inferred over several uses), your setting (/cw stat), from your last\nuse (your stats then), from your gear now (a guess off what you are\nwearing), assumed (stats unreadable), forced (set in the config).')
+    tip('Beat the automaton\'s stat and the maneuver costs 15 burden; lose and\nit costs 20. Dark compares MP, at 10 and 15. Green is the low cost.\nThe three numbers are the 1st, 2nd and 3rd maneuver of that element:\neach one raises the automaton\'s own stat, so a check won bare can be\nlost by the third. The step you are on is the model\'s own cost; ? is a\nstep with nothing to compare.\n\nYour side is the stat you wore when that element last resolved, so a\n? there means you have not used it yet. A gear-swap set is counted off\nits item text; /cmp stat wind 83 tells it what you wear when that is off.\n\nWhere the cost came from: from the server (what it charged), learned\n(inferred over several uses), your setting (/cmp stat), from your last\nuse (your stats then), from your gear now (a guess off what you are\nwearing), assumed (stats unreadable), forced (set in the config).')
 end
 
 -- The Tuning tab body. Everything it reads is module scope or on tm.
@@ -1077,7 +1089,7 @@ local function drawFull()
     -- the text reads over a busy zone. Six vars and two colours, popped after End.
     tm.panelPush()
     imgui.SetNextWindowSize({ tm.s(config.base_width), 0 }, ImGuiCond_FirstUseEver)
-    if not imgui.Begin('clockwork', nil, HUD_FLAGS) then
+    if not imgui.Begin('companion', nil, HUD_FLAGS) then
         imgui.End()
         tm.panelPop()
         return false
@@ -1096,7 +1108,7 @@ end
 -- The what-if panel is its OWN window: moved and closed on its own, and
 -- not computed at all while it is shut. It shares the panel's visibility
 -- gates, which frame.tick applies before draw() runs - logged in, on PUP,
--- /cw show, the game's interface not hidden - because those are about the
+-- /cmp show, the game's interface not hidden - because those are about the
 -- addon rather than about this panel.
 local function drawSidebar(mainX, mainY)
     tm.panelPush()
@@ -1107,7 +1119,7 @@ local function drawSidebar(mainX, mainY)
         imgui.SetNextWindowPos({ mainX + tm.s(config.base_width) + tm.s(12), mainY },
                                ImGuiCond_FirstUseEver)
     end
-    if imgui.Begin('clockwork if you use', nil, HUD_FLAGS) then
+    if imgui.Begin('companion if you use', nil, HUD_FLAGS) then
         tm.sidebarCells()
     end
     imgui.End()

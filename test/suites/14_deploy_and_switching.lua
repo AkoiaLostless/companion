@@ -156,14 +156,14 @@ do
     send044({ head = 2, frame = 33, stats = { STR = 70 } })    -- the automaton's STR above the master's
     handlers['d3d_present']()
     cfg.stat_check = { Fire = 'win' }                           -- the player pins it: cost 15
-    handlers['command']({ command = '/cw reset' })
+    handlers['command']({ command = '/cmp reset' })
     check('the pin is the stored cost', m.cost.Fire, 15)
     check('...as a set cost', m.costSource.Fire, 'set')
     api.reconcile('Fire', 35, false)                            -- a reading: burden 60, verified
     check('burden observed at 60', m.burden.Fire, 60)
-    CLOCKWORK_TEST.last = nil
+    COMPANION_TEST.last = nil
     api.reconcile('Fire', 60 + 15 - 30 + 5, false)              -- the server agrees with the pin
-    local r = CLOCKWORK_TEST.last
+    local r = COMPANION_TEST.last
     check('a reading that agrees with the pin is a plain maneuver', r.kind, 'maneuver')
     check('...graded at the pinned cost', r.rec.err, 0)
     check('...and the record carries the pinned cost', r.rec.cost, 15)
@@ -171,14 +171,14 @@ do
     -- the same for a cost the server taught: three contradictions froze it
     cfg.stat_check = {}
     m.cost.Fire, m.costSource.Fire = 15, 'observed'
-    CLOCKWORK_TEST.last = nil
+    COMPANION_TEST.last = nil
     api.reconcile('Fire', m.burden.Fire + 15 - 30 + 5, false)
-    r = CLOCKWORK_TEST.last
+    r = COMPANION_TEST.last
     check('a reading that agrees with the taught cost is a plain maneuver', r.kind, 'maneuver')
     check('...graded at the taught cost', r.rec.err, 0)
     check('...which stays taught', m.costSource.Fire, 'observed')
     cfg.stat_check = was
-    handlers['command']({ command = '/cw reset' })
+    handlers['command']({ command = '/cmp reset' })
 end
 
 -- --------------------------------- a stat you set outranks what is read --
@@ -202,11 +202,11 @@ do
     world.stats = { [3] = 73 }            -- AGI as memory holds it: no set in it
     send044({ head = 2, frame = 33, stats = { AGI = 80 } })
     handlers['d3d_present']()
-    handlers['command']({ command = '/cw reset' })
+    handlers['command']({ command = '/cmp reset' })
     check('the stale read loses the check', (api.computeCost('Wind')), 20)
 
     -- the Wind set is worth +10 AGI, and the client cannot see it
-    handlers['command']({ command = '/cw stat wind 83' })
+    handlers['command']({ command = '/cmp stat wind 83' })
     check('the command stores the stat', cfg.stat_check.Wind, 83)
     check('...so the check is won', (api.computeCost('Wind')), 15)
     check('...the model holds that cost', m.cost.Wind, 15)
@@ -227,7 +227,7 @@ do
     check('...and the 3rd', ladder[3], 20)
 
     -- the case the ladder exists for: a stat that carries two and not three
-    handlers['command']({ command = '/cw stat wind 88' })
+    handlers['command']({ command = '/cmp stat wind 88' })
     ladder = api.costLadder('Wind')
     check('88 wins the 1st', ladder[1], 15)
     check('...and the 2nd', ladder[2], 15)
@@ -256,7 +256,7 @@ do
     world.icons, world.timers = nil, nil
     send044({ head = 2, frame = 33, stats = { AGI = 80 } })
     handlers['d3d_present']()
-    handlers['command']({ command = '/cw stat wind 83' })
+    handlers['command']({ command = '/cmp stat wind 83' })
 
     -- stacked: the automaton's AGI climbs past the number and it loses again,
     -- which is the whole reason this is a number and not a verdict
@@ -267,23 +267,23 @@ do
 
     -- `now` takes the LIVE read, not the setting: the one call that has to see
     -- what memory holds
-    handlers['command']({ command = '/cw stat wind now' })
+    handlers['command']({ command = '/cmp stat wind now' })
     check('now takes the live read', cfg.stat_check.Wind, 73)
 
-    handlers['command']({ command = '/cw stat wind off' })
+    handlers['command']({ command = '/cmp stat wind off' })
     check('off clears the setting', cfg.stat_check.Wind, nil)
     check('...and the source with it', m.costSource.Wind ~= 'yours', true)
 
     -- what it refuses: Dark reads MP live, and neither a non-element nor an
     -- impossible stat may land
-    handlers['command']({ command = '/cw stat dark 50' })
+    handlers['command']({ command = '/cmp stat dark 50' })
     check('Dark is refused - it compares MP', cfg.stat_check.Dark, nil)
-    handlers['command']({ command = '/cw stat banana 50' })
-    handlers['command']({ command = '/cw stat wind 0' })
-    handlers['command']({ command = '/cw stat wind 1000' })
+    handlers['command']({ command = '/cmp stat banana 50' })
+    handlers['command']({ command = '/cmp stat wind 0' })
+    handlers['command']({ command = '/cmp stat wind 1000' })
     check('an impossible stat is refused', cfg.stat_check.Wind, nil)
     printed = {}
-    handlers['command']({ command = '/cw stat' })
+    handlers['command']({ command = '/cmp stat' })
     check('the list names the stat each element checks', said('AGI'), true)
 
     -- ...and a setting that has gone stale - food worn off, gear changed - is
@@ -293,7 +293,7 @@ do
     cfg.anomaly_chat = true
     send044({ head = 2, frame = 33, stats = { AGI = 80 } })   -- bare again: 83 wins
     handlers['d3d_present']()
-    handlers['command']({ command = '/cw stat wind 83' })
+    handlers['command']({ command = '/cmp stat wind 83' })
     api.reconcile('Wind', 35, false)                  -- burden 60, verified
     printed = {}
     api.reconcile('Wind', 60 + 20 - 30 + 5, false)    -- the server charged 20, not 15
@@ -305,7 +305,7 @@ do
     cfg.anomaly_chat = wasChat
     cfg.stat_check, world.stats = was, wasStats
     api.selectTuneTab(wasTune)
-    handlers['command']({ command = '/cw reset' })
+    handlers['command']({ command = '/cmp reset' })
 end
 
 
@@ -560,7 +560,7 @@ end
 -- is revived.
 do
     local SELF = 0x01000001
-    local pet, st = require('cw.pet'), require('cw.state')
+    local pet, st = require('cmp.pet'), require('cmp.state')
     petOut(PET + 300, MOB + 300)
     api.forgetPet()
     api.timersClear(true, 'activate')
@@ -649,17 +649,17 @@ end
 
 -- ------------------------------------------------------- the cost knobs --
 -- config.default_cost / dark_cost are the knobs for a server whose maneuver
--- costs differ, so all three cost sites in cw/burden.lua must read them rather
+-- costs differ, so all three cost sites in cmp/burden.lua must read them rather
 -- than hardcode 15/20 (Dark 10/15).
 do
     local m, cfg = api.model(), api.config
     local was = cfg.stat_check
     cfg.default_cost, cfg.dark_cost = 25, 12
     cfg.stat_check = { Fire = 'lose', Dark = 'win' }
-    handlers['command']({ command = '/cw reset' })   -- applyStatCheck on every element
+    handlers['command']({ command = '/cmp reset' })   -- applyStatCheck on every element
     check('default_cost is the lost-check cost', m.cost.Fire, 25)
     check('dark_cost is the lost-check cost for Dark, won is 5 under it', m.cost.Dark, 7)
     cfg.default_cost, cfg.dark_cost, cfg.stat_check = 20, 15, was
-    handlers['command']({ command = '/cw reset' })
+    handlers['command']({ command = '/cmp reset' })
     check('the knobs restore', m.cost.Fire, 20)
 end

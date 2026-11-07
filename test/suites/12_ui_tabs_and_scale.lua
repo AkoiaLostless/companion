@@ -88,7 +88,7 @@ do
     -- The player's OWN ImGui scale. ui_scale back to 100, FontScaleMain at
     -- 1.5: ImGui multiplies that onto every size we push, so tm.px must NOT
     -- and the layout MUST. Before 1.17.0 the strings knew about it and the
-    -- offsets did not, which drew a bigger clockwork over an unchanged layout.
+    -- offsets did not, which drew a bigger companion over an unchanged layout.
     cfg.ui_scale = 100
     world.fontScaleMain = 1.5
     frame('global font scale')
@@ -191,18 +191,18 @@ do
     check('an untouched box changes nothing', cfg.ui_scale, 75)
     check('...and writes nothing', api.saveCount(), saves)
     cfg.ui_scale = scale0
-    check('settings names the log path', saw('config/addons/clockwork'), true)
+    check('settings names the log path', saw('config/addons/companion'), true)
     -- One path on the tab, not two: the logging column named the log directory
     -- and the foot of the tab named the settings file, both in the same folder.
     local paths = 0
     for _, d in ipairs(drawn) do
-        if tostring(d):find('config/addons/clockwork', 1, true) then paths = paths + 1 end
+        if tostring(d):find('config/addons/companion', 1, true) then paths = paths + 1 end
     end
     check('settings names it once, not twice', paths, 1)
     -- and it is drawn at label size rather than wrapped, so it stays one line
     check('the settings path is not wrapped', saw('WRAPPED:saved to'), false)
     check('the settings path is still there', saw('saved to '), true)
-    -- /cw verbose still reaches log_all_casts; the switch left the tab
+    -- /cmp verbose still reaches log_all_casts; the switch left the tab
     check('settings drops the verbose switch', saw('BTN:log unrecognised pet skills'), false)
     -- GetInstallPath comes back with a trailing separator and the builders added
     -- their own: `.../Game//config/...` on screen.
@@ -285,10 +285,10 @@ do
     suiteLogging()
 
     -- ...and the model reset, which is why this block is last. Its button left
-    -- the tab in 1.12.18 - `/cw reset` was always the same code path, and a
+    -- the tab in 1.12.18 - `/cmp reset` was always the same code path, and a
     -- reload clears the lot anyway, none of it being persisted.
     while #printed > 0 do table.remove(printed) end
-    handlers['command']({ command = '/cw reset' })
+    handlers['command']({ command = '/cmp reset' })
     frame('after the reset')
     local function said(text)
         for _, p in ipairs(printed) do if p:find(text, 1, true) then return true end end
@@ -348,6 +348,6 @@ do
     check('queued preview mentions the regen', (w2 or ''):find('-> then', 1, true) ~= nil, true)
     check('queued real line does not hedge', (w2 or ''):find('or a Regen', 1, true), nil)
     send028(act(8, 110, SELF))
-    check('queued preview did not excuse the cast', CLOCKWORK_TEST.last.kind, 'spell_mispredicted')
+    check('queued preview did not excuse the cast', COMPANION_TEST.last.kind, 'spell_mispredicted')
     world.icons, world.timers = nil, nil
 end

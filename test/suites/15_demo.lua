@@ -1,5 +1,5 @@
 -- ------------------------------------------------------------ demo mode --
--- /cw demo makes up an automaton so the HUD can be looked at without being on
+-- /cmp demo makes up an automaton so the HUD can be looked at without being on
 -- PUP with a pet out. It is not a second model: the made-up inputs go in at the
 -- same seam this harness stubs, and everything above - burden, the ladder, the
 -- recast rows, the sidebar - is the real code. These checks are that the panel
@@ -15,7 +15,7 @@ do
     api.timersClear(false)
     local burden0 = api.model().burden.Fire
     printed = {}
-    handlers['command']({ command = '/cw demo' })
+    handlers['command']({ command = '/cmp demo' })
     check('demo refuses while a pet is out', api.demoOn(), false)
     local refused = false
     for _, p in ipairs(printed) do if p:find('pet', 1, true) then refused = true end end
@@ -30,13 +30,13 @@ do
     -- demo's constant and the block used to run inside a zone window.
     petIn()
     api.timersClear(false)
-    CLOCKWORK_TEST.last = nil
-    handlers['command']({ command = '/cw demo' })
+    COMPANION_TEST.last = nil
+    handlers['command']({ command = '/cmp demo' })
     check('demo is on', api.demoOn(), true)
     frame('demo')
     check('no lifecycle edge fires on the made-up automaton',
-          CLOCKWORK_TEST.last == nil or (CLOCKWORK_TEST.last.kind ~= 'pet_despawn'
-                                         and CLOCKWORK_TEST.last.kind ~= 'pet_respawn'), true)
+          COMPANION_TEST.last == nil or (COMPANION_TEST.last.kind ~= 'pet_despawn'
+                                         and COMPANION_TEST.last.kind ~= 'pet_respawn'), true)
     check('the made-up automaton is drawn', saw('Alpha'), true)
     check('...with its target', saw('Steelshell Crab'), true)
     -- the model ran on the made-up inputs rather than being printed from them
@@ -133,7 +133,7 @@ do
     -- the next one is a different frame, which is the point of having more
     -- than one: a melee frame never reaches the spell ladder and only
     -- Sharpshot has a shot whose recast the head and Drum Magazine move.
-    handlers['command']({ command = '/cw demo' })
+    handlers['command']({ command = '/cmp demo' })
     frame('demo 2')
     check('the second automaton is drawn', saw('Bravo'), true)
     check('...and it is the Sharpshot frame', api.currentFrame(), 'Sharpshot')
@@ -158,7 +158,7 @@ do
 
     -- ...and the rest of the list, then off. The cycle always ends somewhere
     -- you can get back out of.
-    handlers['command']({ command = '/cw demo' })
+    handlers['command']({ command = '/cmp demo' })
     check('the third is the healer', api.demoName(), 'Soulsoother, healer')
     -- On a caster frame the compact bar's big line is the SPELL and the
     -- weaponskill drops to the footnote, which is the only place the string
@@ -171,7 +171,7 @@ do
     frame('caster compact, no weaponskill')
     check('show_ws off takes the weaponskill off the caster strip', saw('WS '), false)
     api.config.show_ws = true
-    handlers['command']({ command = '/cw demo' })   -- 4: Spiritreaver
+    handlers['command']({ command = '/cmp demo' })   -- 4: Spiritreaver
     check('the fourth is overloaded', api.demoName(), 'Spiritreaver, overloaded')
     api.config.compact = false
     local _, ol = api.activeManeuvers()
@@ -184,7 +184,7 @@ do
     -- already stale by the exit and could not show the bug.
     check('the equipped set is the made-up one',
           ((api.equippedSet() or {}).head or ''):find('Spiritreaver', 1, true) ~= nil, true)
-    handlers['command']({ command = '/cw demo' })
+    handlers['command']({ command = '/cmp demo' })
     check('demo is off at the end of the list', api.demoOn(), false)
     check('the automaton went with it', api.model().burden.Earth, 0)
     -- ...and so did its loadout. disable() cleared tm.auto044 without moving

@@ -5,14 +5,14 @@ do
     -- wrote a line no parser could read.
     local dir = SCRATCH .. '/json/'
     api.config.logging, api.config.log_dir = true, dir
-    handlers['command']({ command = '/cw sync' })          -- one model_reset line
+    handlers['command']({ command = '/cmp sync' })          -- one model_reset line
     local f = io.open(('%s%s_%s.jsonl'):format(dir, 'Harness', os.date('%Y.%m.%d')), 'r')
     check('the log went to the directory', f ~= nil, true)
     if f ~= nil then f:close() end
     -- 30. ...and it does so with no trailing slash on log_dir, which used to
     -- glue the directory onto the filename
     api.config.log_dir = SCRATCH .. '/json2'
-    handlers['command']({ command = '/cw sync' })
+    handlers['command']({ command = '/cmp sync' })
     local g = io.open(('%s/%s_%s.jsonl'):format(SCRATCH .. '/json2', 'Harness',
                                                 os.date('%Y.%m.%d')), 'r')
     check('a log_dir without a slash still lands in it', g ~= nil, true)
@@ -111,7 +111,7 @@ end
 do
     local cfg = api.config
     local scale0 = cfg.ui_scale
-    -- 15. The `/cw width` command went with the other setting-setters in
+    -- 15. The `/cmp width` command went with the other setting-setters in
     -- 1.15.2 - the Settings tab owns what it sets - and its NaN and clamp
     -- guards went with it; the width itself became a scale in 1.17.0. The
     -- guard that matters is the one on the way IN, below: a hand-edited or
@@ -242,11 +242,11 @@ do
     local realGetEntity = GetEntity
     GetEntity = function() return nil end
     api.resetSwallowed()
-    CLOCKWORK_TEST.last = nil
+    COMPANION_TEST.last = nil
     handlers['d3d_present']()
     frame('a culled automaton')
     check('a culled automaton does not read as a despawn',
-          CLOCKWORK_TEST.last ~= nil and CLOCKWORK_TEST.last.kind == 'pet_despawn', false)
+          COMPANION_TEST.last ~= nil and COMPANION_TEST.last.kind == 'pet_despawn', false)
     check('and the frame still swallows nothing', api.swallowed(), 0)
     GetEntity = realGetEntity
     handlers['d3d_present']()
@@ -267,7 +267,7 @@ do
     world.icons, world.timers = nil, nil
     advance(30)
     petOut(PET + 65, MOB + 65)
-    handlers['command']({ command = '/cw sync' })          -- every element at 0
+    handlers['command']({ command = '/cmp sync' })          -- every element at 0
 
     -- one maneuver per element, through the 0x028 handler. 141..148 are
     -- Fire..Dark (abilities.sql), and each must move ITS OWN element and no
@@ -295,7 +295,7 @@ do
 
     -- an INJECTED packet is another addon's, not the server's, and must be
     -- ignored outright: acting on one double-counts whatever sent it
-    handlers['command']({ command = '/cw sync' })
+    handlers['command']({ command = '/cmp sync' })
     advance(6)
     handlers['packet_in']({ id = 0x028, injected = true,
                             data = build028({ actor = SELF, category = 6, param = 141,
@@ -338,21 +338,21 @@ do
     -- one maneuver doubles its cost. 5 s, and the BOUNDARY is what is tested -
     -- 4.5 s in, so a window shortened to 4 fails here where a repeat at 4 s
     -- flat would still look deduped under either value.
-    handlers['command']({ command = '/cw sync' })
+    handlers['command']({ command = '/cmp sync' })
     advance(6)
     local function fire(seq) send028({ actor = SELF, category = 6, param = 141, seq = seq,
                                        targets = { { id = SELF, actions = {
                                            { message = 798, param = 45 } } } } }) end
     fire(7)
-    CLOCKWORK_TEST.last = nil
+    COMPANION_TEST.last = nil
     advance(4.5)
     fire(7)
-    check('a resend inside the window is dropped', CLOCKWORK_TEST.last, nil)
+    check('a resend inside the window is dropped', COMPANION_TEST.last, nil)
     -- the same action in a new chunk carries a new sequence: a real second cast
     fire(8)
-    check('a new sequence inside the window is a new reading', CLOCKWORK_TEST.last ~= nil, true)
-    CLOCKWORK_TEST.last = nil
+    check('a new sequence inside the window is a new reading', COMPANION_TEST.last ~= nil, true)
+    COMPANION_TEST.last = nil
     advance(1)                                    -- 5.5 s from the first: the same bytes, past the window
     fire(7)
-    check('and past it is a new reading', CLOCKWORK_TEST.last ~= nil, true)
+    check('and past it is a new reading', COMPANION_TEST.last ~= nil, true)
 end

@@ -1,5 +1,5 @@
 """
-Offline test run for the clockwork addon.
+Offline test run for the companion addon.
 
 No standalone Lua interpreter is needed: the addon is loaded into lupa's
 embedded LuaJIT 2.1 - the Lua Ashita runs; lupa's default runtime may be a
@@ -35,7 +35,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 
 # Which copy of the addon to test.
 TARGET = os.path.normpath(os.path.join(HERE, ".."))
-# TARGET = r"<your ashita folder>\addons\clockwork"   # to test a deployed copy
+# TARGET = r"<your ashita folder>\addons\companion"   # to test a deployed copy
 
 # The harness, in the order it runs.
 FILES = [
@@ -61,6 +61,7 @@ FILES = [
     ("suites/16_ja_cooldowns.lua", "your own job abilities' recasts: the read, the switches, the column, the Settings block"),
     ("suites/17_gear_stats.lua", "your stat with the gear on now: item text, the 0x061 basis, a maneuver set the client never sees"),
     ("suites/18_pacing.lua", "the model's pace between packets, the per-frame maneuver read, the target's slot from its id"),
+    ("suites/19_pets_and_recast_list.lua", "the pet window for BST, SMN and DRG, its timer and light packet path, and the recast list"),
     ("fixtures/report.lua", "the totals; any failure makes the run fail"),
 ]
 
@@ -88,7 +89,7 @@ def locate(message, origin):
 
 def main():
     source, origin = build()
-    scratch = tempfile.mkdtemp(prefix="clockwork-test-")
+    scratch = tempfile.mkdtemp(prefix="companion-test-")
     runtime = lupa.LuaRuntime(unpack_returned_tuples=True)
     run = runtime.eval(
         "function(src, dir, scratch) return assert(load(src, 'harness'))(dir, scratch) end"

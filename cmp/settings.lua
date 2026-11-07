@@ -1,12 +1,12 @@
--- cw/settings.lua - the Settings tab's toggles, kept across a reload. Owns the
+-- cmp/settings.lua - the Settings tab's toggles, kept across a reload. Owns the
 -- whitelist of saved keys and their defaults. Returns nothing; publishes
 -- tm.settingsPath, tm.saveSettings, tm.loadSettings, tm.restoreDefaults and
--- tm.saveCount. tm.installRoot (cw/log.lua) and tm.sidebarInvalidate are reached
+-- tm.saveCount. tm.installRoot (cmp/log.lua) and tm.sidebarInvalidate are reached
 -- through tm at call time, so neither module is required here.
 local chat = require('chat')
-local config = require('cw.config')
-local tm = require('cw.state')
-local U  = require('cw.util')
+local config = require('cmp.config')
+local tm = require('cmp.state')
+local U  = require('cmp.util')
 local safe = U.safe
 
 -- ======================================================== settings file ==
@@ -42,9 +42,12 @@ local PERSIST = {
     show_oils         = { 'bool' },
     hide_zero_ol_rows = { 'bool' },
     show_ol_secs      = { 'bool' },
-    -- your own job abilities in the recast column (cw/cooldowns.lua)
+    -- your own job abilities in the recast column (cmp/cooldowns.lua)
     cd_hide_ready     = { 'bool' },
     cd_dials          = { 'bool' },
+    cd_list           = { 'bool' },
+    pet_window        = { 'bool' },
+    charm_check       = { 'bool' },
     cd_activate       = { 'bool' },
     cd_dea            = { 'bool' },
     cd_repair         = { 'bool' },
@@ -63,7 +66,7 @@ local PERSIST = {
     warn_at           = { 'int', 1, 100 },
 }
 -- The stat you have on when each element's maneuver goes off, as a number
--- (cw/config.lua's stat_check). Saved as `stat_Wind = 83`, because it is your
+-- (cmp/config.lua's stat_check). Saved as `stat_Wind = 83`, because it is your
 -- own gear rather than one of the model's constants, and retyping it after
 -- every reload is not a thing anyone would do. NUMBERS ONLY: a 'win' / 'lose'
 -- verdict stays an inline edit, so an old file still cannot resurrect one. A
@@ -86,7 +89,7 @@ for k in pairs(PERSIST) do ORDER[#ORDER + 1] = k end
 table.sort(ORDER)   -- a stable file, so a diff of one means something
 
 tm.settingsPath = function()
-    return ('%s/config/addons/clockwork/settings.txt'):format(tm.installRoot())
+    return ('%s/config/addons/companion/settings.txt'):format(tm.installRoot())
 end
 
 tm.saveCount = 0
@@ -98,8 +101,8 @@ tm.saveSettings = function()
     local ok = safe(function()
         safe(function() ashita.fs.create_directory(
             (tm.settingsPath():gsub('/settings%.txt$', '/'))) end)
-        local lines = { '# clockwork settings, saved whenever one is changed in game.\n',
-                        '# Delete this file to go back to the defaults in cw/config.lua.\n' }
+        local lines = { '# companion settings, saved whenever one is changed in game.\n',
+                        '# Delete this file to go back to the defaults in cmp/config.lua.\n' }
         for _, k in ipairs(ORDER) do
             lines[#lines + 1] = ('%s = %s\n'):format(k, tostring(config[k]))
         end
@@ -115,7 +118,7 @@ tm.saveSettings = function()
         return (U.writeFile(tm.settingsPath(), table.concat(lines)))
     end, false)
     if not ok then
-        print(chat.header('clockwork'):append(chat.error(
+        print(chat.header('companion'):append(chat.error(
             'settings could not be saved to ' .. tm.settingsPath()
             .. ' - the change applies to this session only')))
     end
@@ -158,6 +161,46 @@ tm.loadSettings = function()
         -- Those stats decide each element's cost, and nothing else would
         -- recompute them until the next 0x044 arrived.
         tm.refreshStatChecks()
+        return true
+    end, false)
+end
+
+-- First load after Clockwork: your settings and saved sets come across from
+-- config/addons/clockwork/, once. Only while companion has no settings file of
+-- its own, and a set already in companion/sets/ is never overwritten. Clockwork's
+-- folder is left as it was.
+local function exists(path)
+    local f = io.open(path, 'r')
+    if f == nil then return false end
+    f:close()
+    return true
+end
+local function copyFile(from, to)
+    local f = io.open(from, 'rb')
+    if f == nil then return false end
+    local text = f:read('*a')
+    f:close()
+    return U.writeFile(to, text)
+end
+tm.migrateFromClockwork = function()
+    return safe(function()
+        if exists(tm.settingsPath()) then return false end
+        local old = ('%s/config/addons/clockwork/'):format(tm.installRoot())
+        if not exists(old .. 'settings.txt') then return false end
+        local new = tm.settingsPath():gsub('settings%.txt$', '')
+        ashita.fs.create_directory(new)
+        ashita.fs.create_directory(new .. 'sets/')
+        copyFile(old .. 'settings.txt', tm.settingsPath())
+        local n = 0
+        for _, f in ipairs(ashita.fs.get_directory(old .. 'sets/', '.*.txt', false) or {}) do
+            local name = f:match('([^/\\]+%.txt)$')
+            if name ~= nil and not exists(new .. 'sets/' .. name)
+               and copyFile(old .. 'sets/' .. name, new .. 'sets/' .. name) then
+                n = n + 1
+            end
+        end
+        print(chat.header('companion'):append(chat.message(
+            ('brought your Clockwork settings and %d saved sets across'):format(n))))
         return true
     end, false)
 end

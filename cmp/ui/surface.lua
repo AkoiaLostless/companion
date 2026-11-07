@@ -1,4 +1,4 @@
--- cw/ui/surface.lua - how the HUD draws: the palette, the scale, the fonts and
+-- cmp/ui/surface.lua - how the HUD draws: the palette, the scale, the fonts and
 -- shadowed text, bars, squares, gems and the cog, the icon loaders, and the
 -- vitals, target, status and recast strips built from them. Nothing here knows
 -- what a number means. Publishes the draw primitives and tab state on tm; returns
@@ -7,21 +7,21 @@ local imgui = require('imgui')
 local d3d8  = require('d3d8')
 local ffi   = require('ffi')
 local chat  = require('chat')
-local config = require('cw.config')
-local D  = require('cw.data')
+local config = require('cmp.config')
+local D  = require('cmp.data')
 local ELEMENTS, EFFECT_MANEUVER_1 = D.ELEMENTS, D.EFFECT_MANEUVER_1
 local ATTACH_OFFSET, EQUIP_OFFSET = D.ATTACH_OFFSET, D.EQUIP_OFFSET
 local ABILITY_ICON = D.ABILITY_ICON
-local tm = require('cw.state')
-local A  = require('cw.attachments')
+local tm = require('cmp.state')
+local A  = require('cmp.attachments')
 local fmtMod = A.fmtMod
-local U  = require('cw.util')
+local U  = require('cmp.util')
 local safe = U.safe
-local P  = require('cw.pet')
+local P  = require('cmp.pet')
 local MAX_EFFECT_AGE, petEffects = P.MAX_EFFECT_AGE, P.petEffects
--- for the name -> item id map behind the ability icons. cw/sets.lua requires
+-- for the name -> item id map behind the ability icons. cmp/sets.lua requires
 -- nothing from the UI, so this stays acyclic.
-local S  = require('cw.sets')
+local S  = require('cmp.sets')
 
 -- Element colours, matching the in-game elemental palette.
 local EL_COLOR =
@@ -43,7 +43,7 @@ local COL_TP   = { 0.80, 0.66, 0.24, 1.0 }
 local COL_TPUP = { 1.00, 0.86, 0.32, 1.0 }   -- TP >= 1000: a WS can fire
 
 -- A HUD, not a form: no title bar or border, sized to its content. Drag
--- anywhere on the panel to move it; /cw show hides it.
+-- anywhere on the panel to move it; /cmp show hides it.
 local HUD_FLAGS = bit.bor(ImGuiWindowFlags_NoTitleBar, ImGuiWindowFlags_NoCollapse,
                           ImGuiWindowFlags_NoScrollbar, ImGuiWindowFlags_AlwaysAutoResize)
 
@@ -147,7 +147,7 @@ tm.fontLoad = function()
     tm.font     = load(config.font_regular)
     tm.fontBold = load(config.font_bold)
     if #missing > 0 then
-        print(chat.header('clockwork'):append(chat.error(
+        print(chat.header('companion'):append(chat.error(
             ('font not found in C:\\Windows\\Fonts: %s - using the default font')
             :format(table.concat(missing, ', ')))))
     end
@@ -287,7 +287,7 @@ tm.tabButtons = function()
         config.compact = true
         tm.saveSettings()
     end
-    tip('Shrink to the one-line strip. Same as /cw compact.')
+    tip('Shrink to the one-line strip. Same as /cmp compact.')
     -- Drawn, not lettered: the same height as a SmallButton so the row sits
     -- level, and an InvisibleButton to own the click. The cog is drawn well
     -- inside its square, at 0.26 of it: any larger and, with the teeth, it
@@ -305,7 +305,7 @@ tm.tabButtons = function()
         config.show_window = false
         tm.saveSettings()
     end
-    tip('Hide the panel. Logging keeps running. /cw show brings it back.')
+    tip('Hide the panel. Logging keeps running. /cmp show brings it back.')
     imgui.PopFont()
 end
 
@@ -624,7 +624,7 @@ tm.targetRow = function()
     -- Nothing to fight: said outright rather than by leaving the row out, so
     -- nothing under it moves.
     if tm.petTarget == 0 then
-        tm.text('label', COL_DIM, 'target')
+        tm.text('label', COL_DIM, 'Target')
         imgui.SameLine()
         tm.text('text', COL_DIM, 'NOT ENGAGED')
         return
@@ -634,7 +634,7 @@ tm.targetRow = function()
     if slot == nil then
         -- Out of the entity table: too far to render, or dead and despawned.
         -- The last name is kept so a one-frame flap does not blank the row.
-        tm.text('label', COL_DIM, 'target')
+        tm.text('label', COL_DIM, 'Target')
         imgui.SameLine()
         tm.text('text', COL_DIM, ('%s - out of sight'):format(tm.targetName()))
         tip('Too far away to read, or dead.')
@@ -644,7 +644,7 @@ tm.targetRow = function()
     -- Still in the entity table at zero: it is dead, not on 0% of its health -
     -- the server never reports a living mob below 1.
     if hpp <= 0 then
-        tm.text('label', COL_DIM, 'target')
+        tm.text('label', COL_DIM, 'Target')
         imgui.SameLine()
         tm.text('text', COL_DIM, 'NOT ENGAGED')
         return
@@ -660,7 +660,7 @@ tm.targetRow = function()
     -- going well. One colour, the game's own enemy-bar convention.
     tm.bar(nil, hpp / 100, ('%d%%'):format(hpp), COL_MOB,
            hudInner() - nameW - tm.width('label', '100%') - pad, 6)
-    tip('What the automaton last acted on - not necessarily your target.')
+    tip('What your pet last acted on - not necessarily your target.')
 end
 
 -- Which effects are debuffs: XIUI's classification (libs/bufftable.lua,
@@ -881,6 +881,13 @@ end
 -- labelW pads every label to the widest in its group, so the values end level
 -- however the abilities are named.
 tm.recastCell = function(r, labelW)
+    if config.cd_list then
+        local nameW, _, boxW = tm.listWidths(tm.rows)
+        tm.listCell(r, boxW, nameW)
+        tip(('%s: %ds recast. Ready means usable, not that it is about to\nfire. ? = not used since the addon loaded.')
+            :format(r.name, r.model))
+        return
+    end
     local txt = (r.state == 'counting' and tm.fmtLeft(r.remaining))
              or (r.state == 'ready' and 'ready') or '?'
     abilityCell(r)
@@ -891,8 +898,85 @@ tm.recastCell = function(r, labelW)
     tip(('%s: %ds recast. Ready means usable, not that it is about to\nfire. ? = not used since the addon loaded.')
         :format(r.name, r.model))
 end
+-- One recast as a list row, the way PetsReborn lays its recasts out: the
+-- time right-aligned in a column `timeW` wide, then the name. Green Ready,
+-- amber once it is in the last LIST_NEAR of its recast, white while it
+-- counts, dim when it has not been seen since the addon loaded. `total` is
+-- the whole recast, or nil when it is not known (no amber then).
+local LIST_NEAR = 0.30
+tm.listTimeW = function()
+    return math.max(tm.width('text', 'Ready'), tm.width('text', '00:00'))
+end
+
+-- Each recast as a box of its own, a faint panel with a bar down its left
+-- edge in its state's color, so neighbouring abilities can never run into
+-- each other. Inside, one typeface and one baseline for everything: the
+-- name from the left edge, the charges (Ready's n/3) after it in a slot of
+-- their own, and the time right-aligned against the box's right edge, so the
+-- times of a column end on one line.
+local LIST_BG = { 1, 1, 1, 0.07 }
+local function listColor(state, remaining, total)
+    if state == 'ready' then return COL_GOOD end
+    if state == 'counting' then
+        return (total ~= nil and total > 0 and remaining / total <= LIST_NEAR) and COL_WARN or COL_TEXT
+    end
+    return COL_DIM
+end
+-- The widths a column of boxes needs to hold `rows`: the widest name, the
+-- charges slot (0 when none has charges), and the box as a whole.
+tm.listWidths = function(rows)
+    local nameW, chargeW = 0, 0
+    for _, r in ipairs(rows) do
+        local w = tm.width('text', r.label)
+        if w > nameW then nameW = w end
+        if r.charges ~= nil then chargeW = math.max(chargeW, tm.width('text', '0/3') + tm.s(6)) end
+    end
+    local pad = tm.s(6)
+    return nameW, chargeW, pad + nameW + chargeW + tm.s(10) + tm.listTimeW() + pad
+end
+tm.listCell = function(r, boxW, nameW)
+    local state, remaining = r.state, r.remaining
+    local txt = (state == 'counting' and tm.fmtLeft(remaining))
+             or (state == 'ready' and 'Ready') or '?'
+    -- A charge ability (Ready): usable with charges in stock while the next
+    -- one still refills, so the time to that next charge shows, in green.
+    if r.charges ~= nil and remaining ~= nil and remaining > 0 then txt = tm.fmtLeft(remaining) end
+    local col = listColor(state, remaining, r.total or r.model)
+    local x, y = imgui.GetCursorScreenPos()
+    local th = tm.px('text')
+    local h, pad = th + tm.s(6), tm.s(6)
+    local dl = imgui.GetWindowDrawList()
+    dl:AddRectFilled({ x, y }, { x + boxW, y + h }, tm.u32(LIST_BG), tm.s(3))
+    dl:AddRectFilled({ x, y }, { x + tm.s(2), y + h }, tm.u32(col), 0)
+    imgui.PushFont(tm.font, th)
+    local ty = y + (h - th) / 2
+    local function put(tx, s, c)
+        dl:AddText({ tx + tm.s(1), ty + tm.s(1) }, tm.SHADOW, s)
+        dl:AddText({ tx, ty }, tm.u32(c), s)
+    end
+    -- The name gets the box less the time column (and the charges slot when
+    -- this row has charges); one that does not fit is cut, never overlapped.
+    local chargeTxt = r.charges ~= nil and ('%d/%d'):format(r.charges, r.maxCharges) or nil
+    local room = boxW - pad * 2 - tm.s(10) - tm.listTimeW()
+    if chargeTxt ~= nil then room = room - imgui.CalcTextSize('0/3') - tm.s(6) end
+    local nameX = math.min(nameW, room)
+    put(x + pad, tm.fit(r.label, room, 'text'), (state == 'ready') and COL_TEXT or COL_DIM)
+    if chargeTxt ~= nil then
+        put(x + pad + nameX + tm.s(6), chargeTxt, (r.charges > 0) and COL_GOOD or COL_DIM)
+    end
+    put(x + boxW - pad - imgui.CalcTextSize(txt), txt, col)
+    imgui.PopFont()
+    imgui.Dummy({ boxW, h })
+end
+
 -- What is left on one of your own abilities, or that it is ready, on hover.
 local function jaTip(r)
+    if r.charges ~= nil then
+        tip(('%s: %d of %d charges.%s'):format(r.name, r.charges, r.maxCharges,
+            (r.remaining ~= nil and r.remaining > 0)
+                and (' Next in %s (%s a charge).'):format(tm.fmtLeft(r.remaining), tm.fmtLeft(r.total)) or ''))
+        return
+    end
     if r.state == 'counting' then
         local left = tm.fmtLeft(r.remaining)
         tip(r.total ~= nil and ('%s: %s left of %s.'):format(r.name, left, tm.fmtLeft(r.total))
@@ -957,10 +1041,34 @@ end
 -- The compact strip draws them too, under itself: from x0, `width` wide, and
 -- with no label. Each of its lines needs an item that is not SameLine to begin
 -- it - lineStart, which is the rail's slot - and then is placed like the rest.
-tm.jaGrid = function(x0, width, lineStart)
-    local rows = tm.jaRows
+-- `rows` defaults to tm.jaRows; the other pet jobs' window hands its own.
+tm.jaGrid = function(x0, width, lineStart, rows)
+    rows = rows or tm.jaRows
     if #rows == 0 then return end
     x0, width = x0 or hudPad(), width or hudInner()
+    -- The list, as a grid of boxes. Not on the compact strip (lineStart): it
+    -- has no room for names.
+    if config.cd_list and lineStart == nil then
+        -- A grid of equal boxes, filled left to right: as many columns as
+        -- the width holds, but at least three (fewer only when there are
+        -- fewer rows), each stretched so the row fills the window's width. A
+        -- name too long for its box is cut to fit rather than pushing the
+        -- time out.
+        local nameW, _, natural = tm.listWidths(rows)
+        local gap = tm.s(6)
+        local cols = math.floor((width + gap) / (natural + gap))
+        cols = math.max(math.min(3, #rows), math.min(#rows, cols))
+        local cell = (width - gap * (cols - 1)) / cols
+        tm.text('label', COL_DIM, 'Cooldowns')
+        tip('Your own job abilities\' recasts, straight from the client. Which\nones, and whether a ready one is listed: Settings, display.')
+        for i, r in ipairs(rows) do
+            local c = (i - 1) % cols
+            if c > 0 then imgui.SameLine(x0 + c * (cell + gap), 0) end
+            tm.listCell(r, cell, nameW)
+            jaTip(r)
+        end
+        return
+    end
     local labelW, cell, gap = 0, cellW(), tm.s(3)
     if not config.cd_dials then
         for _, r in ipairs(rows) do
@@ -972,7 +1080,7 @@ tm.jaGrid = function(x0, width, lineStart)
     end
     local cols = math.max(1, math.floor((width + gap) / (cell + gap)))
     if lineStart == nil then
-        tm.text('label', COL_DIM, 'you')
+        tm.text('label', COL_DIM, 'Cooldowns')
         tip('Your own job abilities\' recasts, straight from the client. Which\nones, how they are drawn, and whether a ready one is listed:\nSettings, display.')
     end
     for i, r in ipairs(rows) do

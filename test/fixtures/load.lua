@@ -1,12 +1,12 @@
 -- ---------------------------------------------------------- load the addon --
--- The one global the addon looks for: when it exists, cw/log.lua leaves each
--- log event's kind and record in CLOCKWORK_TEST.last for the suites to read.
-CLOCKWORK_TEST = {}
+-- The one global the addon looks for: when it exists, cmp/log.lua leaves each
+-- log event's kind and record in COMPANION_TEST.last for the suites to read.
+COMPANION_TEST = {}
 
 local _   -- the throwaway target in the suite's multi-assignments
 
 -- STRICT GLOBALS. Every global the addon may read is defined above this line:
--- the stubs, the ImGui enums, CLOCKWORK_TEST. From here on an undefined global
+-- the stubs, the ImGui enums, COMPANION_TEST. From here on an undefined global
 -- is an error, not nil - a module that forgot a require, or a name that stayed
 -- behind in another file, fails at its first read instead of drawing nothing.
 -- A global WRITE is an error too: `function name()` without a forward-declared
@@ -16,30 +16,40 @@ setmetatable(_G, {
     __index    = function(_, k) error('undefined global read: ' .. tostring(k), 2) end,
     __newindex = function(_, k) error('global write: ' .. tostring(k), 2) end,
 })
-local chunk = assert(loadfile(ADDON_DIR .. '/clockwork.lua'))
+local chunk = assert(loadfile(ADDON_DIR .. '/companion.lua'))
 chunk()
--- The model's pace and the visibility read's (cw/frame.lua) run every frame
+-- The model's pace and the visibility read's (cmp/frame.lua) run every frame
 -- here: the suites change the world and draw one frame to see it, with the
 -- fake clock standing still. A suite that tests the pacing sets them back.
-require('cw.state').modelEvery = 0
-require('cw.state').hiddenEvery = 0
+require('cmp.state').modelEvery = 0
+require('cmp.state').hiddenEvery = 0
+-- The suites written before the recast list was the default test the icon
+-- cells and dials, so they run with it off; suites/19 turns it on.
+-- Restore defaults (the api's and the Settings tab's button, both through
+-- tm) puts it back off as well.
+require('cmp.config').cd_list = false
+do
+    local tm, config = require('cmp.state'), require('cmp.config')
+    local restore = tm.restoreDefaults
+    tm.restoreDefaults = function() restore() config.cd_list = false end
+end
 -- The api the suites reach the addon's internals through, built from the
 -- loaded modules: require hands back the instances the addon itself loaded.
 local api = (function()
-    local config = require('cw.config')
-    local D      = require('cw.data')
-    local tm     = require('cw.state')
-    local L      = require('cw.log')
-    local R      = require('cw.reading')
-    local A      = require('cw.attachments')
-    local B      = require('cw.burden')
-    local T      = require('cw.timers')
-    local P      = require('cw.pet')
-    local S      = require('cw.sets')
-    local IN     = require('cw.inbound')
-    local SF     = require('cw.ui.surface')
-    local LO     = require('cw.ui.loadout')
-    local PN     = require('cw.ui.panel')
+    local config = require('cmp.config')
+    local D      = require('cmp.data')
+    local tm     = require('cmp.state')
+    local L      = require('cmp.log')
+    local R      = require('cmp.reading')
+    local A      = require('cmp.attachments')
+    local B      = require('cmp.burden')
+    local T      = require('cmp.timers')
+    local P      = require('cmp.pet')
+    local S      = require('cmp.sets')
+    local IN     = require('cmp.inbound')
+    local SF     = require('cmp.ui.surface')
+    local LO     = require('cmp.ui.loadout')
+    local PN     = require('cmp.ui.panel')
     return {
         state = function() return { auto044 = tm.auto044, seq = tm.auto044Seq, apply = tm.applyState } end,
         serializeSet = S.serializeSet, parseSetFile = S.parseSetFile, validSetName = S.validSetName,
@@ -72,7 +82,7 @@ local api = (function()
         scProps = function(kind, id) return (kind == 'ws') and D.WS_SC[id] or D.MOBSKILL_SC[id] end,
         timerRows = function() return tm.timerRows() end,
         timersClear = function(edge, src) T.timersClear(edge, src) end,
-        -- your own job abilities (cw/cooldowns.lua): the refresh frame.tick
+        -- your own job abilities (cmp/cooldowns.lua): the refresh frame.tick
         -- runs, answering the rows it wrote, and the table it reads from
         jaRefresh = function() tm.jaRefresh() return tm.jaRows end,
         jaList = function() return tm.jaList end,

@@ -158,7 +158,7 @@ do
     check('ws anomaly has a reason to expect it', (wantWhy or '') ~= '', true)
     -- whichever of the two it named, send the OTHER one
     send028(act(11, (want == 'Chimera Ripper') and 1941 or 1940))
-    local last = CLOCKWORK_TEST.last
+    local last = COMPANION_TEST.last
     check('ws anomaly kind', last.kind, 'ws_mispredicted')
     check('ws anomaly is a real disagreement', last.rec.ws ~= last.rec.expected, true)
     check('ws anomaly names the expectation', last.rec.expected, want)
@@ -183,7 +183,7 @@ do
     local spell, why = api.predictSpell()
     check('spell anomaly has something to expect', spell, 'Regen II')
     send028(act(8, 59))                                  -- Silence instead
-    last = CLOCKWORK_TEST.last
+    last = COMPANION_TEST.last
     check('spell anomaly kind', last.kind, 'spell_mispredicted')
     check('spell anomaly names the expectation', last.rec.expected, spell)
     check('spell anomaly says what happened', said('got Silence'), true)
@@ -417,10 +417,10 @@ do
           saw('no frame - open the attachments window once'), false)
     check('it names the weaponskill instead', saw('Cannibal Blade'), true)
     -- ...and the published snapshot, which is what a weaponskill is judged against
-    CLOCKWORK_TEST.last = nil
+    COMPANION_TEST.last = nil
     send028(act(11, 1941, MOB + 58))              -- String Clipper: not what the chain picked
-    check('the record carries the prediction', CLOCKWORK_TEST.last.rec.expected, 'Cannibal Blade')
-    check('so a real miss is judged as one', CLOCKWORK_TEST.last.kind, 'ws_mispredicted')
+    check('the record carries the prediction', COMPANION_TEST.last.rec.expected, 'Cannibal Blade')
+    check('so a real miss is judged as one', COMPANION_TEST.last.kind, 'ws_mispredicted')
     world.buffer = { 2, 33, 5, 4, 1, 2, 3, 0, 0, 0, 0, 0, 0, 0 }
     advance(20)
 end

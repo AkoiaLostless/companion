@@ -1,20 +1,20 @@
--- cw/ui/whatif.lua - the what-if sidebar: what using each maneuver right now
+-- cmp/ui/whatif.lua - the what-if sidebar: what using each maneuver right now
 -- would change about the automaton, and the rows that say it. Exports nothing;
 -- publishes tm.whatIf, tm.sidebarRows, tm.sidebarInvalidate, tm.sidebarCells,
 -- tm.rescaleSide and tm.SIDE_W, and writes tm.sideWs and tm.sideDrop.
 local imgui = require('imgui')
-local config = require('cw.config')
-local D  = require('cw.data')
+local config = require('cmp.config')
+local D  = require('cmp.data')
 local ELEMENTS = D.ELEMENTS
-local tm = require('cw.state')
-local A  = require('cw.attachments')
+local tm = require('cmp.state')
+local A  = require('cmp.attachments')
 local attachMods, fmtMod, buffSummary = A.attachMods, A.fmtMod, A.buffSummary
-local R  = require('cw.reading')
+local R  = require('cmp.reading')
 local hasAttachment, equippedAttachments = R.hasAttachment, R.equippedAttachments
-local B  = require('cw.burden')
+local B  = require('cmp.burden')
 local predict, overloadDuration, activeManeuvers, maneuverCounts = B.predict, B.overloadDuration, B.activeManeuvers, B.maneuverCounts
 local decayRate, predictWS = B.decayRate, B.predictWS
-local SF = require('cw.ui.surface')
+local SF = require('cmp.ui.surface')
 local COL_GOOD, COL_WARN, COL_BAD, COL_DIM = SF.COL_GOOD, SF.COL_WARN, SF.COL_BAD, SF.COL_DIM
 local COL_TEXT, tip = SF.COL_TEXT, SF.tip
 
