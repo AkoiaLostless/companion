@@ -14,23 +14,23 @@ do
         f:close()
         return n
     end
-    -- /cw sync writes exactly one model_reset record, which is the whole of
+    -- /cmp sync writes exactly one model_reset record, which is the whole of
     -- what this block needs out of the log.
     api.config.logging, api.config.log_dir = true, dir
     world.dayShift = 24 * 3600           -- tomorrow: rotates out of today's file
     local d1 = os.date('%Y.%m.%d')
-    handlers['command']({ command = '/cw sync' })
+    handlers['command']({ command = '/cmp sync' })
     check('the first day has a file', linesIn('Harness', d1), 1)
     world.dayShift = 48 * 3600           -- ...and again at the next midnight
     local d2 = os.date('%Y.%m.%d')
-    handlers['command']({ command = '/cw sync' })
+    handlers['command']({ command = '/cmp sync' })
     check('the second day has its own file', linesIn('Harness', d2), 1)
     check('and the first day did not grow', linesIn('Harness', d1), 1)
     -- a character switch inside one session rotates too - the name is in the
     -- filename and nothing ever re-read it
     world.charName, world.selfId = 'Other', 0x01000002
     handlers['d3d_present']()            -- ids.self_id follows the new character
-    handlers['command']({ command = '/cw sync' })
+    handlers['command']({ command = '/cmp sync' })
     check('the other character gets its own file', linesIn('Other', d2), 1)
     check('and did not grow the first character', linesIn('Harness', d2), 1)
     world.charName, world.selfId, world.dayShift = nil, nil, 0
@@ -41,14 +41,14 @@ end
 -- --------------------------------- a learned cost override is not permanent --
 -- Three observations that contradict the computed cost freeze cost[el] with
 -- costSource[el] = 'observed', and applyStatCheck returns early on it forever
--- after. Its own comment said /cw reset clears it; /cw reset touched neither
+-- after. Its own comment said /cmp reset clears it; /cmp reset touched neither
 -- costSource nor costDispute, so the frozen value outlived every gear change,
 -- every automaton and the reset that was supposed to drop it.
 do
     local m = api.model()
     m.cost.Fire, m.costSource.Fire = 15, 'observed'
     m.costDispute.Fire = { value = 15, count = 2 }
-    handlers['command']({ command = '/cw reset' })
+    handlers['command']({ command = '/cmp reset' })
     check('reset drops the observed source', m.costSource.Fire == 'observed', false)
     check('reset drops the dispute', m.costDispute.Fire, nil)
     check('reset recomputes a cost', m.cost.Fire ~= nil, true)
@@ -83,11 +83,11 @@ do
 
     -- The packet thread reads only what the render thread published, which is
     -- a statement about one file's require list.
-    local f = assert(io.open(ADDON_DIR .. '/cw/inbound.lua', 'r'))
+    local f = assert(io.open(ADDON_DIR .. '/cmp/inbound.lua', 'r'))
     local inbound = f:read('*a')
     f:close()
-    check('inbound never requires reading', inbound:find("require('cw.reading')", 1, true), nil)
-    check('inbound never requires cooldowns', inbound:find("require('cw.cooldowns')", 1, true), nil)
+    check('inbound never requires reading', inbound:find("require('cmp.reading')", 1, true), nil)
+    check('inbound never requires cooldowns', inbound:find("require('cmp.cooldowns')", 1, true), nil)
     check('inbound is the packet handler', debug.getinfo(handlers['packet_in'], 'u').nups < 60, true)
 
     -- The registered handlers are one-line wrappers, so the ceiling that

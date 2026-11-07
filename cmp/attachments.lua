@@ -1,15 +1,15 @@
--- cw/attachments.lua - what each attachment does at each maneuver count.
+-- cmp/attachments.lua - what each attachment does at each maneuver count.
 -- Owns the effect tables (ATTACH_MODS, REGEN_FORMULA), the ATTACH_ELEM element
 -- and capacity costs, the Optic Fiber boost and the maneuvers' own stat gain.
 -- Exports those three tables plus attachMods, fmtMod, attachEffect and
 -- buffSummary.
-local config = require('cw.config')
-local D      = require('cw.data')
+local config = require('cmp.config')
+local D      = require('cmp.data')
 local ELEMENTS = D.ELEMENTS
-local tm     = require('cw.state')
-local U      = require('cw.util')
+local tm     = require('cmp.state')
+local U      = require('cmp.util')
 local safe, player, isPup, isPupSub = U.safe, U.player, U.isPup, U.isPupSub
-local R      = require('cw.reading')
+local R      = require('cmp.reading')
 local equippedAttachments = R.equippedAttachments
 
 -- =================================================== attachment effects ==

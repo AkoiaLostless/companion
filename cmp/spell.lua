@@ -1,22 +1,22 @@
--- cw/spell.lua - the caster ladder: what each automaton head casts, when it can,
+-- cmp/spell.lua - the caster ladder: what each automaton head casts, when it can,
 -- and the spell it will choose next, plus the enfeebles held on each mob.
 -- Returns an empty table. Publishes on tm: currentHead, spellName, spellDur,
 -- spellEffect, noteMob, mobWearOff, mobPrune, spellObserve, nukeTier, predictSpell
 -- and fn (its tables and helpers); keeps tm.mp/mpHi/maxmp, windows, regenHedge.
-local D  = require('cw.data')
+local D  = require('cmp.data')
 local CAT_MAGIC, CAT_MAGIC_START = D.CAT_MAGIC, D.CAT_MAGIC_START
-local tm = require('cw.state')
-local A  = require('cw.attachments')
+local tm = require('cmp.state')
+local A  = require('cmp.attachments')
 local attachMods = A.attachMods
-local U  = require('cw.util')
+local U  = require('cmp.util')
 local safe, player = U.safe, U.player
-local L  = require('cw.log')
+local L  = require('cmp.log')
 local flagAnomaly = L.flagAnomaly
-local R  = require('cw.reading')
+local R  = require('cmp.reading')
 local petInfo, equippedNames, hasAttachment = R.petInfo, R.equippedNames, R.hasAttachment
-local B  = require('cw.burden')
+local B  = require('cmp.burden')
 local maneuverCounts = B.maneuverCounts
-local P  = require('cw.pet')
+local P  = require('cmp.pet')
 local MSG_STATUS_ON, MSG_STATUS_OFF, petEffects = P.MSG_STATUS_ON, P.MSG_STATUS_OFF, P.petEffects
 
 -- =========================================================== spell model ==

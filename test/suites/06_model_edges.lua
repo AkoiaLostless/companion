@@ -19,7 +19,7 @@ do
     petOut(PET + 20, MOB + 20)
     check('catchup applied', m.burden.Fire, cfg.activate_burden - 20)   -- 20 ticks x 1
     check('catchup unverified', m.verified.Fire, false)
-    check('catchup logged', CLOCKWORK_TEST.last.kind, 'burden_catchup')
+    check('catchup logged', COMPANION_TEST.last.kind, 'burden_catchup')
     -- and not a second time: decay() runs right after resolveIds on the same
     -- frame, and a loading screen means its lastTick is just as far behind
     frame('catchup once')
@@ -69,7 +69,7 @@ do
     -- (seed-1) + 20 - 30 + 5, and the back-solve returns the seed
     local before = cfg.dea_burden - 1
     api.reconcile('Fire', before + 20 - 30 + 5, false)
-    local last = CLOCKWORK_TEST.last
+    local last = COMPANION_TEST.last
     check('dea first cast is a plain maneuver', last.kind, 'maneuver')
     check('dea first cast timed', last.rec.since_activate, 3)
     check('dea first cast pre-cast', last.rec.pre_cast, before)
@@ -79,7 +79,7 @@ do
     send028({ actor = SELF, category = 6, param = 310,
               targets = { { id = SELF, actions = { { message = 0 } } } } })
     api.reconcile('Fire', 8, false)
-    last = CLOCKWORK_TEST.last
+    last = COMPANION_TEST.last
     check('dea wrong seed is a reseed', last.kind, 'burden_reseed')
     check('dea wrong seed still back-solves', last.rec.implied_seed, 33 - 20)
 end
@@ -108,7 +108,7 @@ do
     check('dea clears the recast cells', timerRow(1945).state, 'ready')
     check('dea clears the bash cell too', timerRow(1944).state, 'ready')
     send028(act(11, 1945, MOB + 40))
-    check('first use after a dea logs the edge', CLOCKWORK_TEST.last.kind, 'recast_edge')
+    check('first use after a dea logs the edge', COMPANION_TEST.last.kind, 'recast_edge')
 
     -- ...and the edge is THIS summon, not the last automaton's death
     petIn()                                   -- the automaton dies: despawn edge
@@ -117,8 +117,8 @@ do
     petOut(PET + 41, MOB + 41)
     advance(4)
     send028(act(11, 1945, MOB + 41))
-    check('dea edge kind', CLOCKWORK_TEST.last.kind, 'recast_edge')
-    check('dea edge measured from the summon', CLOCKWORK_TEST.last.rec.since_edge, 4)
+    check('dea edge kind', COMPANION_TEST.last.kind, 'recast_edge')
+    check('dea edge measured from the summon', COMPANION_TEST.last.rec.since_edge, 4)
     world.buffer = { 2, 33, 5, 4, 1, 2, 3, 0, 0, 0, 0, 0, 0, 0 }
     advance(2.5)
 end

@@ -61,7 +61,7 @@ local realPrint = print
 print = function(s) printed[#printed + 1] = tostring(s) end
 
 package.preload['common'] = function()
-    -- the one common extension the addon uses: '/cw a b':args()
+    -- the one common extension the addon uses: '/cmp a b':args()
     string.args = function(s) local t = {} for w in s:gmatch('%S+') do t[#t + 1] = w end return t end
     string.totable = function(s) local t = {} for i = 1, #s do t[i] = s:byte(i) end return t end
     return {}
@@ -80,7 +80,7 @@ package.preload['d3d8'] = function()
     return { get_device = function() return nil end, gc_safe_release = function(x) return x end }
 end
 -- LuaJIT's own ffi, captured before the stub takes its place: the file
--- replace in cw/util.lua goes through kernel32's MoveFileExA, and the stub
+-- replace in cmp/util.lua goes through kernel32's MoveFileExA, and the stub
 -- hands that one call to the real thing - with a switch to make it fail.
 -- require(), then forget it was loaded: the loader registers the real module
 -- in package.loaded, and left there the addon's own require('ffi') got the
@@ -264,6 +264,7 @@ package.preload['imgui'] = function()
     rawset(_G, 'ImGuiCol_WindowBg',                  2)
     rawset(_G, 'ImGuiCol_Text',                      0)
     rawset(_G, 'ImGuiCol_FrameBg',                   7)
+    rawset(_G, 'ImGuiCol_Border',                    5)
     -- STRICT. A permissive __index made a misspelled ImGui call a silent no-op
     -- offline and a per-frame nil call in game: `imgui.Separator` mistyped
     -- passed 924 checks and drew nothing. Anything the addon calls has to be
@@ -445,6 +446,13 @@ local player = permissive({
 })
 AshitaCore = {
     GetInstallPath = function() return SCRATCH end,
+    -- typed commands the addon queues, in world.commands
+    GetChatManager = function()
+        return { QueueCommand = function(_, mode, text)
+            world.commands = world.commands or {}
+            world.commands[#world.commands + 1] = text
+        end }
+    end,
     GetMemoryManager = function()
         return {
             GetPlayer = function() return player end,
@@ -453,6 +461,9 @@ AshitaCore = {
             GetRecast = function() return permissive({
                 GetAbilityTimerId = function(_, i) return (world.recast[i] or { 0, 0 })[1] end,
                 GetAbilityTimer   = function(_, i) return (world.recast[i] or { 0, 0 })[2] end,
+                -- the per-charge seconds beside a charge ability's timer: the
+                -- slot's third value, 0 when a fixture gives none
+                GetAbilityCalc2   = function(_, i) return (world.recast[i] or { 0, 0, 0 })[3] or 0 end,
             }) end,
             GetEntity = function() return permissive({
                 -- Per index, not one name for the whole table: the header's
@@ -460,6 +471,8 @@ AshitaCore = {
                 -- automaton, and a single answer could not tell them apart.
                 GetName = function(_, i)
                     if i == world.mobIndex then return world.mobName or 'Steelshell Crab' end
+                    -- world.petName plays a pet that is not the automaton
+                    if i == world.petIndex and world.petName ~= nil then return world.petName end
                     return 'Bobeche'
                 end,
                 GetServerId = function(_, i)
@@ -524,7 +537,7 @@ AshitaCore = {
             GetItemById = function(_, id)
                 local n = ITEMS[id]
                 -- world.itemDesc: item id -> description text, for the gear
-                -- a fixture wears to move a stat (cw/gear.lua)
+                -- a fixture wears to move a stat (cmp/gear.lua)
                 local desc = world.itemDesc and world.itemDesc[id]
                 if n == nil and desc == nil then return nil end
                 -- Bitmap/ImageSize are real IItem fields and are what the

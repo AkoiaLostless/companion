@@ -1,11 +1,12 @@
--- cw/cooldowns.lua - your own job abilities' recasts, for the Status tab's
+-- cmp/cooldowns.lua - your own job abilities' recasts, for the Status tab's
 -- recast column. The client keeps these itself, so they are READ, not
 -- modelled: nothing here is logged, and there is nothing to calibrate. Native
 -- reads, so render thread only - the packet thread must never require this
--- file. Publishes tm.jaList and tm.jaRefresh; tm.jaRefresh writes tm.jaRows.
-local config = require('cw.config')
-local tm = require('cw.state')
-local U  = require('cw.util')
+-- file. Publishes tm.jaList, tm.jaBuild and tm.jaRefresh; tm.jaRefresh writes
+-- tm.jaRows.
+local config = require('cmp.config')
+local tm = require('cmp.state')
+local U  = require('cmp.util')
 local safe, player = U.safe, U.player
 
 -- The PUP job abilities, in the order the column lists them: bringing the
@@ -45,11 +46,27 @@ local JA_RESOURCE = 0x200
 -- ability holds no slot at all. Slot 0 is the two-hour and its timer id is 0,
 -- which in any other slot means empty - hence (id ~= 0 or i == 0), the guard
 -- Ashita's own recast addon uses. The timer counts 1/60 s ticks.
+-- The client also keeps, beside each timer, the seconds one charge of a
+-- charge ability takes: RecastCalc2, an int16 in the same 8-byte entry as the
+-- timer id (Ashita SDK ffxi/player.h abilityrecast_t; IRecast GetAbilityCalc2;
+-- PetsReborn reads it the same way for Ready). Kept in tm.recastCalc by timer
+-- id while it counts; an answer that is not a plausible charge time leaves it
+-- out, and Ready falls back to learning it (cmp/pets.lua).
+tm.recastCalc = {}
+local function calcOf(r, i)
+    local ok, v = pcall(function() return r:GetAbilityCalc2(i) end)
+    if ok and type(v) == 'number' and v >= 5 and v <= 300 then return v end
+    return nil
+end
 local function recastLeft()
     local r, left = AshitaCore:GetMemoryManager():GetRecast(), {}
+    tm.clear(tm.recastCalc)
     for i = 0, 31 do
         local id, ticks = r:GetAbilityTimerId(i), r:GetAbilityTimer(i)
-        if (id ~= 0 or i == 0) and ticks > 0 then left[id] = ticks / 60 end
+        if (id ~= 0 or i == 0) and ticks > 0 then
+            left[id] = ticks / 60
+            if id == 102 then tm.recastCalc[id] = calcOf(r, i) end
+        end
     end
     return left
 end
@@ -61,47 +78,61 @@ end
 -- is part of one, so that recast's dial starts full.
 local longest = {}
 
--- Whether you have learned it: the client's answer, or under /cw demo the
+-- Whether you have learned it: the client's answer, or under /cmp demo the
 -- made-up master's.
 local function learned(d, p, ja)
     if d ~= nil then return d.has[ja.key] == true end
-    return p:HasAbility(JA_RESOURCE + ja.ability)
+    if p:HasAbility(JA_RESOURCE + ja.ability) then return true end
+    -- one row for two abilities on one timer (Sic and Ready, cmp/pets.lua):
+    -- learned when either is
+    return ja.alt ~= nil and p:HasAbility(JA_RESOURCE + ja.alt)
 end
 
--- Render thread, once a frame from frame.tick, below its visibility gates:
--- this is display only, so it has no reason to run with the window down. One
--- safe() round the lot, so a failed read is an empty group and one count in
--- tm.swallowed.
+-- The client's recast table, read once: what is left on each timer and the
+-- longest each has been seen at, by timer id. Under /cmp demo the made-up
+-- master answers instead (cmp/demo.lua), whole lengths included: a demo opens
+-- mid-recast, where first sight would start each dial full. `longest` is the
+-- client's and is left be. Also answers the player, for learned().
+local function readRecasts()
+    local d = tm.demo and tm.demo.ja
+    if d ~= nil then return d.left, d.total, nil, d end
+    local left, p = recastLeft(), player()
+    for timer in pairs(longest) do
+        if left[timer] == nil then longest[timer] = nil end
+    end
+    for timer, rem in pairs(left) do
+        if rem > (longest[timer] or 0) then longest[timer] = rem end
+    end
+    return left, longest, p, nil
+end
+
+-- The rows for `list` (entries shaped as tm.jaList's), keeping those `on`
+-- accepts and you have learned, and leaving a ready one out under
+-- cd_hide_ready. The other pet jobs' window (cmp/pets.lua) builds its rows
+-- here too, from its own lists.
+tm.jaBuild = function(list, on)
+    local left, total, p, d = readRecasts()
+    local rows = {}
+    for _, ja in ipairs(list) do
+        local rem = left[ja.timer]
+        if on(ja) and learned(d, p, ja)
+           and (rem ~= nil or not config.cd_hide_ready) then
+            rows[#rows + 1] = { key = ja.key, label = ja.label, short = ja.short, name = ja.name,
+                                state = (rem ~= nil) and 'counting' or 'ready',
+                                remaining = rem, total = total[ja.timer] }
+        end
+    end
+    return rows
+end
+
+local function switchedOn(ja) return config['cd_' .. ja.key] end
+
+-- Render thread, at the model's pace from frame.tick, below its visibility
+-- gates: this is display only, so it has no reason to run with the window
+-- down. One safe() round the lot, so a failed read is an empty group and one
+-- count in tm.swallowed.
 tm.jaRefresh = function()
-    tm.jaRows = safe(function()
-        -- Under /cw demo the made-up master answers every read (cw/demo.lua),
-        -- whole lengths included: a demo opens mid-recast, where first sight
-        -- would start each dial full. `longest` is the client's and is left be.
-        local d = tm.demo and tm.demo.ja
-        local left, total, p, rows
-        if d ~= nil then
-            left, total = d.left, d.total
-        else
-            left, total, p = recastLeft(), longest, player()
-            for timer in pairs(longest) do
-                if left[timer] == nil then longest[timer] = nil end
-            end
-            for timer, rem in pairs(left) do
-                if rem > (longest[timer] or 0) then longest[timer] = rem end
-            end
-        end
-        rows = {}
-        for _, ja in ipairs(tm.jaList) do
-            local rem = left[ja.timer]
-            if config['cd_' .. ja.key] and learned(d, p, ja)
-               and (rem ~= nil or not config.cd_hide_ready) then
-                rows[#rows + 1] = { key = ja.key, label = ja.label, short = ja.short, name = ja.name,
-                                    state = (rem ~= nil) and 'counting' or 'ready',
-                                    remaining = rem, total = total[ja.timer] }
-            end
-        end
-        return rows
-    end, {})
+    tm.jaRows = safe(function() return tm.jaBuild(tm.jaList, switchedOn) end, {})
 end
 
 return {}

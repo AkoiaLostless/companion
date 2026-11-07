@@ -1,4 +1,4 @@
--- cw/data.lua - the static tables: message, ability and effect ids, the 0x028
+-- cmp/data.lua - the static tables: message, ability and effect ids, the 0x028
 -- categories, the automaton mobskills and weaponskill lists, the skillchain
 -- tables, oil ids, the stat, gear and slot maps, the equipment offsets, the
 -- head/frame element caps (PUPPET_CAP) and ABILITY_ICON. Returns them all in

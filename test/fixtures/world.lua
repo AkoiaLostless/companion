@@ -1,4 +1,4 @@
--- Offline harness for clockwork. test/run_tests.py joins this file, the other
+-- Offline harness for companion. test/run_tests.py joins this file, the other
 -- fixtures and the suites into one chunk, in the order its FILES list gives:
 -- the fixtures stub the Ashita environment and load the addon, and the suites
 -- reach its internals through `api` (fixtures/load.lua). Never in the game.

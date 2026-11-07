@@ -39,7 +39,7 @@ jobs:
       - name: Check the tag matches addon.version
         if: startsWith(github.ref, 'refs/tags/v')
         run: |
-          version=$(sed -n "s/^addon\.version *= *'\([^']*\)'.*/\1/p" clockwork.lua)
+          version=$(sed -n "s/^addon\.version *= *'\([^']*\)'.*/\1/p" companion.lua)
           if [ "v${version}" != "${GITHUB_REF_NAME}" ]; then
             echo "tag ${GITHUB_REF_NAME} does not match addon.version '${version}'" >&2
             exit 1
@@ -47,15 +47,15 @@ jobs:
 
       - name: Package addon
         run: |
-          mkdir -p release/clockwork
-          cp clockwork.lua LICENSE release/clockwork/
-          cp .github/release/README.md release/clockwork/README.md
-          cp -r cw assets release/clockwork/
+          mkdir -p release/companion
+          cp companion.lua LICENSE release/companion/
+          cp .github/release/README.md release/companion/README.md
+          cp -r cmp assets release/companion/
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: clockwork
+          name: companion
           path: release/
 
       - name: Create Release
@@ -64,6 +64,6 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           cd release
-          zip -r ../clockwork.zip clockwork/
+          zip -r ../companion.zip companion/
           cd ..
-          gh release create "${{ github.ref_name }}" clockwork.zip --generate-notes
+          gh release create "${{ github.ref_name }}" companion.zip --generate-notes

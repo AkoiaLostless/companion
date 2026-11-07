@@ -15,7 +15,7 @@ do
     -- the first reading seeds Fire: 18% at threshold 30 -> burden 43
     api.reconcile('Fire', 18, false)
     check('decay reconciled burden', m.burden.Fire, 43)
-    check('decay reseed logged', CLOCKWORK_TEST.last.kind, 'burden_reseed')
+    check('decay reseed logged', COMPANION_TEST.last.kind, 'burden_reseed')
     local function ticks(n) for _ = 1, n do advance(3) handlers['d3d_present']() end end
     -- ten ticks, no Water: one per tick
     ticks(10)
@@ -39,9 +39,9 @@ do
     -- a 5-point shortfall against the live cost inside a Water window is
     -- logged, carries the window, and is NOT a stat-check dispute
     api.reconcile('Fire', 2, false)                   -- model said 7%
-    check('water window logged as mismatch', CLOCKWORK_TEST.last.kind, 'burden_mismatch')
-    check('water window in the record', CLOCKWORK_TEST.last.rec.water_ticks, 12)
-    check('extra decay in the record', CLOCKWORK_TEST.last.rec.extra_decay, 9)
+    check('water window logged as mismatch', COMPANION_TEST.last.kind, 'burden_mismatch')
+    check('water window in the record', COMPANION_TEST.last.rec.water_ticks, 12)
+    check('extra decay in the record', COMPANION_TEST.last.rec.extra_decay, 9)
     check('water window teaches nothing', m.costDispute.Fire, nil)
     check('water window keeps the live cost', m.cost.Fire, 20)
     check('water counters reset', m.waterSince.Fire.ticks + m.waterSince.Fire.extra, 0)
@@ -50,7 +50,7 @@ do
     ticks(5)                                          -- 27 -> 22
     api.reconcile('Fire', 12, false)                  -- model said 17%
     check('control opens a dispute', m.costDispute.Fire and m.costDispute.Fire.value, 15)
-    check('control record has no window', CLOCKWORK_TEST.last.rec.water_ticks, 0)
+    check('control record has no window', COMPANION_TEST.last.rec.water_ticks, 0)
     -- heatsink_required off: the Water maneuver alone speeds decay
     world.buffer = { 2, 33, 5, 4, 1, 2, 3, 0, 0, 0, 0, 0, 0, 0 }   -- no Heatsink
     cfg.heatsink_required = false
@@ -82,8 +82,8 @@ do
     check('activate entering burden', m.burden.Fire, 60)
     check('activate entering verified', m.verified.Fire, true)
     activate()
-    check('activate logged', CLOCKWORK_TEST.last.kind, 'activate')
-    check('activate logged seed', CLOCKWORK_TEST.last.rec.seeded, cfg.activate_burden)
+    check('activate logged', COMPANION_TEST.last.kind, 'activate')
+    check('activate logged seed', COMPANION_TEST.last.rec.seeded, cfg.activate_burden)
     check('activate seeds fire', m.burden.Fire, cfg.activate_burden)
     check('activate seeds thunder', m.burden.Thunder, cfg.activate_burden)
     check('activate unverified', m.verified.Fire, false)
@@ -98,21 +98,21 @@ do
     advance(3) handlers['d3d_present']()
     check('activate seed decays', m.burden.Fire, cfg.activate_burden - 2)
     api.reconcile('Fire', cfg.activate_burden - 2 + 20 - 30 + 5, false)
-    local last = CLOCKWORK_TEST.last
+    local last = COMPANION_TEST.last
     check('activate first cast is a plain maneuver', last.kind, 'maneuver')
     check('activate first cast timed', last.rec.since_activate, 6)
     check('activate first cast pre-cast', last.rec.pre_cast, cfg.activate_burden - 2)
     check('activate first cast implied seed', last.rec.implied_seed, cfg.activate_burden)
     check('activate seed consumed', m.seededBy.Fire, nil)
     api.reconcile('Fire', 18, false)
-    check('activate second cast not timed', CLOCKWORK_TEST.last.rec.since_activate, nil)
+    check('activate second cast not timed', COMPANION_TEST.last.rec.since_activate, nil)
     -- a wrong seed is a reseed, not an anomaly, and still carries the timing:
     -- 8% right after the Activate means 33 after the cast, 13 before it
     advance(6)
     activate()
     check('activate again seeds', m.burden.Fire, cfg.activate_burden)
     api.reconcile('Fire', 8, false)
-    last = CLOCKWORK_TEST.last
+    last = COMPANION_TEST.last
     check('activate wrong seed is a reseed', last.kind, 'burden_reseed')
     check('activate wrong seed implied', last.rec.implied_seed, 13)
     check('activate wrong seed timed', last.rec.since_activate, 0)
@@ -122,7 +122,7 @@ do
     advance(6)
     activate()
     check('activate carry keeps burden', m.burden.Fire, 33)
-    check('activate carry logged', CLOCKWORK_TEST.last.rec.seeded, 'carried')
+    check('activate carry logged', COMPANION_TEST.last.rec.seeded, 'carried')
     check('activate carry unverified', m.verified.Fire, false)
     check('activate carry marks the seed', m.seededBy.Fire, 'activate')
     cfg.activate_burden = 25
@@ -140,7 +140,7 @@ do
     advance(3) handlers['d3d_present']()
     check('activate seed decays at the Heatsink rate', m.burden.Fire, cfg.activate_burden - 4)
     api.reconcile('Fire', cfg.activate_burden - 4 + 20 - 30 + 5, false)
-    last = CLOCKWORK_TEST.last
+    last = COMPANION_TEST.last
     check('activate first cast under Water counts the extra decay', last.rec.implied_seed, cfg.activate_burden)
     check('...and records the Water ticks', last.rec.water_ticks, 2)
     world.icons, world.timers = nil, nil
