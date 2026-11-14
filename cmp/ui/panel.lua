@@ -799,7 +799,14 @@ local function drawRecastColumn(cx, lines, buffs)
     -- The column, at the same x whether or not the table drew a row:
     -- the recasts belong to the right of the maneuvers, not to
     -- whatever is left over after them.
-    imgui.SameLine(cx[#cx] + 14, 0)
+    -- In list mode the column sits over the Cooldowns grid's right-hand
+    -- column, flush with the panel's right edge, rather than tucked against
+    -- the table; never over the table itself.
+    local x = cx[#cx] + 14
+    if config.cd_list then
+        x = math.max(x, hudPad() + hudInner() - tm.listGridCellW())
+    end
+    imgui.SameLine(x, 0)
     imgui.BeginGroup()
     local spill = tm.sideColumn(lines, buffs)
     imgui.EndGroup()
