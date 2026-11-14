@@ -882,8 +882,10 @@ end
 -- however the abilities are named.
 tm.recastCell = function(r, labelW)
     if config.cd_list then
-        local nameW, _, boxW = tm.listWidths(tm.rows)
-        tm.listCell(r, boxW, nameW)
+        -- the same width as a box in the Cooldowns grid, so the automaton's
+        -- column lines up with the grid's right-hand column under it
+        local nameW = tm.listWidths(tm.rows)
+        tm.listCell(r, tm.listGridCellW(), nameW)
         tip(('%s: %ds recast. Ready means usable, not that it is about to\nfire. ? = not used since the addon loaded.')
             :format(r.name, r.model))
         return
@@ -933,6 +935,12 @@ tm.listWidths = function(rows)
     end
     local pad = tm.s(6)
     return nameW, chargeW, pad + nameW + chargeW + tm.s(10) + tm.listTimeW() + pad
+end
+-- A box's width in a three-across Cooldowns grid at the panel's width.
+local LIST_GAP, LIST_COLS = 6, 3
+tm.listGridCellW = function()
+    local gap = tm.s(LIST_GAP)
+    return (hudInner() - gap * (LIST_COLS - 1)) / LIST_COLS
 end
 tm.listCell = function(r, boxW, nameW)
     local state, remaining = r.state, r.remaining
@@ -1055,9 +1063,9 @@ tm.jaGrid = function(x0, width, lineStart, rows)
         -- name too long for its box is cut to fit rather than pushing the
         -- time out.
         local nameW, _, natural = tm.listWidths(rows)
-        local gap = tm.s(6)
+        local gap = tm.s(LIST_GAP)
         local cols = math.floor((width + gap) / (natural + gap))
-        cols = math.max(math.min(3, #rows), math.min(#rows, cols))
+        cols = math.max(math.min(LIST_COLS, #rows), math.min(#rows, cols))
         local cell = (width - gap * (cols - 1)) / cols
         tm.text('label', COL_DIM, 'Cooldowns')
         tip('Your own job abilities\' recasts, straight from the client. Which\nones, and whether a ready one is listed: Settings, display.')
