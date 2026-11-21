@@ -20,8 +20,6 @@ one HUD for every pet.
 
 ![The Status tab](screenshots/status.png)
 
-The screenshots are from Clockwork. The panel is the same, but Companion draws the
-cooldowns as the boxed grid described below, and adds the Stats line and the pet window.
 
 ## Features
 
@@ -113,11 +111,21 @@ out, so the recast that brings one back is in view. A pet you get from a subjob 
 on /BST, say) gets the window only while it is out. An automaton always gets the full
 Puppetmaster panel, on PUP main or /PUP.
 
+| | |
+|---|---|
+| **Jug pet** — the jug's time left, and Ready's charges | **Charmed pet** — the charm estimate, and Sic |
+| ![A jug pet](screenshots/pet_jug.png) | ![A charmed pet](screenshots/pet_charmed.png) |
+| **Avatar** — MP, and the Blood Pact recasts | **Wyvern** — the Jumps and Steady Wing |
+| ![An avatar](screenshots/pet_avatar.png) | ![A wyvern](screenshots/pet_wyvern.png) |
+
 The pet window draws with the game's own status icons and Windows' Segoe UI, like the
 rest of Companion: it needs no extra fonts or images. **pet window** on the Settings tab
 (or `/cmp pets`) turns it off, for example if another addon draws your pets.
 
 ## Screenshots
+
+These four are still Clockwork's, from before Companion's cooldown grid; the tabs
+themselves are unchanged.
 
 | | |
 |---|---|
