@@ -102,7 +102,8 @@ Puppetmaster panel goes:
   Summoner: Blood Pact: Rage and Ward, Apogee, Elemental Siphon, Avatar's Favor, Astral
   Flow. Dragoon: Call Wyvern, Spirit Link, Steady Wing, Deep Breathing, Jump, High Jump,
   Super Jump, Angon, Spirit Surge. Only abilities you have learned at your current level
-  are listed.
+  are listed. Ready shows its charges (`2/3`) and the countdown to the next charge, so
+  you can see when one comes back even while you still have some left.
 
 With Beastmaster, Summoner or Dragoon as your main job the window stays up with no pet
 out, so the recast that brings one back is in view. A pet you get from a subjob (Charm
