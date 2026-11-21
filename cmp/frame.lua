@@ -284,6 +284,13 @@ function model()
     -- automaton's model below. snap.other turns the packet thread's light
     -- path on and snap.is_pup its automaton path off. Not under demo, which
     -- plays an automaton.
+    if tm.demo ~= nil and tm.demo.view ~= nil then
+        -- a demo pet (cmp/demo.lua): its window, as petRefresh would build it
+        tm.petView = tm.demo.view
+        if not config.pet_window then return false end
+        snap.is_pup, snap.other, tm.view = false, false, 'pet'
+        return true
+    end
     if tm.demo == nil and tm.petRefresh() then
         snap.is_pup, snap.other, tm.view = false, true, 'pet'
         return true

@@ -184,6 +184,36 @@ do
     -- already stale by the exit and could not show the bug.
     check('the equipped set is the made-up one',
           ((api.equippedSet() or {}).head or ''):find('Spiritreaver', 1, true) ~= nil, true)
+    -- then the other pet jobs, each in the pet window rather than the panel,
+    -- in the list layout that draws Ready's charges
+    local wasList = api.config.cd_list
+    api.config.cd_list = true
+    handlers['command']({ command = '/cmp demo' })
+    check('the fifth is a jug pet', api.demoName(), 'Beastmaster, jug pet')
+    frame('demo 5')
+    check('demo jug: its name', saw('CourierCarrie'), true)
+    check('demo jug: the Jug tag', saw('Jug'), true)
+    check('demo jug: its time left', saw('21:52') or saw('21:51'), true)
+    check('demo jug: Tame on recast', saw('Tame'), true)
+    check('demo jug: Ready with its charges', saw('1/3'), true)
+    check('demo jug: no maneuver table', saw('burden'), false)
+    handlers['command']({ command = '/cmp demo' })
+    check('the sixth is a charmed pet', api.demoName(), 'Beastmaster, charmed pet')
+    frame('demo 6')
+    check('demo charmed: the Charmed tag', saw('Charmed'), true)
+    check('demo charmed: the charm estimate', saw('~3:44') or saw('~3:43'), true)
+    check('demo charmed: Sic, not Ready', saw('Sic'), true)
+    handlers['command']({ command = '/cmp demo' })
+    check('the seventh is an avatar', api.demoName(), 'Summoner, avatar')
+    frame('demo 7')
+    check('demo avatar: its name', saw('Garuda'), true)
+    check('demo avatar: an MP bar', saw('MP'), true)
+    check('demo avatar: Blood Pact recasts', saw('BP: Rage'), true)
+    handlers['command']({ command = '/cmp demo' })
+    check('the eighth is a wyvern', api.demoName(), 'Dragoon, wyvern')
+    frame('demo 8')
+    check('demo wyvern: the Jumps', saw('Super Jump'), true)
+    api.config.cd_list = wasList
     handlers['command']({ command = '/cmp demo' })
     check('demo is off at the end of the list', api.demoOn(), false)
     check('the automaton went with it', api.model().burden.Earth, 0)
