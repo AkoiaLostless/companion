@@ -1,6 +1,7 @@
--- cmp/demo.lua - made-up automatons, so the HUD can be looked at without being on
--- Puppetmaster with a pet out and something to fight. Owns tm.demo and the four
--- scenarios; exports enable, disable, cycle (/cmp demo) and tick (once a frame,
+-- cmp/demo.lua - made-up automatons and other pets, so the HUD and the pet window
+-- can be looked at without being on the job with a pet out and something to
+-- fight. Owns tm.demo and the scenarios (four automatons, then a BST jug pet, a
+-- BST charmed pet, a SMN avatar and a DRG wyvern); exports enable, disable, cycle (/cmp demo) and tick (once a frame,
 -- from cmp/frame.lua).
 --
 -- What this is NOT: a second model. Everything the panel shows is still computed
@@ -109,6 +110,59 @@ local SCENARIOS = {
     },
 }
 
+-- The other pet jobs, drawn in the pet window (cmp/ui/petframe.lua) rather than
+-- the automaton's panel. There is no model behind that window - it shows what
+-- the client reports - so these are the reports themselves: the pet, its timer
+-- and your recasts, each moving with the clock in tick(). `rows` are the job's
+-- abilities from cmp/pets.lua's lists, by label, with how long each has left
+-- (0 = ready) and its whole recast; Ready carries its charges.
+local PET_SCENARIOS = {
+    {
+        name = 'Beastmaster, jug pet', kind = 'jug',
+        pet  = { name = 'CourierCarrie', hpp = 88, tp = 300, dist = 2.4 },
+        mob  = { name = 'Goblin Smithy', hpp = 71, slot = 41 },
+        timer = { left = 1312, total = 1800 },
+        rows = {
+            { 'Call Beast', 0, 300 }, { 'Loyalty', 0, 900 }, { 'Charm', 0, 15 },
+            { 'Gauge', 0, 30 }, { 'Tame', 425, 600 }, { 'Reward', 52, 90 },
+            { 'Ready', 18, 30, charges = 1 }, { 'Snarl', 0, 30 },
+            { 'Feral Howl', 130, 300 }, { 'Killer Ins.', 0, 300 }, { 'Familiar', 0, 7200 },
+        },
+    },
+    {
+        name = 'Beastmaster, charmed pet', kind = 'charmed',
+        pet  = { name = 'Forest Hare', hpp = 64, tp = 120, dist = 4.1 },
+        mob  = { name = 'Tiger', hpp = 58, slot = 41 },
+        timer = { left = 224, total = 402, charm = true },
+        rows = {
+            { 'Call Beast', 0, 300 }, { 'Loyalty', 0, 900 }, { 'Charm', 9, 15 },
+            { 'Gauge', 0, 30 }, { 'Tame', 0, 600 }, { 'Reward', 0, 90 },
+            { 'Sic', 41, 120 }, { 'Snarl', 0, 30 },
+            { 'Feral Howl', 0, 300 }, { 'Killer Ins.', 0, 300 }, { 'Familiar', 0, 7200 },
+        },
+    },
+    {
+        name = 'Summoner, avatar', kind = 'avatar',
+        pet  = { name = 'Garuda', hpp = 93, mpp = 68, tp = 0, dist = 5.0 },
+        mob  = { name = 'Greater Colibri', hpp = 82, slot = 41 },
+        rows = {
+            { 'BP: Rage', 34, 60 }, { 'BP: Ward', 0, 60 }, { 'Apogee', 0, 300 },
+            { 'Siphon', 412, 600 }, { "Avatar's Favor", 0, 30 }, { 'Astral Flow', 0, 7200 },
+        },
+    },
+    {
+        name = 'Dragoon, wyvern', kind = 'wyvern',
+        pet  = { name = 'Wyvern', hpp = 76, tp = 650, dist = 1.8 },
+        mob  = { name = 'Ruszor', hpp = 63, slot = 41 },
+        rows = {
+            { 'Call Wyvern', 0, 1200 }, { 'Spirit Link', 47, 90 }, { 'Steady Wing', 0, 300 },
+            { 'Deep Breath', 0, 300 }, { 'Jump', 21, 60 }, { 'High Jump', 0, 120 },
+            { 'Super Jump', 88, 180 }, { 'Angon', 0, 180 }, { 'Spirit Surge', 0, 7200 },
+        },
+    },
+}
+for _, sc in ipairs(PET_SCENARIOS) do SCENARIOS[#SCENARIOS + 1] = sc end
+
 -- The master's own job abilities, for the `you` group under the maneuver table
 -- (cmp/cooldowns.lua): the same on every automaton, because they are yours, not
 -- the frame's. Five are learned. Lengths are LSB's recastTime
@@ -162,6 +216,33 @@ local function slotIds(sc)
     return head, frame, ids
 end
 
+-- One frame of a pet-window scenario: tm.petView as cmp/pets.lua would build
+-- it, with every clock run down by the time since the scenario began. A
+-- recast that reaches zero stays ready; the jug and charm timers count down.
+local function petTick(d, t)
+    local sc, v = d.scenario, d.view
+    d.pet.tp = math.floor((sc.pet.tp + t * 45) % 1500)
+    d.mob.hpp = 100 - math.floor(((100 - sc.mob.hpp) + t * 2.5) % 96)
+    if sc.timer ~= nil then
+        v.timer.left = math.max(0, sc.timer.left - t)
+    end
+    for i, r in ipairs(sc.rows) do
+        local row = v.rows[i]
+        local left = r[2] - t
+        if r.charges ~= nil then
+            -- a charge comes back every r[3] seconds, up to three; r[2] is
+            -- how long the one on its way had left when the scenario began
+            local progressed = (r[3] - r[2]) + t
+            row.charges = math.min(3, r.charges + math.floor(progressed / r[3]))
+            row.state = (row.charges > 0) and 'ready' or 'counting'
+            row.remaining = (row.charges < 3) and (r[3] - progressed % r[3]) or nil
+        else
+            row.state = (left > 0) and 'counting' or 'ready'
+            row.remaining = (left > 0) and left or nil
+        end
+    end
+end
+
 -- One frame of the made-up world. Everything here is an INPUT - what the client
 -- would be reporting - so the real model runs on a moving picture rather than a
 -- still one. Nothing in here computes burden, picks a spell or sets a recast:
@@ -176,6 +257,7 @@ local function tick()
     local d = tm.demo
     if d == nil then return end
     local t = os.clock() - d.at
+    if d.view ~= nil then petTick(d, t) return end
     for _, m in ipairs(d.maneuvers) do
         m.remaining = math.ceil(m.dur - (t % m.dur))
     end
@@ -193,9 +275,46 @@ local function tick()
     jaAt(d, t)
 end
 
+local function enablePet(i, sc)
+    local rows = {}
+    for j, r in ipairs(sc.rows) do
+        rows[j] = { key = r[1], label = r[1], short = r[1], name = r[1], total = r[3],
+                    charges = r.charges, maxCharges = r.charges and 3 or nil }
+    end
+    local d = {
+        which = i, name = sc.name, at = os.clock(), scenario = sc,
+        pet = { name = sc.pet.name, hpp = sc.pet.hpp, mpp = sc.pet.mpp,
+                tp = sc.pet.tp, dist = sc.pet.dist },
+        mob = { name = sc.mob.name, hpp = sc.mob.hpp, slot = sc.mob.slot },
+        maneuvers = {}, ja = { has = {}, left = {}, total = {} },
+        names = {}, oils = {},
+    }
+    d.view = {
+        kind = sc.kind, listKind = sc.kind, pet = d.pet, rows = rows,
+        timer = sc.timer and { left = sc.timer.left, total = sc.timer.total,
+                               charm = sc.timer.charm } or nil,
+    }
+    tm.demo = d
+    -- no automaton: nothing for the panel's model or the Loadout tab to show
+    tm.auto044 = nil
+    tm.auto044Seq = tm.auto044Seq + 1
+    tm.ids.pet_id, tm.ids.pet_index, tm.ids.self_id = 0x01000200, 40, 0x01000100
+    tm.petTarget = 0x01000300
+    tm.mobName = sc.mob.name
+    tm.clear(P.petEffects)
+    tm.clear(tm.usedAt)
+    for _, el in ipairs(ELEMENTS) do
+        tm.burden[el] = 0
+        tm.burdenVerified[el] = false
+    end
+    petTick(d, 0)
+    return sc.name
+end
+
 local function enable(i)
     local sc = SCENARIOS[i]
     if sc == nil then return nil end
+    if sc.kind ~= nil then return enablePet(i, sc) end
     local head, frame, ids = slotIds(sc)
     -- copies, not the scenario's own tables: tick() writes into these every
     -- frame and the scenario has to still be itself when it comes round again
