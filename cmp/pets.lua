@@ -26,9 +26,11 @@ local JOB_BST, JOB_SMN, JOB_DRG, JOB_PUP = 9, 15, 14, 18
 -- row out. The pet commands with a few seconds' recast (Fight, Heel, Stay,
 -- Leave, Assault, Retreat, Release) are left out: they are never waited on.
 -- The two-hours share slot 0 of the recast table, whose timer id is 0.
+-- Level-75 era as Horizon runs it: Bestial Loyalty (removed in Horizon's
+-- 1.1 update), Snarl, Apogee, Elemental Siphon and Avatar's Favor are not on
+-- Horizon and are not listed. Ready and Steady Wing are (Horizon's wiki).
 local BEAST = {
     { key = 'call_beast',      label = 'Call Beast', short = 'Call', name = 'Call Beast',      ability = 85,  timer = 104 },
-    { key = 'bestial_loyalty', label = 'Loyalty',    short = 'BL',   name = 'Bestial Loyalty', ability = 387, timer = 94 },
     { key = 'charm',           label = 'Charm',      short = 'Chm',  name = 'Charm',           ability = 52,  timer = 97 },
     { key = 'gauge',           label = 'Gauge',      short = 'Gau',  name = 'Gauge',           ability = 53,  timer = 98 },
     { key = 'tame',            label = 'Tame',       short = 'Tam',  name = 'Tame',            ability = 54,  timer = 99 },
@@ -36,7 +38,6 @@ local BEAST = {
     -- Sic, and Ready where the server grants it instead: one timer, listed
     -- when you have either, and the label and charges follow which (sicRow)
     { key = 'sic',             label = 'Sic',        short = 'Sic',  name = 'Sic',             ability = 72,  timer = 102, alt = 251 },
-    { key = 'snarl',           label = 'Snarl',      short = 'Snl',  name = 'Snarl',           ability = 225, timer = 107 },
     { key = 'feral_howl',      label = 'Feral Howl', short = 'FH',   name = 'Feral Howl',      ability = 161, timer = 105 },
     { key = 'killer_instinct', label = 'Killer Ins.', short = 'KI',  name = 'Killer Instinct', ability = 162, timer = 106 },
     { key = 'familiar',        label = 'Familiar',   short = 'Fam',  name = 'Familiar',        ability = 24,  timer = 0 },
@@ -48,9 +49,6 @@ local ABIL_FAMILIAR, FAMILIAR_CHARM = 24, 1800
 local AVATAR = {
     { key = 'bp_rage',         label = 'BP: Rage',   short = 'Rage', name = 'Blood Pact: Rage', ability = 91,  timer = 173 },
     { key = 'bp_ward',         label = 'BP: Ward',   short = 'Ward', name = 'Blood Pact: Ward', ability = 172, timer = 174 },
-    { key = 'apogee',          label = 'Apogee',     short = 'Apo',  name = 'Apogee',           ability = 385, timer = 108 },
-    { key = 'siphon',          label = 'Siphon',     short = 'Sph',  name = 'Elemental Siphon', ability = 232, timer = 175 },
-    { key = 'avatars_favor',   label = "Avatar's Favor", short = 'AF', name = "Avatar's Favor", ability = 250, timer = 176 },
     { key = 'astral_flow',     label = 'Astral Flow', short = 'AF2', name = 'Astral Flow',      ability = 30,  timer = 0 },
 }
 local WYVERN = {
