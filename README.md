@@ -84,7 +84,7 @@ Puppetmaster panel goes:
   green **Jug** bubble, a gold **Charmed** bubble, or plain **Avatar** or **Wyvern**.
 - **A jug pet's time left**, counting down from its jug's duration (30, 60, 90, 120 or
   180 minutes), amber in the last 5 minutes and red in the last minute. It starts when
-  you use Call Beast or Bestial Loyalty, and it survives zoning and an addon reload. A
+  you use Call Beast, and it survives zoning and an addon reload. A
   jug pet that was already out when Companion loaded has no timer until the next one.
 - **A charmed pet's charm time left**, an estimate shown as `~3:44`. The server never
   tells your client how long a charm lasts, so Companion works it out with the server's
@@ -99,12 +99,13 @@ Puppetmaster panel goes:
 - **What is on the pet**: buffs on the left and debuffs on the right, the same strip the
   automaton gets.
 - **What the pet is fighting**, and that mob's HP.
-- **Your recasts for that job**, in the same grid of boxes as above. Beastmaster: Call Beast, Bestial
-  Loyalty, Charm, Gauge, Tame, Reward, Sic (or Ready), Snarl, Feral Howl, Killer Instinct, Familiar.
-  Summoner: Blood Pact: Rage and Ward, Apogee, Elemental Siphon, Avatar's Favor, Astral
-  Flow. Dragoon: Call Wyvern, Spirit Link, Steady Wing, Deep Breathing, Jump, High Jump,
-  Super Jump, Angon, Spirit Surge. Only abilities you have learned at your current level
-  are listed. Ready shows its charges (`2/3`) and the countdown to the next charge, so
+- **Your recasts for that job**, in the same grid of boxes as above. Beastmaster: Call
+  Beast, Charm, Gauge, Tame, Reward, Sic (or Ready), Feral Howl, Killer Instinct,
+  Familiar. Summoner: Blood Pact: Rage and Ward, Astral Flow. Dragoon: Call Wyvern,
+  Spirit Link, Steady Wing, Deep Breathing, Jump, High Jump, Super Jump, Angon, Spirit
+  Surge. Only abilities you have learned at your current level are listed, and only
+  ones Horizon has: Bestial Loyalty, Snarl, Apogee, Elemental Siphon and Avatar's
+  Favor are left out. Ready shows its charges (`2/3`) and the countdown to the next charge, so
   you can see when one comes back even while you still have some left.
 
 With Beastmaster, Summoner or Dragoon as your main job the window stays up with no pet

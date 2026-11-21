@@ -123,9 +123,9 @@ local PET_SCENARIOS = {
         mob  = { name = 'Goblin Smithy', hpp = 71, slot = 41 },
         timer = { left = 1312, total = 1800 },
         rows = {
-            { 'Call Beast', 0, 300 }, { 'Loyalty', 0, 900 }, { 'Charm', 0, 15 },
+            { 'Call Beast', 0, 300 }, { 'Charm', 0, 15 },
             { 'Gauge', 0, 30 }, { 'Tame', 425, 600 }, { 'Reward', 52, 90 },
-            { 'Ready', 18, 30, charges = 1 }, { 'Snarl', 0, 30 },
+            { 'Ready', 18, 45, charges = 1 },
             { 'Feral Howl', 130, 300 }, { 'Killer Ins.', 0, 300 }, { 'Familiar', 0, 7200 },
         },
     },
@@ -135,9 +135,9 @@ local PET_SCENARIOS = {
         mob  = { name = 'Tiger', hpp = 58, slot = 41 },
         timer = { left = 224, total = 402, charm = true },
         rows = {
-            { 'Call Beast', 0, 300 }, { 'Loyalty', 0, 900 }, { 'Charm', 9, 15 },
+            { 'Call Beast', 0, 300 }, { 'Charm', 9, 15 },
             { 'Gauge', 0, 30 }, { 'Tame', 0, 600 }, { 'Reward', 0, 90 },
-            { 'Sic', 41, 120 }, { 'Snarl', 0, 30 },
+            { 'Sic', 41, 120 },
             { 'Feral Howl', 0, 300 }, { 'Killer Ins.', 0, 300 }, { 'Familiar', 0, 7200 },
         },
     },
@@ -146,8 +146,7 @@ local PET_SCENARIOS = {
         pet  = { name = 'Garuda', hpp = 93, mpp = 68, tp = 0, dist = 5.0 },
         mob  = { name = 'Greater Colibri', hpp = 82, slot = 41 },
         rows = {
-            { 'BP: Rage', 34, 60 }, { 'BP: Ward', 0, 60 }, { 'Apogee', 0, 300 },
-            { 'Siphon', 412, 600 }, { "Avatar's Favor", 0, 30 }, { 'Astral Flow', 0, 7200 },
+            { 'BP: Rage', 34, 60 }, { 'BP: Ward', 0, 60 }, { 'Astral Flow', 0, 7200 },
         },
     },
     {
