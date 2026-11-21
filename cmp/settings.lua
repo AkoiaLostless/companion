@@ -175,8 +175,10 @@ local function exists(path)
     f:close()
     return true
 end
+-- Read in text mode, as writeFile writes: a binary read kept Windows' \r\n,
+-- and the text-mode write then turned each line end into \r\r\n.
 local function copyFile(from, to)
-    local f = io.open(from, 'rb')
+    local f = io.open(from, 'r')
     if f == nil then return false end
     local text = f:read('*a')
     f:close()
