@@ -1,8 +1,10 @@
 # Companion
 
 An Ashita addon for HorizonXI (requires Ashita 4.3 or later): one HUD for every pet.
-On **Puppetmaster**, burden and overload risk per element, the maneuvers you have up, the
-automaton's next weaponskill and spell, its recasts, and your loadout. On
+On **Puppetmaster**, burden and overload risk per element (with your stat read when you
+use each maneuver, so a gear-swap maneuver set counts), the maneuvers you have up, the
+automaton's next weaponskill and spell, your cooldowns, what your maneuvers add, and your
+loadout. On
 **Beastmaster, Summoner and Dragoon**, a pet window: HP, MP and TP, the pet's target and
 status, a jug pet's time left, and your pet abilities' recasts.
 

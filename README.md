@@ -3,8 +3,8 @@
 > Companion is built from [Clockwork](https://github.com/patheed-ffxi/clockwork) by Pathead,
 > which is **approved for use on HorizonXI**, by way of the
 > [AkoiaLostless/clockwork](https://github.com/AkoiaLostless/clockwork) fork. It adds
-> gear-aware stat reads, a lighter per-frame load, recasts laid out as a list, and a pet
-> window for Beastmaster, Summoner and Dragoon. None of those changes has been reviewed by
+> stat checks that follow your gear swaps, a lighter per-frame load, a grid of cooldowns,
+> and a pet window for Beastmaster, Summoner and Dragoon. None of those changes has been reviewed by
 > Horizon staff.
 
 An [Ashita](https://www.ashitaxi.com/) 4.3 addon for [HorizonXI](https://horizonxi.com/):
@@ -20,6 +20,9 @@ one HUD for every pet.
 
 ![The Status tab](screenshots/status.png)
 
+The screenshots are from Clockwork. The panel is the same, but Companion draws the
+cooldowns as the boxed grid described below, and adds the Stats line and the pet window.
+
 ## Features
 
 - **Burden and overload per element.** Burden is tracked for all eight elements
@@ -31,23 +34,32 @@ one HUD for every pet.
   overload anything yet can be hidden from the table (**hide burden at 0% OL**, Settings
   tab).
 - **Maneuver stat checks that follow your gear swaps.** Whether a maneuver costs 15 or
-  20 burden depends on your stat as it goes off. The stat is read with the gear you have
-  on at that moment, so a LuAshitacast or GearSwap maneuver set is counted with no menu
-  opening and no setting. See *Gear swaps* below.
+  20 burden depends on your stat as it goes off. Companion reads your stat when you use
+  the maneuver, with the gear on at that moment, so the stat set your LuAshitacast or
+  GearSwap profile puts on for the maneuver is the one counted. It remembers that read
+  for the element's next maneuver, so the HUD does not drop back to your idle gear's stats
+  between maneuvers. No menu opening and no setting needed. See *Gear swaps* below.
 - **Maneuver slots and decay.** What is up, how long each has left, and the real decay
   rate — the Heatsink behaviour this model assumes for Horizon, not upstream's.
 - **Weaponskill prediction.** What the automaton will use next, and why, with skillchain
   properties for automaton skills, player weaponskills and avatar skills.
-- **Recasts as a list.** Live timers for the automaton's abilities and its ranged shot
-  beside the maneuver table, and under it, headed `you`, your own job abilities' recasts,
-  read straight from the client: Activate, Deus Ex Automata, Repair, Maneuver, Role
-  Reversal, Ventriloquy, Overdrive and the rest. Each is a row the way PetsReborn lays its
-  recasts out: the time first, right-aligned in its own column, then the name. **Ready**
-  is green, a recast in its last 30% is amber, and one still counting is white. Each of
-  your abilities has a switch (Retrieve and Deactivate start off), and **hide when ready**
-  leaves a ready one out (Settings tab, **display**). Turning **as a list** off goes back
-  to Clockwork's icon cells and dials; the compact strip always uses those, since it has
-  no room for names.
+- **Cooldowns as a grid of boxes.** Under the maneuver table, headed **Cooldowns**, your
+  own job abilities' recasts, read straight from the client: Activate, Deus Ex Automata,
+  Repair, Maintenance, Maneuver, Deploy, Overdrive and the rest. Each ability is its own
+  box, three across, filled left to right. The name sits on the left and the time on the
+  right, in one font size, and a colored edge on the left shows the state: **Ready** is
+  green, a recast in its last 30% is amber, and one still counting is white. The
+  automaton's own abilities (Provoke and the like) get the same boxes on the right, beside
+  the maneuver table. Each of your abilities has a switch (Retrieve and Deactivate start
+  off), and **hide when ready** leaves a ready one out (Settings tab, **display**).
+  Turning **as a list** off goes back to Clockwork's icon cells and dials; the compact
+  strip always uses those, since it has no room for names.
+- **Stats from your maneuvers.** Directly under Cooldowns, a **Stats** line lists what
+  your maneuvers are adding through your attachments right now (ATT +6%, STR +4 and so
+  on), so it is always in the same place. It only appears while a maneuver is adding
+  something. An attachment note, like Flame Holder's warning that the weaponskill will
+  use up your Fire maneuvers, sits between Cooldowns and Stats. **what maneuvers give**
+  on the Settings tab turns the Stats line off.
 - **Loadout tab.** Head, frame and every attachment with its live modifier values, plus
   capacity per element. Saved attachment sets with a preview and a confirmed apply,
   paced a second a step as pupsets is — from the tab's Apply button, or from a macro
@@ -66,8 +78,8 @@ one HUD for every pet.
 When the pet out is not an automaton, Companion draws a smaller pet window where the
 Puppetmaster panel goes:
 
-- **The pet's name**, how many yalms away it is, and what kind of pet it is (`jug`,
-  `charmed`, `avatar` or `wyvern`).
+- **The pet's name**, how many yalms away it is, and what kind of pet it is: a light
+  green **Jug** bubble, a gold **Charmed** bubble, or plain **Avatar** or **Wyvern**.
 - **A jug pet's time left**, counting down from its jug's duration (30, 60, 90, 120 or
   180 minutes), amber in the last 5 minutes and red in the last minute. It starts when
   you use Call Beast or Bestial Loyalty, and it survives zoning and an addon reload. A
@@ -85,7 +97,7 @@ Puppetmaster panel goes:
 - **What is on the pet**: buffs on the left and debuffs on the right, the same strip the
   automaton gets.
 - **What the pet is fighting**, and that mob's HP.
-- **Your recasts for that job**, as the list above. Beastmaster: Call Beast, Bestial
+- **Your recasts for that job**, in the same grid of boxes as above. Beastmaster: Call Beast, Bestial
   Loyalty, Charm, Gauge, Tame, Reward, Sic (or Ready), Snarl, Feral Howl, Killer Instinct, Familiar.
   Summoner: Blood Pact: Rage and Ward, Apogee, Elemental Siphon, Avatar's Favor, Astral
   Flow. Dragoon: Call Wyvern, Spirit Link, Steady Wing, Deep Breathing, Jump, High Jump,
@@ -128,7 +140,8 @@ or the `1` button, goes back to one.
    `addons/companion/companion.lua` with `cmp/` and `assets/` beside it.
 3. In game: `/addon unload clockwork` if you run it, then `/addon load companion`.
 
-Companion replaces Clockwork, so load one or the other, not both. To load it every time,
+Companion replaces Clockwork, so load one or the other, not both: running both draws two
+Puppetmaster panels and handles every packet twice. To load it every time,
 put `/addon load companion` in your Ashita script in place of `/addon load clockwork`.
 
 The first time it loads, Companion copies your Clockwork settings and saved attachment
@@ -189,11 +202,27 @@ A maneuver costs 15 burden when your stat meets or beats the automaton's and 20 
 does not, compared as the maneuver goes off — so a gear-swap addon that puts a stat set on
 for the maneuver changes the answer.
 
-The client is only told your stats when it asks (opening the status or equipment menu) or
-when something like a level or zoning makes the server send them, and *never* because you
-swapped gear. What it *does* see straight away is what is in each equipment slot. So
-Companion remembers the gear you had on the last time the server sent your stats, and
-corrects the stat in memory by the difference:
+This is how Companion handles that, which is where it differs most from Clockwork:
+
+1. **When you use a maneuver**, Companion reads your stat for that element as the
+   maneuver goes off. The server's answer arrives while your maneuver set is still on
+   (LuAshitacast holds it for a moment after the ability), so the read uses the same gear
+   the server just compared.
+2. **It remembers that read** for the element. The cost shown for that element's next
+   maneuver, the What-if sidebar and the Tuning tab's **maneuver cost** view all use it,
+   rather than the stats of whatever you wear between maneuvers. Before you have used an
+   element's maneuver, they use the gear you have on now.
+3. **The server's real burden checks the guess.** The overload chance the server reports
+   after each maneuver shows whether the 15 or the 20 was right. If the reads keep
+   disagreeing with the server, Companion goes with what the server shows (the cost is
+   then marked *learned*).
+
+Reading the stat at that moment is harder than it sounds. The client is only told your
+stats when it asks (opening the status or equipment menu) or when something like a level
+or zoning makes the server send them, and *never* because you swapped gear. What it
+*does* see straight away is what is in each equipment slot. So Companion remembers the
+gear you had on the last time the server sent your stats, and corrects the stat in memory
+by the difference:
 
     your stat now = stat in memory − that gear's stats + the stats of what you wear now
 
@@ -204,8 +233,8 @@ lines are conditional and are left out, and food, buffs and merits ride along in
 number in memory. If you load Companion mid-session it assumes the gear on at load is what
 your last stat refresh saw; open the equipment menu once if you loaded it in other gear.
 
-If the read is still wrong for you — a set bonus or latent that matters — tell it what you
-wear: `/cmp stat wind 83`. A typed number outranks the read, and is compared against the
+If the read is still wrong for you, for example because a set bonus or latent matters,
+tell it what you wear: `/cmp stat wind 83`. A typed number outranks the read, and is compared against the
 automaton's live stat, so the check is still lost once that element is stacked. `/cmp stat
 wind now` takes the corrected read, and `/cmp stat wind off` goes back to reading it.
 
@@ -244,10 +273,10 @@ Companion stands on other people's work:
 
 - **Clockwork** (Pathead, [patheed-ffxi/clockwork](https://github.com/patheed-ffxi/clockwork))
   — the Puppetmaster HUD Companion is built from. Everything on the Puppetmaster side but
-  the gear-aware stat read, the lighter frame and the recast list is theirs.
-- **PetsReborn** (Zaldas) — the idea of one pet window for every pet job, and the recast
-  list's layout: the time, then the name, green when ready. Companion borrows those ideas
-  only. None of PetsReborn's code, data, fonts or images is in Companion, which is why
+  the gear-aware stat read, the lighter frame, the cooldown grid and the Stats line is
+  theirs.
+- **PetsReborn** (Zaldas) — the idea of one pet window for every pet job, and of listing
+  recasts by name with green for ready. Companion borrows those ideas only. None of PetsReborn's code, data, fonts or images is in Companion, which is why
   Companion can stay under the MIT License while PetsReborn is GPL-3.0.
 - **[LandSandBoat](https://github.com/LandSandBoat/server)** — the burden, overload,
   weaponskill, spell and attachment logic is re-implemented from its
