@@ -70,8 +70,10 @@ cooldowns as the boxed grid described below, and adds the Stats line and the pet
   mismatches between prediction and reality flagged. Off by default; turn it on from
   the Settings tab.
 - **Pet window for other jobs.** See *Beastmaster, Summoner and Dragoon* below.
-- **Demo mode.** `/cmp demo` walks four made-up automatons so you can see and size the HUD
-  without being on PUP.
+- **Demo mode.** `/cmp demo` walks four made-up automatons, then the pet window with a
+  Beastmaster jug pet, a charmed pet, a Summoner avatar and a Dragoon wyvern, so you can
+  see and size everything without being on those jobs. Each `/cmp demo` steps to the
+  next, and the last one turns demo off.
 
 ## Beastmaster, Summoner and Dragoon
 
@@ -158,7 +160,7 @@ it was.
 | `/cmp show` | the panel (or the pet window) on or off (the model and the log run either way) |
 | `/cmp pets` | the pet window for Beastmaster, Summoner and Dragoon on or off |
 | `/cmp compact` | the compact strip instead of the full panel; `/cmp compact 2` for two rows, `/cmp compact 1` for one |
-| `/cmp demo` | made-up automatons, for looking at the HUD off PUP; each `/cmp demo` is the next one, then off again |
+| `/cmp demo` | made-up automatons, then made-up BST, SMN and DRG pets in the pet window, for looking at the HUD off those jobs; each `/cmp demo` is the next one, then off again |
 | `/cmp attachments` | the attachments you own |
 | `/cmp equipped` | head, frame and attachments |
 | `/cmp load <name>` | put a saved attachment set on the automaton, as the Loadout tab's Apply does — the same checks, the same apply, so the automaton has to be deactivated first. Works from a macro; a name with a space needs no quotes. Bare `/cmp load` lists your sets |
