@@ -118,13 +118,15 @@ Puppetmaster panel, on PUP main or /PUP.
 | **Avatar** — MP, and the Blood Pact recasts | **Wyvern** — the Jumps and Steady Wing |
 | ![An avatar](screenshots/pet_avatar.png) | ![A wyvern](screenshots/pet_wyvern.png) |
 
+These four, and the Status tab above, were taken in demo mode (`/cmp demo`).
+
 The pet window draws with the game's own status icons and Windows' Segoe UI, like the
 rest of Companion: it needs no extra fonts or images. **pet window** on the Settings tab
 (or `/cmp pets`) turns it off, for example if another addon draws your pets.
 
 ## Screenshots
 
-These four are still Clockwork's, from before Companion's cooldown grid; the tabs
+These are still Clockwork's, from before Companion's cooldown grid; the tabs
 themselves are unchanged.
 
 | | |
