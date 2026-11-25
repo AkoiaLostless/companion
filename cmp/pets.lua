@@ -44,7 +44,7 @@ local BEAST = {
 }
 local ABIL_READY = 251
 -- Familiar (the two-hour) sets a charmed pet's time left to about half an
--- hour: 28-30 minutes, as Ross has seen it on Horizon. Thirty is shown.
+-- hour: 28-30 minutes, as seen on Horizon. Thirty is shown.
 local ABIL_FAMILIAR, FAMILIAR_CHARM = 24, 1800
 local AVATAR = {
     { key = 'bp_rage',         label = 'BP: Rage',   short = 'Rage', name = 'Blood Pact: Rage', ability = 91,  timer = 173 },

@@ -889,12 +889,12 @@ local function drawStatus(pet, maneuvers, overload)
     drawManeuverTable(rows, cx, hid)
     -- The column beside the table holds only the recast cells: every stat
     -- goes on the Stats line under the cooldowns, so it is always in one
-    -- place however many maneuvers are up (Ross, 1.2.0).
+    -- place however many maneuvers are up.
     drawRecastColumn(cx, #rows + 1, {})
     tm.jaGrid()   -- your own recasts, under the table and its column
 
     -- attachment notes (Flame Holder) between the cooldowns and the Stats
-    -- line, where Ross wants them
+    -- line
     if hasFire and hasAttachment('Flame Holder') then
         tm.text('text', COL_WARN, 'Flame Holder: the weaponskill will eat your Fire maneuvers')
         tip('+25% weaponskill damage per Fire maneuver consumed.')
